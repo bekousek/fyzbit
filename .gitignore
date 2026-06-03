@@ -1,0 +1,15 @@
+node_modules/
+dist/
+docs/
+.vite/
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.local
+.idea/
+.vscode/
+coverage/
+.scratch/
+# Avoid committing the local plan / session metadata
+.claude/plans/

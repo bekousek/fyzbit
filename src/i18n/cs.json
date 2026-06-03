@@ -1,0 +1,186 @@
+{
+  "app": {
+    "title": "FyzBit",
+    "tagline": "Fyzika na micro:bitu"
+  },
+  "status": {
+    "disconnected": "Odpojeno",
+    "connecting": "Připojuji…",
+    "handshake": "Domlouvání…",
+    "connected": "Připojeno",
+    "measuring": "Měřím",
+    "calibrating": "Kalibruji"
+  },
+  "button": {
+    "connect": "Připojit micro:bit",
+    "start": "▶ START",
+    "stop": "■ STOP",
+    "tare": "⊘ TÁRA",
+    "saveRun": "💾 Uložit",
+    "newRun": "+ Nové",
+    "calibrate": "⚙ Kalibrovat",
+    "exportCsv": "📥 CSV",
+    "exportPdf": "📄 PDF",
+    "exportPng": "🖼 PNG",
+    "settings": "Nastavení",
+    "cancel": "Zrušit",
+    "close": "Zavřít"
+  },
+  "panel": {
+    "wiring": "Zapojení",
+    "wiringPlaceholder": "Schéma připojení",
+    "runs": "Měření",
+    "exports": "Export"
+  },
+  "connection": {
+    "title": "Připojit micro:bit",
+    "intro": "Vyber způsob připojení k micro:bitu.",
+    "serial": "USB kabel",
+    "serialHint": "Web Serial · funguje na Chrome / Edge na Windows, macOS i Linuxu.",
+    "bluetooth": "Bluetooth",
+    "bluetoothPending": "Bude doplněno spolu s firmware pro V2.",
+    "mock": "Demo (Mock)",
+    "mockHint": "Simulovaný teploměr. Hodí se na ukázku bez hardwaru.",
+    "disconnect": "Odpojit",
+    "openPicker": "Vyber port v dialogu prohlížeče…",
+    "userCancelled": "Připojení zrušeno.",
+    "unsupportedBrowser": "Tento prohlížeč nepodporuje Web Serial. Použij Chrome nebo Edge."
+  },
+  "chart": {
+    "autoscale": "⌂ Autoscale",
+    "resetZoom": "🔍 Reset zoom",
+    "annotation": "📍 Anotace",
+    "annotationHint": "Tip: podrž A a klikni do grafu pro anotaci",
+    "time": "Čas (s)",
+    "noData": "Zatím žádná data — stiskni START.",
+    "aria": "Graf v reálném čase s naměřenými hodnotami"
+  },
+  "runs": {
+    "empty": "Zatím žádná uložená měření.",
+    "runName": "Měření {{n}}",
+    "active": "(probíhá)",
+    "dblclickRename": "Dvojklikem přejmenuješ",
+    "delete": "Smazat",
+    "confirmDelete": "Opravdu smazat „{{name}}“?"
+  },
+  "channel": {
+    "temperature": "Teplota",
+    "humidity": "Vlhkost",
+    "force": "Síla",
+    "distance": "Vzdálenost",
+    "speed": "Rychlost",
+    "pressure": "Tlak"
+  },
+  "stats": {
+    "min": "Minimum",
+    "max": "Maximum",
+    "avg": "Průměr",
+    "median": "Medián",
+    "deltaT": "Δt",
+    "deltaY": "Δ"
+  },
+  "pdf": {
+    "title": "Protokol měření",
+    "className": "Třída",
+    "students": "Žáci",
+    "date": "Datum",
+    "experimentTitle": "Název experimentu",
+    "notes": "Poznámky",
+    "generatedBy": "Vytvořeno aplikací FyzBit"
+  },
+  "pdfModal": {
+    "title": "Export PDF protokolu",
+    "classPlaceholder": "např. 8.A",
+    "studentsPlaceholder": "Jeden žák na řádek, nebo oddělené čárkami",
+    "experimentPlaceholder": "např. Chladnutí vody",
+    "notesPlaceholder": "Pozorování, závěry…",
+    "download": "Stáhnout PDF",
+    "noDataYet": "Nemáš žádné měření k exportu. Nejdřív něco změř."
+  },
+  "settings": {
+    "title": "Nastavení",
+    "language": "Jazyk",
+    "theme": "Motiv",
+    "themeLight": "Světlý",
+    "themeDark": "Tmavý",
+    "themeAuto": "Podle systému",
+    "samplingRate": "Vzorkovací frekvence",
+    "resetData": "Smazat všechna data",
+    "about": "O aplikaci",
+    "makecodeExt": "MakeCode rozšíření",
+    "version": "Verze {{version}}"
+  },
+  "calibration": {
+    "title": "Kalibrace senzoru",
+    "noChannels": "Nejdřív se připoj k micro:bitu, ať vím, co kalibrovat.",
+    "choose": "Vyber, který kanál chceš kalibrovat.",
+    "channel": "Kanál",
+    "prepare": "Připrav si známou referenci pro {{name}} (např. tabulkovou hodnotu nebo etalon).",
+    "enterValue": "Zadej skutečnou hodnotu pro {{name}}",
+    "valueHelp": "Použij desetinnou tečku. Hodnota se pošle do micro:bitu, který spočítá nový kalibrační faktor.",
+    "sending": "Posílám kalibraci pro {{name}}, čekám na odpověď…",
+    "waiting": "Čekám…",
+    "send": "Odeslat kalibraci",
+    "back": "← Zpět",
+    "next": "Pokračovat →",
+    "failed": "Kalibrace selhala.",
+    "failedTitle": "Kalibrace neproběhla",
+    "doneTitle": "Hotovo",
+    "doneBody": "Nový kalibrační faktor pro {{name}} je {{factor}}.",
+    "warningFactor": "Pozor: nový faktor je výrazně mimo obvyklý rozsah. Zkontroluj zadanou hodnotu a zapojení čidla.",
+    "invalidNumber": "Zadej platné číslo.",
+    "tipTemperature1": "Použij teploměr s ověřenou stupnicí nebo známou bod (tání ledu = 0 °C, var vody = 100 °C).",
+    "tipTemperature2": "Nechej čidlo aspoň 30 s ustálit v médiu, než zadáš referenční hodnotu.",
+    "tipForce1": "Pověs známé závaží (např. 1 N = 100 g) na háček siloměru.",
+    "tipForce2": "Siloměr musí být svisle a v klidu.",
+    "tipPressure1": "Použij atmosférický tlak z ČHMÚ pro danou nadmořskou výšku.",
+    "tipPressure2": "Pro hydrostatický kalibrační bod změř výšku vodního sloupce nad čidlem.",
+    "tipDistance1": "Změř známou vzdálenost metrem a ujisti se, že čidlo míří kolmo.",
+    "tipGeneric": "Připrav referenční hodnotu, kterou znáš s dostatečnou přesností."
+  },
+  "toast": {
+    "tareOk": "Vynulováno.",
+    "tareErr": "Tárování selhalo.",
+    "deviceError": "Chyba senzoru"
+  },
+  "shortcuts": {
+    "title": "Klávesové zkratky",
+    "click": "klik na graf",
+    "start": "Spustit / zastavit měření",
+    "tare": "Vynulovat (tára)",
+    "save": "Uložit měření",
+    "newRun": "Nové měření",
+    "annotation": "Přidat anotaci",
+    "exportCsv": "Export CSV",
+    "exportPdf": "Export PDF",
+    "escape": "Reset zoomu / zavřít okno",
+    "help": "Tato nápověda"
+  },
+  "selection": {
+    "title": "Výběr",
+    "noChannels": "Připoj micro:bit pro statistiky výběru.",
+    "noSelection": "Tažením v grafu vyber oblast pro výpočet statistik."
+  },
+  "annotation": {
+    "promptLabel": "Popis anotace:",
+    "defaultLabel": "Anotace"
+  },
+  "recovery": {
+    "title": "Obnovit poslední session?",
+    "description": "Našel jsem rozpracované měření z minulého běhu. Chceš pokračovat, kde jsi skončil/a?",
+    "date": "Naposledy uloženo",
+    "points": "Počet vzorků",
+    "annotations": "Anotace",
+    "restore": "Obnovit",
+    "discard": "Zahodit"
+  },
+  "resetData": {
+    "confirm": "Opravdu smazat všechna lokálně uložená data (uložená měření, jména žáků, motiv a jazyk)?",
+    "done": "Smazáno. Obnov stránku pro čistý start."
+  },
+  "error": {
+    "browserUnsupported": "Tento prohlížeč nepodporuje připojení k micro:bitu. Použij Chrome nebo Edge.",
+    "connectionLost": "Spojení s micro:bitem ztraceno.",
+    "calibrationTimeout": "Kalibrace neodpověděla. Zkus znovu."
+  }
+}

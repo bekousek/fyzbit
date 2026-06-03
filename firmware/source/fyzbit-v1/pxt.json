@@ -1,0 +1,21 @@
+{
+  "name": "fyzbit-v1",
+  "version": "0.1.0",
+  "description": "FyzBit firmware V1 — speaks FyzBit serial protocol for the FyzBit web app. Supports DS18B20, HX711, HC-SR04, HX710B, DHT11.",
+  "dependencies": {
+    "core": "*",
+    "microbit-dstemp": "github:bsiever/microbit-dstemp#v0.1.26",
+    "pxt-HX711": "github:daferdur/pxt-myhx711#v1.0.18",
+    "pxt-DHT11_DHT22": "github:alankrantas/pxt-DHT11_DHT22#v0.0.3"
+  },
+  "files": [
+    "main.ts",
+    "README.md"
+  ],
+  "targetVersions": {
+    "target": "8.0.18",
+    "targetId": "microbit"
+  },
+  "supportedTargets": ["microbit"],
+  "preferredEditor": "tsprj"
+}

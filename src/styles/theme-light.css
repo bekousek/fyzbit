@@ -1,0 +1,41 @@
+:root[data-theme='light'] {
+  /* Surfaces */
+  --bg: #f7f9f7;
+  --surface-1: #ffffff;
+  --surface-2: #eef2ee;
+  --surface-3: #e1e8e1;
+
+  /* Text */
+  --fg: #1a1f1a;
+  --fg-muted: #5c6b5c;
+  --fg-on-accent: #ffffff;
+
+  /* Accent (FyzBit green) */
+  --accent: #1b5e20;
+  --accent-hover: #154a19;
+  --accent-active: #0f3812;
+  --accent-soft: #c8e6c9;
+
+  /* Status colors */
+  --status-ok: #2e7d32;
+  --status-warn: #f57c00;
+  --status-err: #c62828;
+  --status-idle: #9e9e9e;
+
+  /* Borders & lines */
+  --border: #d0d7d0;
+  --border-strong: #95a395;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --shadow-2: 0 4px 16px rgba(0, 0, 0, 0.12);
+
+  /* Chart */
+  --chart-bg: #ffffff;
+  --chart-grid: #e8ece8;
+  --chart-axis: #5c6b5c;
+  --chart-series-1: #1b5e20;
+  --chart-series-2: #1565c0;
+  --chart-series-3: #c62828;
+  --chart-series-4: #ef6c00;
+  --chart-series-5: #6a1b9a;
+  --chart-series-6: #00838f;
+}

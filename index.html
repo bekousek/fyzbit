@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1B5E20" />
+    <meta name="description" content="FyzBit — webový datalogger pro micro:bit s fyzikálními senzory" />
+    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="FyzBit" />
+    <title data-i18n="app.title">FyzBit</title>
+  </head>
+  <body>
+    <div id="app">
+      <!-- Top bar -->
+      <header class="topbar">
+        <div class="topbar__left">
+          <div class="status-badge" id="status-badge">
+            <span class="status-badge__dot" aria-hidden="true"></span>
+            <span class="status-badge__text" data-i18n="status.disconnected">Odpojeno</span>
+          </div>
+          <button type="button" class="btn btn--primary" id="btn-connect">
+            <span data-i18n="button.connect">Připojit micro:bit</span>
+          </button>
+          <div class="big-value" id="big-value" aria-live="polite">
+            <span class="big-value__number">—</span>
+            <span class="big-value__unit"></span>
+          </div>
+        </div>
+        <div class="topbar__right">
+          <button
+            type="button"
+            class="btn btn--icon"
+            id="btn-settings"
+            data-i18n-title="button.settings"
+            title="Nastavení"
+            aria-label="Nastavení"
+          >
+            ⚙
+          </button>
+        </div>
+      </header>
+
+      <!-- Main 3-column layout -->
+      <main class="layout">
+        <!-- Left column: wiring + actions -->
+        <aside class="panel panel--left">
+          <h2 class="panel__title" data-i18n="panel.wiring">Zapojení</h2>
+          <div class="wiring-placeholder" aria-hidden="true">
+            <!-- SVG schéma zapojení doplníme později -->
+            <svg viewBox="0 0 200 120" role="img" aria-label="Schéma zapojení">
+              <rect
+                x="20"
+                y="20"
+                width="160"
+                height="80"
+                rx="8"
+                fill="var(--surface-2)"
+                stroke="var(--border)"
+              />
+              <text
+                x="100"
+                y="65"
+                text-anchor="middle"
+                fill="var(--fg-muted)"
+                font-size="12"
+                data-i18n="panel.wiringPlaceholder"
+              >
+                Schéma připojení
+              </text>
+            </svg>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn btn--primary btn--lg" id="btn-start">
+              <span data-i18n="button.start">▶ START</span>
+            </button>
+            <button type="button" class="btn btn--lg" id="btn-tare" disabled>
+              <span data-i18n="button.tare">⊘ TÁRA</span>
+            </button>
+            <button type="button" class="btn btn--lg" id="btn-save-run" disabled>
+              <span data-i18n="button.saveRun">💾 Uložit</span>
+            </button>
+            <button type="button" class="btn btn--lg" id="btn-calibrate" disabled>
+              <span data-i18n="button.calibrate">⚙ Kalibrovat</span>
+            </button>
+          </div>
+        </aside>
+
+        <!-- Center column: chart -->
+        <section class="panel panel--center">
+          <div class="chart-toolbar">
+            <button type="button" class="btn btn--sm" id="btn-autoscale" aria-pressed="true">
+              <span data-i18n="chart.autoscale">⌂ Autoscale</span>
+            </button>
+            <button type="button" class="btn btn--sm" id="btn-reset-zoom">
+              <span data-i18n="chart.resetZoom">🔍 Reset zoom</span>
+            </button>
+            <button
+              type="button"
+              class="btn btn--sm"
+              id="btn-help"
+              data-i18n-title="shortcuts.title"
+              data-i18n-aria-label="shortcuts.title"
+              title="Klávesové zkratky"
+              aria-label="Klávesové zkratky"
+            >
+              ?
+            </button>
+            <span class="chart-toolbar__hint" data-i18n="chart.annotationHint"
+              >Tip: podrž A a klikni do grafu pro anotaci</span
+            >
+          </div>
+          <div
+            class="chart-container"
+            id="chart-container"
+            role="img"
+            data-i18n-aria-label="chart.aria"
+            aria-label="Graf v reálném čase"
+          ></div>
+          <div class="selection-stats" id="selection-stats" hidden></div>
+        </section>
+
+        <!-- Right column: runs + exports -->
+        <aside class="panel panel--right">
+          <h2 class="panel__title" data-i18n="panel.runs">Měření</h2>
+          <ul class="runs-list" id="runs-list">
+            <li class="runs-list__empty" data-i18n="runs.empty">Zatím žádná uložená měření.</li>
+          </ul>
+          <button type="button" class="btn btn--sm" id="btn-new-run" disabled>
+            <span data-i18n="button.newRun">+ Nové</span>
+          </button>
+
+          <h2 class="panel__title panel__title--spaced" data-i18n="panel.exports">Export</h2>
+          <div class="actions actions--column">
+            <button type="button" class="btn btn--sm" id="btn-export-csv" disabled>
+              <span data-i18n="button.exportCsv">📥 CSV</span>
+            </button>
+            <button type="button" class="btn btn--sm" id="btn-export-pdf" disabled>
+              <span data-i18n="button.exportPdf">📄 PDF</span>
+            </button>
+            <button type="button" class="btn btn--sm" id="btn-export-png" disabled>
+              <span data-i18n="button.exportPng">🖼 PNG</span>
+            </button>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <!-- Calibration wizard modal -->
+    <dialog id="calibration-modal" class="modal calibration-modal">
+      <form method="dialog" class="modal__form" id="calibration-form">
+        <header class="modal__header">
+          <h2 data-i18n="calibration.title">Kalibrace senzoru</h2>
+          <button
+            type="button"
+            class="btn btn--icon"
+            id="btn-close-calibration"
+            data-i18n-aria-label="button.close"
+            aria-label="Zavřít"
+          >
+            ✕
+          </button>
+        </header>
+        <div class="modal__body" id="calibration-body">
+          <!-- Steps populated by CalibrationModal.ts -->
+        </div>
+        <footer class="modal__footer">
+          <button type="button" class="btn" id="btn-cal-cancel" data-i18n="button.cancel">Zrušit</button>
+          <button type="button" class="btn" id="btn-cal-back" data-i18n="calibration.back" hidden>← Zpět</button>
+          <button type="button" class="btn btn--primary" id="btn-cal-next" data-i18n="calibration.next">Pokračovat →</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <!-- PDF Export modal -->
+    <dialog id="pdf-modal" class="modal">
+      <form method="dialog" class="modal__form" id="pdf-form">
+        <header class="modal__header">
+          <h2 data-i18n="pdfModal.title">Export PDF protokolu</h2>
+          <button
+            type="button"
+            class="btn btn--icon"
+            id="btn-close-pdf"
+            data-i18n-aria-label="button.close"
+            aria-label="Zavřít"
+          >
+            ✕
+          </button>
+        </header>
+        <div class="modal__body">
+          <label class="field">
+            <span class="field__label" data-i18n="pdf.date">Datum</span>
+            <input type="text" id="pdf-date" class="field__input" readonly />
+          </label>
+          <label class="field">
+            <span class="field__label" data-i18n="pdf.className">Třída</span>
+            <input
+              type="text"
+              id="pdf-class"
+              class="field__input"
+              data-i18n-placeholder="pdfModal.classPlaceholder"
+              placeholder="např. 8.A"
+            />
+          </label>
+          <label class="field">
+            <span class="field__label" data-i18n="pdf.students">Žáci</span>
+            <textarea
+              id="pdf-students"
+              class="field__input"
+              rows="3"
+              data-i18n-placeholder="pdfModal.studentsPlaceholder"
+              placeholder="Jeden žák na řádek, nebo oddělené čárkami"
+            ></textarea>
+          </label>
+          <label class="field">
+            <span class="field__label" data-i18n="pdf.experimentTitle"
+              >Název experimentu</span
+            >
+            <input
+              type="text"
+              id="pdf-experiment"
+              class="field__input"
+              data-i18n-placeholder="pdfModal.experimentPlaceholder"
+              placeholder="např. Chladnutí vody"
+            />
+          </label>
+          <label class="field">
+            <span class="field__label" data-i18n="pdf.notes">Poznámky</span>
+            <textarea
+              id="pdf-notes"
+              class="field__input"
+              rows="3"
+              data-i18n-placeholder="pdfModal.notesPlaceholder"
+              placeholder="Pozorování, závěry…"
+            ></textarea>
+          </label>
+        </div>
+        <footer class="modal__footer">
+          <button type="button" class="btn" id="btn-pdf-cancel">
+            <span data-i18n="button.cancel">Zrušit</span>
+          </button>
+          <button type="button" class="btn btn--primary" id="btn-pdf-download">
+            <span data-i18n="pdfModal.download">Stáhnout PDF</span>
+          </button>
+        </footer>
+      </form>
+    </dialog>
+
+    <!-- Connection modal -->
+    <dialog id="connection-modal" class="modal">
+      <div class="modal__form">
+        <header class="modal__header">
+          <h2 data-i18n="connection.title">Připojit micro:bit</h2>
+          <button
+            type="button"
+            class="btn btn--icon"
+            id="btn-close-connection"
+            data-i18n-aria-label="button.close"
+            aria-label="Zavřít"
+          >
+            ✕
+          </button>
+        </header>
+        <div class="modal__body">
+          <p
+            class="connection-intro"
+            data-i18n="connection.intro"
+          >
+            Vyber způsob připojení k micro:bitu.
+          </p>
+          <button
+            type="button"
+            class="connect-option"
+            id="btn-connect-serial"
+            data-transport="serial"
+          >
+            <span class="connect-option__icon">🔌</span>
+            <span class="connect-option__body">
+              <strong data-i18n="connection.serial">USB kabel</strong>
+              <small data-i18n="connection.serialHint"
+                >Web Serial · funguje na Chrome / Edge na Windows / macOS / Linux</small
+              >
+            </span>
+          </button>
+          <button
+            type="button"
+            class="connect-option"
+            id="btn-connect-bluetooth"
+            data-transport="bluetooth"
+            disabled
+          >
+            <span class="connect-option__icon">📡</span>
+            <span class="connect-option__body">
+              <strong data-i18n="connection.bluetooth">Bluetooth</strong>
+              <small data-i18n="connection.bluetoothPending"
+                >Bude doplněno spolu s firmware pro V2.</small
+              >
+            </span>
+          </button>
+          <button
+            type="button"
+            class="connect-option"
+            id="btn-connect-mock"
+            data-transport="mock"
+          >
+            <span class="connect-option__icon">🧪</span>
+            <span class="connect-option__body">
+              <strong data-i18n="connection.mock">Demo (Mock)</strong>
+              <small data-i18n="connection.mockHint"
+                >Simulovaný teploměr. Hodí se na ukázku bez hardwaru.</small
+              >
+            </span>
+          </button>
+          <p class="connection-error" id="connection-error" hidden></p>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- Settings modal -->
+    <dialog id="settings-modal" class="modal">
+      <form method="dialog" class="modal__form" id="settings-form">
+        <header class="modal__header">
+          <h2 data-i18n="settings.title">Nastavení</h2>
+          <button
+            type="button"
+            class="btn btn--icon"
+            id="btn-close-settings"
+            data-i18n-aria-label="button.close"
+            aria-label="Zavřít"
+          >
+            ✕
+          </button>
+        </header>
+        <div class="modal__body">
+          <label class="field">
+            <span class="field__label" data-i18n="settings.language">Jazyk</span>
+            <select id="setting-language" class="field__input">
+              <option value="cs">Čeština</option>
+              <option value="en">English</option>
+            </select>
+          </label>
+          <fieldset class="field">
+            <legend class="field__label" data-i18n="settings.theme">Motiv</legend>
+            <label class="radio">
+              <input type="radio" name="theme" value="light" />
+              <span data-i18n="settings.themeLight">Světlý</span>
+            </label>
+            <label class="radio">
+              <input type="radio" name="theme" value="dark" />
+              <span data-i18n="settings.themeDark">Tmavý</span>
+            </label>
+            <label class="radio">
+              <input type="radio" name="theme" value="auto" />
+              <span data-i18n="settings.themeAuto">Podle systému</span>
+            </label>
+          </fieldset>
+          <label class="field">
+            <span class="field__label" data-i18n="settings.samplingRate">Vzorkovací frekvence</span>
+            <select id="setting-sampling" class="field__input">
+              <option value="1">1 Hz</option>
+              <option value="5">5 Hz</option>
+              <option value="10" selected>10 Hz</option>
+              <option value="25">25 Hz</option>
+              <option value="50">50 Hz</option>
+            </select>
+          </label>
+          <div class="field">
+            <button type="button" class="btn btn--danger" id="btn-reset-data">
+              <span data-i18n="settings.resetData">Smazat všechna data</span>
+            </button>
+          </div>
+          <div class="field about">
+            <p>
+              <strong data-i18n="settings.about">O aplikaci</strong>
+            </p>
+            <p>
+              <span data-i18n="app.title">FyzBit</span>
+              <span id="about-version">v0.1.0</span>
+            </p>
+            <p>
+              <a
+                href="https://github.com/bekousek/fyzbit"
+                target="_blank"
+                rel="noopener noreferrer"
+                >GitHub</a
+              >
+              · MIT ·
+              <a
+                href="https://github.com/bekousek/fyzikalni_senzory"
+                target="_blank"
+                rel="noopener noreferrer"
+                data-i18n="settings.makecodeExt"
+                >MakeCode rozšíření</a
+              >
+            </p>
+          </div>
+        </div>
+      </form>
+    </dialog>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

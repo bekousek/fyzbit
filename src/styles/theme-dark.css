@@ -1,0 +1,41 @@
+:root[data-theme='dark'] {
+  /* Surfaces */
+  --bg: #0f1410;
+  --surface-1: #161c17;
+  --surface-2: #1f2720;
+  --surface-3: #28322a;
+
+  /* Text */
+  --fg: #e8efe9;
+  --fg-muted: #9aa89c;
+  --fg-on-accent: #ffffff;
+
+  /* Accent (FyzBit green – brighter for dark mode) */
+  --accent: #66bb6a;
+  --accent-hover: #81c784;
+  --accent-active: #a5d6a7;
+  --accent-soft: #2e4a32;
+
+  /* Status colors */
+  --status-ok: #66bb6a;
+  --status-warn: #ffb74d;
+  --status-err: #ef5350;
+  --status-idle: #757575;
+
+  /* Borders & lines */
+  --border: #2c3a2e;
+  --border-strong: #4a5a4d;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 4px 16px rgba(0, 0, 0, 0.5);
+
+  /* Chart */
+  --chart-bg: #161c17;
+  --chart-grid: #243024;
+  --chart-axis: #9aa89c;
+  --chart-series-1: #81c784;
+  --chart-series-2: #64b5f6;
+  --chart-series-3: #ef9a9a;
+  --chart-series-4: #ffb74d;
+  --chart-series-5: #ce93d8;
+  --chart-series-6: #4dd0e1;
+}
