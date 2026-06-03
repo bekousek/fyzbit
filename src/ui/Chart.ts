@@ -215,8 +215,23 @@ export class Chart {
 
     const { data, series } = this.buildAlignedData();
 
+    // X axis grows in fixed steps (default 10 s) so a live recording doesn't
+    // re-scale on every sample. The max snaps to the next multiple of
+    // X_STEP_SECONDS; the min is anchored at 0 (run-relative time).
+    const X_STEP_SECONDS = 10;
     const scales: Options['scales'] = {
-      x: { time: false },
+      x: {
+        time: false,
+        range: (_u, dataMin, dataMax) => {
+          if (!Number.isFinite(dataMax)) return [0, X_STEP_SECONDS];
+          const stepped = Math.max(
+            X_STEP_SECONDS,
+            Math.ceil(dataMax / X_STEP_SECONDS) * X_STEP_SECONDS,
+          );
+          const min = Number.isFinite(dataMin) ? Math.min(0, dataMin) : 0;
+          return [min, stepped];
+        },
+      },
     };
     for (const ch of this.channels) {
       scales[ch.id] = { auto: this.autoscale };
