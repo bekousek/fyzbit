@@ -128,6 +128,11 @@ body {
   color: var(--fg-muted);
 }
 
+.sensor-select {
+  min-height: 32px;
+  max-width: 200px;
+}
+
 /* ---------- Main layout ---------- */
 
 .layout {
@@ -864,4 +869,28 @@ textarea.field__input {
   font-size: 14px;
   font-weight: 500;
   border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+/* ---------- Responsive ---------- */
+
+/* Tablets / small screens: stack panels instead of squeezing three columns. */
+@media (max-width: 900px) {
+  .topbar {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+
+  .big-value__number {
+    font-size: 32pt;
+  }
+
+  .layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    overflow-y: auto;
+  }
+
+  .panel--center {
+    min-height: 320px;
+  }
 }

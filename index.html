@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#1B5E20" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'"
+    />
     <meta name="description" content="FyzBit — webový datalogger pro micro:bit s fyzikálními senzory" />
     <link rel="icon" type="image/svg+xml" href="./icon.svg" />
     <link rel="manifest" href="./manifest.json" />
@@ -28,6 +32,13 @@
             <span class="big-value__number">—</span>
             <span class="big-value__unit"></span>
           </div>
+          <select
+            id="sensor-select"
+            class="field__input sensor-select"
+            data-i18n-aria-label="sensor.label"
+            aria-label="Senzor"
+            hidden
+          ></select>
         </div>
         <div class="topbar__right">
           <button

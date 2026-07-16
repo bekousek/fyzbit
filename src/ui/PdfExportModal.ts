@@ -1,5 +1,5 @@
 import { studentInfoStore, parseStudents } from '../state/StudentInfo';
-import { exportPdf, type PdfMetadata } from '../export/pdf';
+import type { PdfMetadata } from '../export/pdf';
 import { findChartCanvas } from '../export/png';
 import type { AppState } from '../state/AppState';
 import { getLanguage, t } from '../i18n/i18n';
@@ -79,6 +79,7 @@ export class PdfExportModal {
 
     const canvas = findChartCanvas(document.getElementById('chart-container'));
     try {
+      const { exportPdf } = await import('../export/pdf');
       await exportPdf({
         runs: visibleRuns,
         channels: [...this.state.channels],

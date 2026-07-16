@@ -71,6 +71,14 @@
     "speed": "Rychlost",
     "pressure": "Tlak"
   },
+  "sensor": {
+    "label": "Senzor",
+    "ds18b20": "Teploměr (DS18B20)",
+    "hx711": "Siloměr (HX711)",
+    "hcsr04": "Sonar (HC-SR04)",
+    "hx710b": "Tlakoměr (HX710B)",
+    "dht11": "Teplota + vlhkost (DHT11)"
+  },
   "stats": {
     "min": "Minimum",
     "max": "Maximum",

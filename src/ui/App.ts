@@ -6,6 +6,7 @@ import { settings } from '../state/Settings';
 import { t, onLanguageChange, applyTranslations } from '../i18n/i18n';
 import { Chart, type SelectionRange } from './Chart';
 import { TopBar } from './TopBar';
+import { SensorSelect } from './SensorSelect';
 import { SettingsModal } from './SettingsModal';
 import { ConnectionModal } from './ConnectionModal';
 import { RunsList } from './RunsList';
@@ -53,6 +54,7 @@ export class App {
     if (!root) throw new Error('App: #app root not found');
 
     new TopBar(root, appState);
+    new SensorSelect(root, appState, (cmd) => this.sendCommand(cmd));
     new SettingsModal();
     new RunsList(appState);
     this.connectionModal = new ConnectionModal();

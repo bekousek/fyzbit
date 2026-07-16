@@ -71,6 +71,14 @@
     "speed": "Speed",
     "pressure": "Pressure"
   },
+  "sensor": {
+    "label": "Sensor",
+    "ds18b20": "Thermometer (DS18B20)",
+    "hx711": "Load cell (HX711)",
+    "hcsr04": "Sonar (HC-SR04)",
+    "hx710b": "Pressure sensor (HX710B)",
+    "dht11": "Temperature + humidity (DHT11)"
+  },
   "stats": {
     "min": "Minimum",
     "max": "Maximum",

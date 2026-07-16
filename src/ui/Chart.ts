@@ -41,6 +41,8 @@ export class Chart {
   private autoscale = true;
   private pendingRedraw = false;
   private lastRedrawTs = 0;
+  private pendingUpdate = false;
+  private lastUpdateTs = 0;
   private disposers: Array<() => void> = [];
 
   constructor(
@@ -86,7 +88,7 @@ export class Chart {
         this.activeRun.values[ch.id]?.shift();
       }
     }
-    this.scheduleRedraw();
+    this.scheduleDataUpdate();
   }
 
   setAutoscale(on: boolean): void {
@@ -136,6 +138,34 @@ export class Chart {
       this.lastRedrawTs = performance.now();
       this.rebuild();
     }, delay);
+  }
+
+  /**
+   * Throttled data-only update for streaming samples into the active run.
+   * Reuses the existing uPlot instance via setData() instead of a full
+   * destroy()+recreate — channels/runs/theme haven't changed, only the
+   * active run's arrays grew, so series/axes/legend stay valid as-is.
+   */
+  private scheduleDataUpdate(): void {
+    if (this.pendingRedraw || this.pendingUpdate) return;
+    const now = performance.now();
+    const minInterval = 1000 / REDRAW_FPS;
+    const delay = Math.max(0, minInterval - (now - this.lastUpdateTs));
+    this.pendingUpdate = true;
+    setTimeout(() => {
+      this.pendingUpdate = false;
+      this.lastUpdateTs = performance.now();
+      this.updateData();
+    }, delay);
+  }
+
+  private updateData(): void {
+    if (!this.plot) {
+      this.rebuild();
+      return;
+    }
+    const { data } = this.buildAlignedData();
+    this.plot.setData(data, true);
   }
 
   /** All tracks (saved visible runs + active run) merged into AlignedData. */

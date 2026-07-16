@@ -5,6 +5,8 @@
  * and unsubscribe via the returned disposer.
  */
 
+import { runColorForIndex } from '../theme/runColors';
+
 export type Channel = {
   /** Short protocol ID, e.g. "t", "h", "F". */
   id: string;
@@ -70,17 +72,6 @@ export type AppStateEvents = {
   error: { message: string };
   reset: void;
 };
-
-const RUN_COLORS = [
-  '#1B5E20', // FyzBit green
-  '#1565C0', // blue
-  '#C62828', // red
-  '#EF6C00', // orange
-  '#6A1B9A', // purple
-  '#00838F', // teal
-  '#558B2F', // light green
-  '#AD1457', // pink
-];
 
 function makeId(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -188,7 +179,7 @@ export class AppState {
    */
   startRun(samplingHz: number, defaultNameFn: (n: number) => string): Run {
     this._runCounter += 1;
-    const color = RUN_COLORS[(this._runs.length + (this._activeRun ? 1 : 0)) % RUN_COLORS.length]!;
+    const color = runColorForIndex(this._runs.length + (this._activeRun ? 1 : 0));
     const run: Run = {
       id: makeId(),
       name: defaultNameFn(this._runCounter),

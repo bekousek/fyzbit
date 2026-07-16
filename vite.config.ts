@@ -41,5 +41,13 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     include: ['tests/**/*.test.ts'],
+    // Node >=22 ships an experimental global `localStorage` that shadows the
+    // one jsdom injects, breaking every test that touches localStorage
+    // (throws "Cannot read properties of undefined"). Disable it so jsdom's
+    // own implementation wins.
+    poolOptions: {
+      threads: { execArgv: ['--no-experimental-webstorage'] },
+      forks: { execArgv: ['--no-experimental-webstorage'] },
+    },
   },
 });
