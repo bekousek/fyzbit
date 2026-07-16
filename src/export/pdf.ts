@@ -230,7 +230,7 @@ export async function exportPdf(opts: PdfOptions): Promise<void> {
   // ── Footer ──────────────────────────────────────────────
   doc.setFontSize(9);
   doc.setTextColor(140, 140, 140);
-  doc.text(t('pdf.generatedBy') + ' · fyzbit.cz', margin, pageH - 8);
+  doc.text(t('pdf.generatedBy') + ' · bekousek.github.io/fyzbit', margin, pageH - 8);
 
   // ── Save ────────────────────────────────────────────────
   const blob = doc.output('blob');

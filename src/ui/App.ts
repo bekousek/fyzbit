@@ -149,6 +149,8 @@ export class App {
     appState.bus.on('active-run-changed', () => this.updateButtonStates());
     appState.bus.on('runs-changed', () => this.updateButtonStates());
 
+    settings.onSamplingChange((hz) => this.sendCommand(Commands.rate(hz)));
+
     // Storage: start auto-save and offer to recover any prior session.
     this.autoSave.start();
     void this.recoveryModal.maybeShow();
@@ -246,6 +248,7 @@ export class App {
       /* ignore */
     }
     appState.reset();
+    this.autoSave.start();
     window.alert(t('resetData.done'));
   }
 
@@ -360,8 +363,8 @@ export class App {
     appState.setStatus('connecting');
 
     this.buffer = new LineBuffer((line) => this.handleLine(line));
-    transport.onLine((line) => {
-      this.buffer!.push(line.endsWith('\n') ? line : line + '\n');
+    transport.onChunk((chunk) => {
+      this.buffer!.push(chunk);
     });
     transport.onDisconnect(() => {
       const wasMeasuring = appState.recording;
@@ -398,7 +401,16 @@ export class App {
 
   private sendCommand(cmd: string): void {
     if (!this.transport || !this.transport.isConnected()) return;
-    void this.transport.send(cmd);
+    const transport = this.transport;
+    transport.send(cmd).catch((err) => {
+      console.error('[App] send failed:', err);
+      if (!transport.isConnected() && this.transport === transport) {
+        const wasMeasuring = appState.recording;
+        appState.stopRecording();
+        appState.setStatus('disconnected');
+        if (wasMeasuring) toast.error(t('error.connectionLost'));
+      }
+    });
   }
 
   private isConnectedStatus(s: typeof appState.status): boolean {
@@ -427,6 +439,7 @@ export class App {
       }
       case 'ready':
         appState.setStatus(this.channelsReceived > 0 ? 'measuring' : 'connected');
+        this.sendCommand(Commands.rate(settings.samplingHz));
         break;
       case 'tare':
         if (msg.ok) toast.success(t('toast.tareOk'), 2000);

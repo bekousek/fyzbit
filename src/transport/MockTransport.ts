@@ -14,7 +14,7 @@ import type { Transport } from './Transport';
  */
 export class MockTransport implements Transport {
   private connected = false;
-  private lineHandlers = new Set<(line: string) => void>();
+  private chunkHandlers = new Set<(chunk: string) => void>();
   private disconnectHandlers = new Set<() => void>();
   private dataTimer: number | null = null;
   private streaming = true;
@@ -74,8 +74,8 @@ export class MockTransport implements Transport {
     }
   }
 
-  onLine(callback: (line: string) => void): void {
-    this.lineHandlers.add(callback);
+  onChunk(callback: (chunk: string) => void): void {
+    this.chunkHandlers.add(callback);
   }
 
   onDisconnect(callback: () => void): void {
@@ -86,12 +86,14 @@ export class MockTransport implements Transport {
     return this.connected;
   }
 
+  /** Emits one complete protocol line, terminated with \n as a real transport would. */
   private emit(line: string): void {
-    this.lineHandlers.forEach((h) => {
+    const chunk = `${line}\n`;
+    this.chunkHandlers.forEach((h) => {
       try {
-        h(line);
+        h(chunk);
       } catch (err) {
-        console.error('[MockTransport] line handler threw:', err);
+        console.error('[MockTransport] chunk handler threw:', err);
       }
     });
   }

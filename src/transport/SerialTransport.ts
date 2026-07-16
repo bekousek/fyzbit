@@ -29,7 +29,7 @@ export class SerialTransport implements Transport {
   private connected = false;
   private closingDeliberately = false;
 
-  private lineHandlers = new Set<(line: string) => void>();
+  private chunkHandlers = new Set<(chunk: string) => void>();
   private disconnectHandlers = new Set<() => void>();
 
   static isSupported(): boolean {
@@ -106,8 +106,8 @@ export class SerialTransport implements Transport {
     await this.writer.write(bytes);
   }
 
-  onLine(callback: (line: string) => void): void {
-    this.lineHandlers.add(callback);
+  onChunk(callback: (chunk: string) => void): void {
+    this.chunkHandlers.add(callback);
   }
 
   onDisconnect(callback: () => void): void {
@@ -149,11 +149,11 @@ export class SerialTransport implements Transport {
   };
 
   private emit(chunk: string): void {
-    this.lineHandlers.forEach((h) => {
+    this.chunkHandlers.forEach((h) => {
       try {
         h(chunk);
       } catch (err) {
-        console.error('[SerialTransport] line handler threw:', err);
+        console.error('[SerialTransport] chunk handler threw:', err);
       }
     });
   }

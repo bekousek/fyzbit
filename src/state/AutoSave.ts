@@ -22,10 +22,7 @@ export class AutoSave {
     state.bus.on('active-run-changed', () => this.markDirty());
     state.bus.on('channels-changed', () => this.markDirty());
     state.bus.on('sensor-name', () => this.markDirty());
-    state.bus.on('data-point', () => {
-      // Don't flag dirty on every sample — too noisy. The active-run-changed
-      // event fires on start/stop, and we save explicitly on save/stop anyway.
-    });
+    state.bus.on('data-point', () => this.markDirty());
   }
 
   /** Adopt the id of a recovered session so subsequent saves keep it stable. */

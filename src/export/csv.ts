@@ -19,7 +19,7 @@ export type CsvOptions = {
  *   0,0;24,5;22,1\n
  *   ...
  *
- * - BOM `﻿` for Excel UTF-8 detection.
+ * - BOM (U+FEFF) for Excel UTF-8 detection.
  * - First row `sep=;` instructs Excel to use semicolon delimiter regardless of locale.
  * - Decimal: comma in CZ, dot in EN.
  * - Header text translated via i18n.
@@ -38,10 +38,10 @@ export function buildRunsCsv(opts: CsvOptions): string {
   const xs = [...tKeys].sort((a, b) => a - b);
 
   // Build header.
-  const headers: string[] = [t('chart.time')];
+  const headers: string[] = [escapeCsvField(t('chart.time'))];
   for (const r of runs) {
     for (const ch of channels) {
-      headers.push(`${r.name} - ${t(ch.nameKey)} (${ch.unit})`);
+      headers.push(escapeCsvField(`${r.name} - ${t(ch.nameKey)} (${ch.unit})`));
     }
   }
 
