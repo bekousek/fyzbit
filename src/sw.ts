@@ -32,8 +32,9 @@ sw.addEventListener('install', (event) => {
         './icon-512.png',
         './fonts/Roboto-Regular.ttf',
         // So "Prepare micro:bit" (WebUSB flash) works offline in a classroom
-        // without wifi — the .hex is only ~1.3 MB.
+        // without wifi — each .hex is only ~1.3 MB.
         './firmware/fyzbit-usb.hex',
+        './firmware/fyzbit-ble-v2.hex',
       ]).catch((err) => {
         console.warn('[sw] precache miss:', err);
       });

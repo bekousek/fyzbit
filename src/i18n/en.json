@@ -47,7 +47,7 @@
     "serial": "USB cable",
     "serialHint": "Web Serial · works in Chrome / Edge on Windows, macOS and Linux.",
     "bluetooth": "Bluetooth",
-    "bluetoothPending": "Coming alongside V2 firmware.",
+    "bluetoothHint": "Web Bluetooth · micro:bit V2 with BLE firmware only",
     "mock": "Demo (Mock)",
     "mockHint": "Simulated thermometer. Useful for showing the app without hardware.",
     "firmwareHint": "Don't have the FyzBit firmware on your micro:bit yet?",
@@ -60,12 +60,15 @@
   "flash": {
     "title": "Prepare micro:bit",
     "hint": "Flashes the FyzBit firmware onto the micro:bit over USB (WebUSB)",
+    "variantLabel": "Firmware variant",
+    "variantUsb": "USB (V1 + V2)",
+    "variantBle": "Bluetooth (V2 only)",
     "stageInitializing": "Preparing…",
     "stageFindingDevice": "Pick a micro:bit in the browser dialog…",
     "stageConnecting": "Connecting…",
     "stagePartialFlashing": "Flashing firmware (partial write)…",
     "stageFullFlashing": "Flashing firmware (full write)…",
-    "success": "Firmware flashed! Now click \"Connect\" → \"USB cable\".",
+    "success": "Firmware flashed! Now click \"Connect\" → \"USB cable\" or \"Bluetooth\".",
     "failed": "Flashing the firmware failed"
   },
   "chart": {

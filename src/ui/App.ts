@@ -405,8 +405,10 @@ export class App {
       await transport.connect();
     } catch (err) {
       const msg = (err as Error)?.message ?? String(err);
-      // User-cancelled port pickers are not actual errors.
-      if (/(canceled|cancelled|no port selected)/i.test(msg)) {
+      // User-cancelled device/port pickers are not actual errors. Web Serial
+      // says "no port selected"; Web Bluetooth (via @microbit/microbit-connection)
+      // says "No device selected".
+      if (/(canceled|cancelled|no (port|device) selected)/i.test(msg)) {
         appState.setStatus('disconnected');
         appState.setSensorName('');
       } else {

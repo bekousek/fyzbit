@@ -292,13 +292,12 @@
             class="connect-option"
             id="btn-connect-bluetooth"
             data-transport="bluetooth"
-            disabled
           >
             <span class="connect-option__icon">📡</span>
             <span class="connect-option__body">
               <strong data-i18n="connection.bluetooth">Bluetooth</strong>
-              <small data-i18n="connection.bluetoothPending"
-                >Bude doplněno spolu s firmware pro V2.</small
+              <small data-i18n="connection.bluetoothHint"
+                >Web Bluetooth · jen micro:bit V2 s BLE firmwarem</small
               >
             </span>
           </button>
@@ -321,6 +320,13 @@
             <p class="connection-firmware__hint" data-i18n="connection.firmwareHint">
               Ještě nemáš na micro:bitu nahraný firmware FyzBit?
             </p>
+            <label class="field connection-firmware__variant">
+              <span class="field__label" data-i18n="flash.variantLabel">Varianta firmwaru</span>
+              <select id="flash-firmware-variant" class="field__input">
+                <option value="usb" data-i18n="flash.variantUsb">USB (V1 + V2)</option>
+                <option value="ble" data-i18n="flash.variantBle">Bluetooth (jen V2)</option>
+              </select>
+            </label>
             <button type="button" class="connect-option" id="btn-flash-firmware" hidden>
               <span class="connect-option__icon">⚡</span>
               <span class="connect-option__body">

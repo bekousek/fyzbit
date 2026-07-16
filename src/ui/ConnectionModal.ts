@@ -3,15 +3,20 @@ import { MockTransport } from '../transport/MockTransport';
 import { SerialTransport } from '../transport/SerialTransport';
 import { t, onLanguageChange } from '../i18n/i18n';
 import { required } from '../utils/dom';
-import type { FlashProgress } from '../flash/Flasher';
+import type { FirmwareVariant, FlashProgress } from '../flash/Flasher';
 import { toast } from './Toast';
 
-const FIRMWARE_HEX_URL = `${import.meta.env.BASE_URL}firmware/fyzbit-usb.hex`;
+const FIRMWARE_HEX_URL: Record<FirmwareVariant, string> = {
+  usb: `${import.meta.env.BASE_URL}firmware/fyzbit-usb.hex`,
+  ble: `${import.meta.env.BASE_URL}firmware/fyzbit-ble-v2.hex`,
+};
 
-// Not imported from Flasher.ts: that module pulls in @microbit/microbit-connection
-// (~50 kB), so it's loaded lazily in startFlash() only when actually flashing.
-// This check needs no library code, just the WebUSB API's presence.
+// Not imported from Flasher.ts / BluetoothTransport.ts: both pull in
+// @microbit/microbit-connection (~50 kB), so they're loaded lazily — in
+// startFlash() and pick('bluetooth') respectively — only when actually used.
+// These checks need no library code, just the relevant browser API's presence.
 const FLASH_SUPPORTED = typeof navigator !== 'undefined' && 'usb' in navigator;
+const BLUETOOTH_SUPPORTED = typeof navigator !== 'undefined' && 'bluetooth' in navigator;
 
 const STAGE_I18N_KEY: Partial<Record<string, string>> = {
   Initializing: 'flash.stageInitializing',
@@ -29,17 +34,21 @@ export type ConnectRequest = {
 };
 
 /**
- * ConnectionModal — lets the user pick a transport. Web Bluetooth option is
- * shown but disabled until M9. Errors during transport selection (user
+ * ConnectionModal — lets the user pick a transport (USB serial, Bluetooth,
+ * or the Mock demo), plus flash the FyzBit firmware over WebUSB or download
+ * it manually. Errors during transport selection or flashing (user
  * cancelled, browser unsupported) are surfaced inside the modal, not as toasts.
  */
 export class ConnectionModal {
   private dialog: HTMLDialogElement;
   private errorEl: HTMLElement;
   private serialBtn: HTMLButtonElement;
+  private bluetoothBtn: HTMLButtonElement;
   private mockBtn: HTMLButtonElement;
   private closeBtn: HTMLButtonElement;
   private flashBtn: HTMLButtonElement;
+  private flashVariantSelect: HTMLSelectElement;
+  private downloadLink: HTMLAnchorElement;
   private flashProgressEl: HTMLElement;
   private flashProgressFillEl: HTMLElement;
   private flashProgressLabelEl: HTMLElement;
@@ -51,28 +60,39 @@ export class ConnectionModal {
     this.dialog = required<HTMLDialogElement>('#connection-modal');
     this.errorEl = required<HTMLElement>('#connection-error', this.dialog);
     this.serialBtn = required<HTMLButtonElement>('#btn-connect-serial', this.dialog);
+    this.bluetoothBtn = required<HTMLButtonElement>('#btn-connect-bluetooth', this.dialog);
     this.mockBtn = required<HTMLButtonElement>('#btn-connect-mock', this.dialog);
     this.closeBtn = required<HTMLButtonElement>('#btn-close-connection', this.dialog);
     this.flashBtn = required<HTMLButtonElement>('#btn-flash-firmware', this.dialog);
+    this.flashVariantSelect = required<HTMLSelectElement>('#flash-firmware-variant', this.dialog);
+    this.downloadLink = required<HTMLAnchorElement>('#link-download-firmware', this.dialog);
     this.flashProgressEl = required<HTMLElement>('#flash-progress', this.dialog);
     this.flashProgressFillEl = required<HTMLElement>('#flash-progress-fill', this.dialog);
     this.flashProgressLabelEl = required<HTMLElement>('#flash-progress-label', this.dialog);
     this.flashErrorEl = required<HTMLElement>('#flash-error', this.dialog);
-    required<HTMLAnchorElement>('#link-download-firmware', this.dialog).href = FIRMWARE_HEX_URL;
+    this.updateDownloadLink();
 
     if (!SerialTransport.isSupported()) {
       this.serialBtn.disabled = true;
       this.serialBtn.title = t('connection.unsupportedBrowser');
+    }
+    if (!BLUETOOTH_SUPPORTED) {
+      this.bluetoothBtn.disabled = true;
+      this.bluetoothBtn.title = t('connection.unsupportedBrowser');
     }
     this.flashBtn.hidden = !FLASH_SUPPORTED;
 
     this.serialBtn.addEventListener('click', () => {
       void this.pick('serial');
     });
+    this.bluetoothBtn.addEventListener('click', () => {
+      void this.pick('bluetooth');
+    });
     this.mockBtn.addEventListener('click', () => {
       void this.pick('mock');
     });
     this.flashBtn.addEventListener('click', () => void this.startFlash());
+    this.flashVariantSelect.addEventListener('change', () => this.updateDownloadLink());
     this.closeBtn.addEventListener('click', () => {
       if (!this.flashing) this.cancel();
     });
@@ -85,6 +105,9 @@ export class ConnectionModal {
       if (this.serialBtn.disabled) {
         this.serialBtn.title = t('connection.unsupportedBrowser');
       }
+      if (this.bluetoothBtn.disabled) {
+        this.bluetoothBtn.title = t('connection.unsupportedBrowser');
+      }
     });
   }
 
@@ -93,12 +116,14 @@ export class ConnectionModal {
     this.clearFlashError();
     this.flashBtn.disabled = true;
     this.serialBtn.disabled = true;
+    this.bluetoothBtn.disabled = true;
     this.mockBtn.disabled = true;
     this.flashProgressEl.hidden = false;
     this.setFlashProgress({ stage: 'Initializing' });
     try {
       const { flashFirmware } = await import('../flash/Flasher');
-      await flashFirmware((p) => this.setFlashProgress(p));
+      const variant = this.flashVariantSelect.value as FirmwareVariant;
+      await flashFirmware(variant, (p) => this.setFlashProgress(p));
       toast.success(t('flash.success'), 6000);
     } catch (err) {
       this.showFlashError(`${t('flash.failed')}: ${String((err as Error)?.message ?? err)}`);
@@ -107,8 +132,14 @@ export class ConnectionModal {
       this.flashProgressEl.hidden = true;
       this.flashBtn.disabled = false;
       this.serialBtn.disabled = !SerialTransport.isSupported();
+      this.bluetoothBtn.disabled = !BLUETOOTH_SUPPORTED;
       this.mockBtn.disabled = false;
     }
+  }
+
+  private updateDownloadLink(): void {
+    const variant = this.flashVariantSelect.value as FirmwareVariant;
+    this.downloadLink.href = FIRMWARE_HEX_URL[variant];
   }
 
   private setFlashProgress(p: FlashProgress): void {
@@ -153,8 +184,17 @@ export class ConnectionModal {
         this.resolveAndClose({ kind, transport, label: 'USB' });
         return;
       }
-      // Bluetooth not yet implemented.
-      this.showError('Bluetooth not implemented yet.');
+      if (kind === 'bluetooth') {
+        if (!BLUETOOTH_SUPPORTED) {
+          this.showError(t('connection.unsupportedBrowser'));
+          return;
+        }
+        const { BluetoothTransport } = await import('../transport/BluetoothTransport');
+        // Same pattern as serial: transport.connect() (triggered by App.connect())
+        // is what actually shows the device picker.
+        this.resolveAndClose({ kind, transport: new BluetoothTransport(), label: 'Bluetooth' });
+        return;
+      }
     } catch (err) {
       this.showError(String((err as Error)?.message ?? err));
     }

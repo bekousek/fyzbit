@@ -47,7 +47,7 @@
     "serial": "USB kabel",
     "serialHint": "Web Serial · funguje na Chrome / Edge na Windows, macOS i Linuxu.",
     "bluetooth": "Bluetooth",
-    "bluetoothPending": "Bude doplněno spolu s firmware pro V2.",
+    "bluetoothHint": "Web Bluetooth · jen micro:bit V2 s BLE firmwarem",
     "mock": "Demo (Mock)",
     "mockHint": "Simulovaný teploměr. Hodí se na ukázku bez hardwaru.",
     "firmwareHint": "Ještě nemáš na micro:bitu nahraný firmware FyzBit?",
@@ -60,12 +60,15 @@
   "flash": {
     "title": "Připravit micro:bit",
     "hint": "Nahraje firmware FyzBit do micro:bitu přes USB (WebUSB)",
+    "variantLabel": "Varianta firmwaru",
+    "variantUsb": "USB (V1 + V2)",
+    "variantBle": "Bluetooth (jen V2)",
     "stageInitializing": "Připravuji…",
     "stageFindingDevice": "Vyber micro:bit v dialogu prohlížeče…",
     "stageConnecting": "Připojuji se…",
     "stagePartialFlashing": "Nahrávám firmware (rychlý zápis)…",
     "stageFullFlashing": "Nahrávám firmware (plný zápis)…",
-    "success": "Firmware nahrán! Teď klikni na „Připojit“ → „USB kabel“.",
+    "success": "Firmware nahrán! Teď klikni na „Připojit“ → „USB kabel“ nebo „Bluetooth“.",
     "failed": "Nahrání firmwaru selhalo"
   },
   "chart": {

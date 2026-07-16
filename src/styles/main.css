@@ -703,6 +703,10 @@ textarea.field__input {
   color: var(--fg-muted);
 }
 
+.connection-firmware__variant {
+  margin: 4px 0;
+}
+
 .connection-firmware__link {
   color: var(--accent);
   font-size: 14px;
