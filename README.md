@@ -29,6 +29,20 @@ npm run lint      # ESLint
 npm run format    # Prettier
 ```
 
+## Firmware
+
+Micro:bit potřebuje nahraný firmware FyzBit, aby s aplikací uměl mluvit — buď [`fyzbit-v1`](firmware/source/fyzbit-v1) (USB, V1 i V2), nebo [`fyzbit-ble`](firmware/source/fyzbit-ble) (USB *i* Bluetooth, jen V2).
+
+**Nejjednodušší cesta pro učitele/žáky:** v aplikaci → dialog „Připojit micro:bit" → „⚡ Připravit micro:bit" nahraje vybranou variantu firmwaru přímo přes WebUSB (Chrome/Edge), bez otevírání MakeCode. Kdo WebUSB nemá, stáhne `.hex` stejným dialogem a přetáhne ho ručně na disk `MICROBIT`.
+
+Hex soubory se staví přes [MakeCode CLI](https://github.com/microsoft/pxt-mkc) (balíček `makecode`, ne ruční export z makecode.microbit.org):
+
+```bash
+npm run firmware   # sestaví firmware/source/{fyzbit-v1,fyzbit-ble} a zkopíruje hexy do public/firmware/
+```
+
+Detaily zapojení senzorů, protokolu a Bluetooth (No Pairing Required) jsou v READMEs jednotlivých firmware projektů.
+
 ## Hosting
 
 Produkční verze běží na [bekousek.github.io/fyzbit](https://bekousek.github.io/fyzbit/) (později [fyzbit.cz](https://fyzbit.cz)). Build je v adresáři `docs/`, který slouží jako root GitHub Pages.
