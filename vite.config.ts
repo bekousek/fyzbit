@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
@@ -45,9 +45,6 @@ export default defineConfig({
     // one jsdom injects, breaking every test that touches localStorage
     // (throws "Cannot read properties of undefined"). Disable it so jsdom's
     // own implementation wins.
-    poolOptions: {
-      threads: { execArgv: ['--no-experimental-webstorage'] },
-      forks: { execArgv: ['--no-experimental-webstorage'] },
-    },
+    execArgv: ['--no-experimental-webstorage'],
   },
 });

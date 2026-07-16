@@ -2,6 +2,7 @@ import type { Transport, TransportKind } from '../transport/Transport';
 import { MockTransport } from '../transport/MockTransport';
 import { SerialTransport } from '../transport/SerialTransport';
 import { t, onLanguageChange } from '../i18n/i18n';
+import { required } from '../utils/dom';
 
 export type ConnectRequest = {
   kind: TransportKind;
@@ -124,13 +125,4 @@ export class ConnectionModal {
     this.errorEl.textContent = '';
     this.errorEl.hidden = true;
   }
-}
-
-function required<T extends HTMLElement = HTMLElement>(
-  selector: string,
-  scope: ParentNode = document,
-): T {
-  const el = scope.querySelector<T>(selector);
-  if (!el) throw new Error(`ConnectionModal: missing element ${selector}`);
-  return el;
 }

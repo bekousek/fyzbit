@@ -1,6 +1,7 @@
 import { Commands, type SensorName } from '../protocol/Commands';
 import type { AppState, ConnectionStatus } from '../state/AppState';
 import { onLanguageChange, t } from '../i18n/i18n';
+import { required } from '../utils/dom';
 
 const SENSORS: SensorName[] = ['DS18B20', 'HX711', 'HCSR04', 'HX710B', 'DHT11'];
 
@@ -43,13 +44,4 @@ export class SensorSelect {
   private updateVisibility(status: ConnectionStatus): void {
     this.select.hidden = !(status === 'connected' || status === 'measuring');
   }
-}
-
-function required<T extends HTMLElement = HTMLElement>(
-  selector: string,
-  scope: ParentNode,
-): T {
-  const el = scope.querySelector<T>(selector);
-  if (!el) throw new Error(`SensorSelect: missing element ${selector}`);
-  return el;
 }

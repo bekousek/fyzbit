@@ -1,5 +1,7 @@
 import type { AppState, Run } from '../state/AppState';
 import { onLanguageChange, t } from '../i18n/i18n';
+import { required } from '../utils/dom';
+import { showConfirm } from './Dialog';
 
 /**
  * RunsList — rendered in the right column. Lists saved runs with a checkbox
@@ -93,9 +95,12 @@ export class RunsList {
       del.setAttribute('aria-label', t('runs.delete'));
       del.title = t('runs.delete');
       del.addEventListener('click', () => {
-        if (confirm(t('runs.confirmDelete', { name: run.name }))) {
-          this.state.deleteRun(run.id);
-        }
+        void showConfirm(t('runs.confirmDelete', { name: run.name }), {
+          okLabel: t('runs.delete'),
+          danger: true,
+        }).then((confirmed) => {
+          if (confirmed) this.state.deleteRun(run.id);
+        });
       });
       li.appendChild(del);
     }
@@ -127,13 +132,4 @@ export class RunsList {
       }
     });
   }
-}
-
-function required<T extends HTMLElement = HTMLElement>(
-  selector: string,
-  scope: ParentNode = document,
-): T {
-  const el = scope.querySelector<T>(selector);
-  if (!el) throw new Error(`RunsList: missing element ${selector}`);
-  return el;
 }

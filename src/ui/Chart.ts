@@ -13,8 +13,8 @@ export type SelectionRange = { tMin: number; tMax: number } | null;
 
 export type ChartCallbacks = {
   onSelection?: (range: SelectionRange) => void;
-  /** Returns label entered by user, or null if cancelled. */
-  promptAnnotation?: () => string | null;
+  /** Resolves to the label entered by the user, or null if cancelled. */
+  promptAnnotation?: () => Promise<string | null>;
   /** A held? Asked at the moment of click. */
   isAnnotationModifierHeld?: () => boolean;
   /** Called when user clicks chart while annotation modifier is held. */
@@ -114,9 +114,12 @@ export class Chart {
     if (x < 0 || x > rect.width) return;
     const tSec = this.plot.posToVal(x, 'x');
     if (!Number.isFinite(tSec)) return;
-    const label = this.callbacks.promptAnnotation?.() ?? null;
-    if (!label) return;
-    this.callbacks.onAnnotationClick?.(tSec, label);
+    const pending = this.callbacks.promptAnnotation?.();
+    if (!pending) return;
+    void pending.then((label) => {
+      if (!label) return;
+      this.callbacks.onAnnotationClick?.(tSec, label);
+    });
   };
 
   private handleResize(): void {

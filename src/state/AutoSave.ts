@@ -16,8 +16,13 @@ export class AutoSave {
   private dirty = false;
   private timer: number | null = null;
   private sessionId: string | undefined;
+  private saveFailedNotified = false;
 
-  constructor(private readonly state: AppState) {
+  /** `onSaveError` fires once per failure streak (e.g. full storage, private mode). */
+  constructor(
+    private readonly state: AppState,
+    private readonly onSaveError?: () => void,
+  ) {
     state.bus.on('runs-changed', () => this.markDirty());
     state.bus.on('active-run-changed', () => this.markDirty());
     state.bus.on('channels-changed', () => this.markDirty());
@@ -74,8 +79,14 @@ export class AutoSave {
     const allRuns = active ? [...runs, active] : runs;
     const session = buildSession(channels, allRuns, sensorName, this.sessionId);
     this.sessionId = session.id;
-    await storage.saveSession(session);
-    this.dirty = false;
+    const ok = await storage.saveSession(session);
+    if (ok) {
+      this.dirty = false;
+      this.saveFailedNotified = false;
+    } else if (!this.saveFailedNotified) {
+      this.saveFailedNotified = true;
+      this.onSaveError?.();
+    }
   }
 
   private flushOnUnload = (): void => {

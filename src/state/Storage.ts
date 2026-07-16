@@ -48,11 +48,14 @@ export const storage = {
     }
   },
 
-  async saveSession(session: StoredSession): Promise<void> {
+  /** Returns false (instead of throwing) on failure — e.g. full storage or private mode. */
+  async saveSession(session: StoredSession): Promise<boolean> {
     try {
       await set(KEY_SESSION, session);
+      return true;
     } catch (err) {
       console.error('[storage] saveSession failed:', err);
+      return false;
     }
   },
 
@@ -64,12 +67,14 @@ export const storage = {
     }
   },
 
-  /** Nuclear option used by Settings → Smazat všechna data. */
-  async clearAll(): Promise<void> {
+  /** Nuclear option used by Settings → Smazat všechna data. Returns false on failure. */
+  async clearAll(): Promise<boolean> {
     try {
       await clear();
+      return true;
     } catch (err) {
       console.error('[storage] clearAll failed:', err);
+      return false;
     }
   },
 };

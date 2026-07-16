@@ -1,4 +1,5 @@
 import { onLanguageChange, t } from '../i18n/i18n';
+import { escapeHtml } from '../utils/dom';
 
 /**
  * Help overlay listing keyboard shortcuts. Toggled by `?` key.
@@ -62,6 +63,7 @@ export class ShortcutsHelp {
       ['S', t('shortcuts.save')],
       ['N', t('shortcuts.newRun')],
       ['A + ' + t('shortcuts.click'), t('shortcuts.annotation')],
+      ['Shift+A', t('shortcuts.annotationKeyboard')],
       ['E', t('shortcuts.exportCsv')],
       ['P', t('shortcuts.exportPdf')],
       ['Esc', t('shortcuts.escape')],
@@ -74,12 +76,4 @@ export class ShortcutsHelp {
       )
       .join('');
   }
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
 }

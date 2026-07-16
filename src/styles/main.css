@@ -784,6 +784,17 @@ textarea.field__input {
   font-weight: 500;
 }
 
+/* ---------- Confirm/alert/prompt dialog ---------- */
+
+.confirm-dialog {
+  max-width: 400px;
+}
+
+.confirm-dialog__message {
+  margin: 0;
+  white-space: pre-line;
+}
+
 .recovery-summary dd {
   margin: 0;
   font-variant-numeric: tabular-nums;

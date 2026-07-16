@@ -1,15 +1,16 @@
 /**
  * Global keyboard shortcuts (spec §10.4).
  *
- *   Space → START / STOP
- *   T     → Tára
- *   S     → Uložit run
- *   N     → Nový run
- *   A     → (held) annotation mode (handled separately; this module just exposes isHeld)
- *   E     → Export CSV
- *   P     → Export PDF
- *   Esc   → Reset zoom / close modal (modals already handle Esc natively)
- *   ?     → Help overlay
+ *   Space   → START / STOP
+ *   T       → Tára
+ *   S       → Uložit run
+ *   N       → Nový run
+ *   A       → (held) annotation mode (handled separately; this module just exposes isHeld)
+ *   Shift+A → Add annotation at the current position without a mouse
+ *   E       → Export CSV
+ *   P       → Export PDF
+ *   Esc     → Reset zoom / close modal (modals already handle Esc natively)
+ *   ?       → Help overlay
  *
  * Skips firing when focus is in an editable field, when modifier keys (Ctrl /
  * Meta) are pressed, or when a <dialog> is open.
@@ -20,6 +21,7 @@ export type ShortcutHandlers = {
   tare: () => void;
   save: () => void;
   newRun: () => void;
+  annotation: () => void;
   exportCsv: () => void;
   exportPdf: () => void;
   help: () => void;
@@ -72,7 +74,12 @@ export class KeyboardShortcuts {
         break;
       case 'a':
       case 'A':
-        this.aHeld = true;
+        if (e.shiftKey) {
+          e.preventDefault();
+          this.handlers.annotation();
+        } else {
+          this.aHeld = true;
+        }
         break;
       case 'e':
       case 'E':

@@ -17,6 +17,7 @@ import { PdfExportModal } from './PdfExportModal';
 import { CalibrationModal } from './CalibrationModal';
 import { RecoveryModal } from './RecoveryModal';
 import { toast } from './Toast';
+import { showAlert, showConfirm, showPrompt } from './Dialog';
 import { AutoSave } from '../state/AutoSave';
 import { storage } from '../state/Storage';
 import {
@@ -69,7 +70,7 @@ export class App {
         return () => this.calibrationListeners.delete(handler);
       },
     });
-    this.autoSave = new AutoSave(appState);
+    this.autoSave = new AutoSave(appState, () => toast.warn(t('error.storageSaveFailed'), 0));
     this.recoveryModal = new RecoveryModal(appState, this.autoSave);
 
     const chartHost = document.getElementById('chart-container');
@@ -77,10 +78,7 @@ export class App {
     this.chart = new Chart(chartHost, {
       onSelection: (range: SelectionRange) => this.selectionStats.setRange(range),
       isAnnotationModifierHeld: () => this.shortcuts.isAnnotationModifierHeld(),
-      promptAnnotation: () => {
-        const label = window.prompt(t('annotation.promptLabel'), '');
-        return label && label.trim() ? label.trim() : null;
-      },
+      promptAnnotation: () => this.promptAnnotationLabel(),
       onAnnotationClick: (tSec, label) => {
         appState.addAnnotation({ t: tSec, label });
       },
@@ -103,6 +101,7 @@ export class App {
         const newBtn = document.getElementById('btn-new-run') as HTMLButtonElement | null;
         if (newBtn && !newBtn.disabled) newBtn.click();
       },
+      annotation: () => void this.addAnnotationAtCursor(),
       exportCsv: () => this.exportCsv(),
       exportPdf: () => this.exportPdf(),
       help: () => this.shortcutsHelp.toggle(),
@@ -237,13 +236,17 @@ export class App {
   }
 
   private async resetAllData(): Promise<void> {
-    if (!window.confirm(t('resetData.confirm'))) return;
+    const confirmed = await showConfirm(t('resetData.confirm'), {
+      okLabel: t('settings.resetData'),
+      danger: true,
+    });
+    if (!confirmed) return;
     if (this.transport && this.transport.isConnected()) {
       await this.transport.disconnect();
       this.transport = null;
     }
     this.autoSave.stop();
-    await storage.clearAll();
+    const cleared = await storage.clearAll();
     try {
       localStorage.clear();
     } catch {
@@ -251,7 +254,11 @@ export class App {
     }
     appState.reset();
     this.autoSave.start();
-    window.alert(t('resetData.done'));
+    if (cleared) {
+      await showAlert(t('resetData.done'));
+    } else {
+      await showAlert(t('resetData.failed'));
+    }
   }
 
   private hasAnyData(): boolean {
@@ -331,6 +338,21 @@ export class App {
   private newRun(): void {
     if (appState.activeRun) appState.discardActiveRun();
     // The next START click will create a fresh active run.
+  }
+
+  private async promptAnnotationLabel(): Promise<string | null> {
+    const label = await showPrompt(t('annotation.promptLabel'), '');
+    return label && label.trim() ? label.trim() : null;
+  }
+
+  /** Keyboard-only annotation path (Shift+A): marks the active run's latest sample. */
+  private async addAnnotationAtCursor(): Promise<void> {
+    const run = appState.activeRun;
+    if (!run || run.times.length === 0) return;
+    const tSec = run.times[run.times.length - 1]!;
+    const label = await this.promptAnnotationLabel();
+    if (!label) return;
+    appState.addAnnotation({ t: tSec, label });
   }
 
   private updateButtonStates(): void {

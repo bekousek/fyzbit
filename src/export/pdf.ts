@@ -5,6 +5,7 @@ import type { Channel, Run } from '../state/AppState';
 import { formatNumber, getLanguage, t } from '../i18n/i18n';
 import { chartToDataUrl } from './png';
 import { timestampedFilename, triggerDownload } from './csv';
+import { computeRunChannelStats } from '../utils/stats';
 
 const FONT_URL_BASE = `${import.meta.env.BASE_URL}fonts/Roboto-Regular.ttf`;
 const FONT_NAME = 'Roboto';
@@ -61,7 +62,7 @@ export async function exportPdf(opts: PdfOptions): Promise<void> {
   const pageH = doc.internal.pageSize.getHeight();
   const margin = 14;
   const accent: [number, number, number] = [27, 94, 32]; // FyzBit green
-  let y = margin;
+  let y: number;
 
   // ── Header ───────────────────────────────────────────────
   doc.setFillColor(...accent);
@@ -142,7 +143,7 @@ export async function exportPdf(opts: PdfOptions): Promise<void> {
     const body: string[][] = [];
     for (const r of visibleRuns) {
       for (const ch of opts.channels) {
-        const stats = quickStats(r, ch.id);
+        const stats = computeRunChannelStats(r, ch.id);
         if (!stats) continue;
         body.push([
           r.name,
@@ -224,7 +225,6 @@ export async function exportPdf(opts: PdfOptions): Promise<void> {
     doc.setFontSize(10);
     const wrapped = doc.splitTextToSize(meta.notes, pageW - 2 * margin);
     doc.text(wrapped, margin, y);
-    y += wrapped.length * 5 + 4;
   }
 
   // ── Footer ──────────────────────────────────────────────
@@ -237,20 +237,3 @@ export async function exportPdf(opts: PdfOptions): Promise<void> {
   triggerDownload(blob, timestampedFilename('FyzBit_protokol', 'pdf'));
 }
 
-function quickStats(
-  run: Run,
-  channelId: string,
-): { min: number; max: number; avg: number; median: number; deltaY: number } | null {
-  const col = run.values[channelId];
-  if (!col || col.length === 0) return null;
-  const finite = col.filter((v) => Number.isFinite(v));
-  if (finite.length === 0) return null;
-  const min = Math.min(...finite);
-  const max = Math.max(...finite);
-  const avg = finite.reduce((a, b) => a + b, 0) / finite.length;
-  const sorted = [...finite].sort((a, b) => a - b);
-  const mid = Math.floor(sorted.length / 2);
-  const median =
-    sorted.length % 2 === 0 ? (sorted[mid - 1]! + sorted[mid]!) / 2 : sorted[mid]!;
-  return { min, max, avg, median, deltaY: max - min };
-}

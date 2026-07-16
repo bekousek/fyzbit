@@ -1,6 +1,8 @@
 import type { AppState, Run } from '../state/AppState';
 import type { SelectionRange } from './Chart';
 import { formatNumber, onLanguageChange, t } from '../i18n/i18n';
+import { computeRangeStats } from '../utils/stats';
+import { escapeHtml, required } from '../utils/dom';
 
 /**
  * Statistics panel for the currently selected x range (drag-select in chart).
@@ -56,7 +58,7 @@ export class SelectionStats {
     const rows: string[] = [];
     for (const r of visibleRuns) {
       for (const ch of this.state.channels) {
-        const stats = computeStats(r, ch.id, tMin, tMax);
+        const stats = computeRangeStats(r, ch.id, tMin, tMax);
         if (!stats) continue;
         rows.push(
           `<tr>
@@ -95,48 +97,3 @@ export class SelectionStats {
   }
 }
 
-function computeStats(
-  run: Run,
-  channelId: string,
-  tMin: number,
-  tMax: number,
-): { min: number; max: number; avg: number; median: number; deltaY: number } | null {
-  const col = run.values[channelId];
-  if (!col) return null;
-  const values: number[] = [];
-  for (let i = 0; i < run.times.length; i++) {
-    const t = run.times[i];
-    if (t === undefined || t < tMin || t > tMax) continue;
-    const v = col[i];
-    if (v === undefined || !Number.isFinite(v)) continue;
-    values.push(v);
-  }
-  if (values.length === 0) return null;
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const sum = values.reduce((a, b) => a + b, 0);
-  const avg = sum / values.length;
-  const sorted = [...values].sort((a, b) => a - b);
-  const mid = Math.floor(sorted.length / 2);
-  const median =
-    sorted.length % 2 === 0 ? (sorted[mid - 1]! + sorted[mid]!) / 2 : sorted[mid]!;
-  const deltaY = max - min;
-  return { min, max, avg, median, deltaY };
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-function required<T extends HTMLElement = HTMLElement>(
-  selector: string,
-  scope: ParentNode = document,
-): T {
-  const el = scope.querySelector<T>(selector);
-  if (!el) throw new Error(`SelectionStats: missing element ${selector}`);
-  return el;
-}

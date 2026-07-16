@@ -24,7 +24,8 @@
     "exportPng": "🖼 PNG",
     "settings": "Nastavení",
     "cancel": "Zrušit",
-    "close": "Zavřít"
+    "close": "Zavřít",
+    "ok": "OK"
   },
   "panel": {
     "wiring": "Zapojení",
@@ -116,7 +117,8 @@
     "resetData": "Smazat všechna data",
     "about": "O aplikaci",
     "makecodeExt": "MakeCode rozšíření",
-    "version": "Verze {{version}}"
+    "version": "Verze {{version}}",
+    "privacyNote": "Všechna data (měření i jména žáků) zůstávají v tomto počítači; aplikace nic neodesílá."
   },
   "calibration": {
     "title": "Kalibrace senzoru",
@@ -159,6 +161,7 @@
     "save": "Uložit měření",
     "newRun": "Nové měření",
     "annotation": "Přidat anotaci",
+    "annotationKeyboard": "Přidat anotaci na aktuální pozici (bez myši)",
     "exportCsv": "Export CSV",
     "exportPdf": "Export PDF",
     "escape": "Reset zoomu / zavřít okno",
@@ -184,11 +187,13 @@
   },
   "resetData": {
     "confirm": "Opravdu smazat všechna lokálně uložená data (uložená měření, jména žáků, motiv a jazyk)?",
-    "done": "Smazáno. Obnov stránku pro čistý start."
+    "done": "Smazáno. Obnov stránku pro čistý start.",
+    "failed": "Část dat se nepodařilo smazat (chyba úložiště prohlížeče). Zkus to znovu nebo zkontroluj režim soukromého prohlížení."
   },
   "error": {
     "browserUnsupported": "Tento prohlížeč nepodporuje připojení k micro:bitu. Použij Chrome nebo Edge.",
     "connectionLost": "Spojení s micro:bitem ztraceno.",
-    "calibrationTimeout": "Kalibrace neodpověděla. Zkus znovu."
+    "calibrationTimeout": "Kalibrace neodpověděla. Zkus znovu.",
+    "storageSaveFailed": "Automatické ukládání selhává (plné úložiště nebo režim soukromého prohlížení) — probíhající měření se neukládá."
   }
 }

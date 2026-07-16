@@ -1,6 +1,7 @@
 import { settings, type SamplingHz } from '../state/Settings';
 import type { Language } from '../i18n/i18n';
 import type { ThemePreference } from '../theme/theme';
+import { required } from '../utils/dom';
 
 /**
  * Settings modal — native <dialog> with language/theme/sampling/reset/about.
@@ -67,13 +68,4 @@ export class SettingsModal {
       r.checked = r.value === pref;
     });
   }
-}
-
-function required<T extends HTMLElement = HTMLElement>(
-  selector: string,
-  scope: ParentNode,
-): T {
-  const el = scope.querySelector<T>(selector);
-  if (!el) throw new Error(`SettingsModal: missing element ${selector}`);
-  return el;
 }

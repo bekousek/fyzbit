@@ -1,6 +1,8 @@
 import { studentInfoStore, parseStudents } from '../state/StudentInfo';
 import type { PdfMetadata } from '../export/pdf';
 import { findChartCanvas } from '../export/png';
+import { required } from '../utils/dom';
+import { showAlert } from './Dialog';
 import type { AppState } from '../state/AppState';
 import { getLanguage, t } from '../i18n/i18n';
 
@@ -73,7 +75,7 @@ export class PdfExportModal {
       ...(this.state.activeRun ? [this.state.activeRun] : []),
     ];
     if (visibleRuns.length === 0) {
-      window.alert(t('pdfModal.noDataYet'));
+      await showAlert(t('pdfModal.noDataYet'));
       return;
     }
 
@@ -89,16 +91,7 @@ export class PdfExportModal {
       this.close();
     } catch (err) {
       console.error('[PdfExportModal] generation failed:', err);
-      window.alert(`PDF export failed: ${String((err as Error)?.message ?? err)}`);
+      await showAlert(`PDF export failed: ${String((err as Error)?.message ?? err)}`);
     }
   }
-}
-
-function required<T extends HTMLElement = HTMLElement>(
-  selector: string,
-  scope: ParentNode = document,
-): T {
-  const el = scope.querySelector<T>(selector);
-  if (!el) throw new Error(`PdfExportModal: missing element ${selector}`);
-  return el;
 }

@@ -1,5 +1,6 @@
 import type { AppState, Channel, ConnectionStatus } from '../state/AppState';
 import { formatNumber, onLanguageChange, t } from '../i18n/i18n';
+import { required } from '../utils/dom';
 
 /**
  * Top bar widget. Shows connection status badge + sensor name + big numeric
@@ -66,13 +67,4 @@ export class TopBar {
     this.bigNumber.textContent = value === undefined ? '—' : formatNumber(value, 1);
     this.bigUnit.textContent = primary.unit;
   }
-}
-
-function required<T extends HTMLElement = HTMLElement>(
-  selector: string,
-  scope: ParentNode,
-): T {
-  const el = scope.querySelector<T>(selector);
-  if (!el) throw new Error(`TopBar: missing element ${selector}`);
-  return el;
 }

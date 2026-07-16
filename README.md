@@ -14,6 +14,10 @@ FyzBit je webová aplikace, ve které učitel nebo žák připojí micro:bit s f
 - 🇨🇿 / 🇬🇧 Čeština a angličtina
 - 📲 PWA — funguje offline
 
+## Soukromí
+
+Všechna data (naměřené hodnoty, jména žáků, nastavení) zůstávají uložená v tomto počítači/prohlížeči. Aplikace neodesílá nic na žádný server — žádná analytika, žádné externí požadavky za běhu.
+
 ## Vývoj
 
 ```bash

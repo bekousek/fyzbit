@@ -3,6 +3,7 @@ import { storage, storedToRun } from '../state/Storage';
 import type { AppState, Run } from '../state/AppState';
 import type { AutoSave } from '../state/AutoSave';
 import { onLanguageChange, t, getLanguage } from '../i18n/i18n';
+import { escapeHtml } from '../utils/dom';
 
 /**
  * Recovery prompt — shown at startup if a non-empty session is sitting in
@@ -95,12 +96,4 @@ export class RecoveryModal {
       },
     );
   }
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
 }

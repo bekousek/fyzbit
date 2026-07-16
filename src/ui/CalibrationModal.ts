@@ -1,6 +1,8 @@
 import type { AppState, Channel } from '../state/AppState';
 import { Commands } from '../protocol/Commands';
 import { t, onLanguageChange, formatNumber } from '../i18n/i18n';
+import { required } from '../utils/dom';
+import { showAlert } from './Dialog';
 
 const CAL_TIMEOUT_MS = 3000;
 const WARN_FACTOR_RATIO = 10;
@@ -71,7 +73,7 @@ export class CalibrationModal {
   open(): void {
     const channels = this.deps.state.channels;
     if (channels.length === 0) {
-      window.alert(t('calibration.noChannels'));
+      void showAlert(t('calibration.noChannels'));
       return;
     }
     this.step = channels.length === 1 ? 'instructions' : 'choose';
@@ -351,13 +353,4 @@ function escape(s: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
-}
-
-function required<T extends HTMLElement = HTMLElement>(
-  selector: string,
-  scope: ParentNode = document,
-): T {
-  const el = scope.querySelector<T>(selector);
-  if (!el) throw new Error(`CalibrationModal: missing element ${selector}`);
-  return el;
 }

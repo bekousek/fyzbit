@@ -24,7 +24,8 @@
     "exportPng": "🖼 PNG",
     "settings": "Settings",
     "cancel": "Cancel",
-    "close": "Close"
+    "close": "Close",
+    "ok": "OK"
   },
   "panel": {
     "wiring": "Wiring",
@@ -116,7 +117,8 @@
     "resetData": "Delete all data",
     "about": "About",
     "makecodeExt": "MakeCode extension",
-    "version": "Version {{version}}"
+    "version": "Version {{version}}",
+    "privacyNote": "All data (measurements and student names) stays on this computer; the app doesn't send anything anywhere."
   },
   "calibration": {
     "title": "Sensor calibration",
@@ -159,6 +161,7 @@
     "save": "Save run",
     "newRun": "New run",
     "annotation": "Add annotation",
+    "annotationKeyboard": "Add annotation at the current position (no mouse)",
     "exportCsv": "Export CSV",
     "exportPdf": "Export PDF",
     "escape": "Reset zoom / close dialog",
@@ -184,11 +187,13 @@
   },
   "resetData": {
     "confirm": "Delete all locally stored data (saved runs, student names, theme and language)?",
-    "done": "Deleted. Refresh the page for a clean start."
+    "done": "Deleted. Refresh the page for a clean start.",
+    "failed": "Some data could not be deleted (browser storage error). Try again or check if private browsing mode is blocking storage."
   },
   "error": {
     "browserUnsupported": "This browser does not support connecting to micro:bit. Use Chrome or Edge.",
     "connectionLost": "Connection to micro:bit lost.",
-    "calibrationTimeout": "Calibration did not respond. Try again."
+    "calibrationTimeout": "Calibration did not respond. Try again.",
+    "storageSaveFailed": "Auto-save is failing (full storage or private browsing mode) — the current recording is not being saved."
   }
 }
