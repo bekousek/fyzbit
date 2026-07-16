@@ -31,6 +31,7 @@
     "url": "https://github.com/bekousek/fyzbit.git"
   },
   "dependencies": {
+    "@microbit/microbit-connection": "^1.0.0",
     "idb-keyval": "^6.3.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",

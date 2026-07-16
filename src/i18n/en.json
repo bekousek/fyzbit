@@ -57,6 +57,17 @@
     "userCancelled": "Connection cancelled.",
     "unsupportedBrowser": "This browser does not support Web Serial. Use Chrome or Edge."
   },
+  "flash": {
+    "title": "Prepare micro:bit",
+    "hint": "Flashes the FyzBit firmware onto the micro:bit over USB (WebUSB)",
+    "stageInitializing": "Preparing…",
+    "stageFindingDevice": "Pick a micro:bit in the browser dialog…",
+    "stageConnecting": "Connecting…",
+    "stagePartialFlashing": "Flashing firmware (partial write)…",
+    "stageFullFlashing": "Flashing firmware (full write)…",
+    "success": "Firmware flashed! Now click \"Connect\" → \"USB cable\".",
+    "failed": "Flashing the firmware failed"
+  },
   "chart": {
     "autoscale": "⌂ Autoscale",
     "resetZoom": "🔍 Reset zoom",

@@ -714,6 +714,32 @@ textarea.field__input {
   text-decoration: underline;
 }
 
+.flash-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.flash-progress__bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+
+.flash-progress__fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 200ms ease;
+}
+
+.flash-progress__label {
+  margin: 0;
+  font-size: 13px;
+  color: var(--fg-muted);
+}
+
 /* ---------- Calibration modal ---------- */
 
 .calibration-modal .modal__body {

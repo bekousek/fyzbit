@@ -321,6 +321,22 @@
             <p class="connection-firmware__hint" data-i18n="connection.firmwareHint">
               Ještě nemáš na micro:bitu nahraný firmware FyzBit?
             </p>
+            <button type="button" class="connect-option" id="btn-flash-firmware" hidden>
+              <span class="connect-option__icon">⚡</span>
+              <span class="connect-option__body">
+                <strong data-i18n="flash.title">Připravit micro:bit</strong>
+                <small data-i18n="flash.hint"
+                  >Nahraje firmware FyzBit do micro:bitu přes USB (WebUSB)</small
+                >
+              </span>
+            </button>
+            <div class="flash-progress" id="flash-progress" hidden>
+              <div class="flash-progress__bar">
+                <div class="flash-progress__fill" id="flash-progress-fill"></div>
+              </div>
+              <p class="flash-progress__label" id="flash-progress-label"></p>
+            </div>
+            <p class="connection-error" id="flash-error" hidden></p>
             <a class="connection-firmware__link" id="link-download-firmware" download>
               <span data-i18n="connection.downloadFirmware">⬇ Stáhnout firmware (.hex)</span>
             </a>

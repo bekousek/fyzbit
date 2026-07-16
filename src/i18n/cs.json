@@ -57,6 +57,17 @@
     "userCancelled": "Připojení zrušeno.",
     "unsupportedBrowser": "Tento prohlížeč nepodporuje Web Serial. Použij Chrome nebo Edge."
   },
+  "flash": {
+    "title": "Připravit micro:bit",
+    "hint": "Nahraje firmware FyzBit do micro:bitu přes USB (WebUSB)",
+    "stageInitializing": "Připravuji…",
+    "stageFindingDevice": "Vyber micro:bit v dialogu prohlížeče…",
+    "stageConnecting": "Připojuji se…",
+    "stagePartialFlashing": "Nahrávám firmware (rychlý zápis)…",
+    "stageFullFlashing": "Nahrávám firmware (plný zápis)…",
+    "success": "Firmware nahrán! Teď klikni na „Připojit“ → „USB kabel“.",
+    "failed": "Nahrání firmwaru selhalo"
+  },
   "chart": {
     "autoscale": "⌂ Autoscale",
     "resetZoom": "🔍 Reset zoom",

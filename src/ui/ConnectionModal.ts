@@ -3,8 +3,23 @@ import { MockTransport } from '../transport/MockTransport';
 import { SerialTransport } from '../transport/SerialTransport';
 import { t, onLanguageChange } from '../i18n/i18n';
 import { required } from '../utils/dom';
+import type { FlashProgress } from '../flash/Flasher';
+import { toast } from './Toast';
 
 const FIRMWARE_HEX_URL = `${import.meta.env.BASE_URL}firmware/fyzbit-usb.hex`;
+
+// Not imported from Flasher.ts: that module pulls in @microbit/microbit-connection
+// (~50 kB), so it's loaded lazily in startFlash() only when actually flashing.
+// This check needs no library code, just the WebUSB API's presence.
+const FLASH_SUPPORTED = typeof navigator !== 'undefined' && 'usb' in navigator;
+
+const STAGE_I18N_KEY: Partial<Record<string, string>> = {
+  Initializing: 'flash.stageInitializing',
+  FindingDevice: 'flash.stageFindingDevice',
+  Connecting: 'flash.stageConnecting',
+  PartialFlashing: 'flash.stagePartialFlashing',
+  FullFlashing: 'flash.stageFullFlashing',
+};
 
 export type ConnectRequest = {
   kind: TransportKind;
@@ -24,6 +39,12 @@ export class ConnectionModal {
   private serialBtn: HTMLButtonElement;
   private mockBtn: HTMLButtonElement;
   private closeBtn: HTMLButtonElement;
+  private flashBtn: HTMLButtonElement;
+  private flashProgressEl: HTMLElement;
+  private flashProgressFillEl: HTMLElement;
+  private flashProgressLabelEl: HTMLElement;
+  private flashErrorEl: HTMLElement;
+  private flashing = false;
   private pendingResolve: ((req: ConnectRequest | null) => void) | null = null;
 
   constructor() {
@@ -32,12 +53,18 @@ export class ConnectionModal {
     this.serialBtn = required<HTMLButtonElement>('#btn-connect-serial', this.dialog);
     this.mockBtn = required<HTMLButtonElement>('#btn-connect-mock', this.dialog);
     this.closeBtn = required<HTMLButtonElement>('#btn-close-connection', this.dialog);
+    this.flashBtn = required<HTMLButtonElement>('#btn-flash-firmware', this.dialog);
+    this.flashProgressEl = required<HTMLElement>('#flash-progress', this.dialog);
+    this.flashProgressFillEl = required<HTMLElement>('#flash-progress-fill', this.dialog);
+    this.flashProgressLabelEl = required<HTMLElement>('#flash-progress-label', this.dialog);
+    this.flashErrorEl = required<HTMLElement>('#flash-error', this.dialog);
     required<HTMLAnchorElement>('#link-download-firmware', this.dialog).href = FIRMWARE_HEX_URL;
 
     if (!SerialTransport.isSupported()) {
       this.serialBtn.disabled = true;
       this.serialBtn.title = t('connection.unsupportedBrowser');
     }
+    this.flashBtn.hidden = !FLASH_SUPPORTED;
 
     this.serialBtn.addEventListener('click', () => {
       void this.pick('serial');
@@ -45,8 +72,14 @@ export class ConnectionModal {
     this.mockBtn.addEventListener('click', () => {
       void this.pick('mock');
     });
-    this.closeBtn.addEventListener('click', () => this.cancel());
-    this.dialog.addEventListener('cancel', () => this.cancel());
+    this.flashBtn.addEventListener('click', () => void this.startFlash());
+    this.closeBtn.addEventListener('click', () => {
+      if (!this.flashing) this.cancel();
+    });
+    this.dialog.addEventListener('cancel', (e) => {
+      if (this.flashing) e.preventDefault();
+      else this.cancel();
+    });
 
     onLanguageChange(() => {
       if (this.serialBtn.disabled) {
@@ -55,9 +88,40 @@ export class ConnectionModal {
     });
   }
 
+  private async startFlash(): Promise<void> {
+    this.flashing = true;
+    this.clearFlashError();
+    this.flashBtn.disabled = true;
+    this.serialBtn.disabled = true;
+    this.mockBtn.disabled = true;
+    this.flashProgressEl.hidden = false;
+    this.setFlashProgress({ stage: 'Initializing' });
+    try {
+      const { flashFirmware } = await import('../flash/Flasher');
+      await flashFirmware((p) => this.setFlashProgress(p));
+      toast.success(t('flash.success'), 6000);
+    } catch (err) {
+      this.showFlashError(`${t('flash.failed')}: ${String((err as Error)?.message ?? err)}`);
+    } finally {
+      this.flashing = false;
+      this.flashProgressEl.hidden = true;
+      this.flashBtn.disabled = false;
+      this.serialBtn.disabled = !SerialTransport.isSupported();
+      this.mockBtn.disabled = false;
+    }
+  }
+
+  private setFlashProgress(p: FlashProgress): void {
+    const key = STAGE_I18N_KEY[p.stage];
+    this.flashProgressLabelEl.textContent = key ? t(key) : p.stage;
+    const pct = p.progress !== undefined ? Math.round(p.progress * 100) : null;
+    this.flashProgressFillEl.style.width = pct !== null ? `${pct}%` : '30%';
+  }
+
   /** Open the modal and resolve with the chosen transport, or null if cancelled. */
   open(): Promise<ConnectRequest | null> {
     this.clearError();
+    this.clearFlashError();
     if (typeof this.dialog.showModal === 'function') this.dialog.showModal();
     else this.dialog.setAttribute('open', '');
     return new Promise((resolve) => {
@@ -127,5 +191,15 @@ export class ConnectionModal {
   private clearError(): void {
     this.errorEl.textContent = '';
     this.errorEl.hidden = true;
+  }
+
+  private showFlashError(msg: string): void {
+    this.flashErrorEl.textContent = msg;
+    this.flashErrorEl.hidden = false;
+  }
+
+  private clearFlashError(): void {
+    this.flashErrorEl.textContent = '';
+    this.flashErrorEl.hidden = true;
   }
 }
