@@ -13,3 +13,9 @@ coverage/
 .scratch/
 # Avoid committing the local plan / session metadata
 .claude/plans/
+
+# Firmware build artifacts (rebuilt via `npm run firmware`; only the copied
+# public/firmware/*.hex is committed as the distributed artifact)
+firmware/source/**/built/
+firmware/source/**/pxt_modules/
+firmware/source/**/.pxt/

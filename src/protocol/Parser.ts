@@ -18,6 +18,8 @@ export type HelloMessage = {
   type: 'hello';
   protocolVersion: string;
   board: 'V1' | 'V2' | string;
+  /** Currently active physical sensor, if the firmware reports one (optional field). */
+  sensor?: string;
 };
 
 export type ChannelMessage = {
@@ -79,11 +81,14 @@ function parseControl(line: string): ParsedMessage {
 
   switch (head) {
     case '#HELLO': {
-      // #HELLO;v1;board=V1
+      // #HELLO;v1;board=V1[;sensor=DS18B20]
       const proto = parts[1] ?? '';
       const boardPart = parts[2] ?? '';
       const board = boardPart.startsWith('board=') ? boardPart.slice('board='.length) : '';
-      return { type: 'hello', protocolVersion: proto, board };
+      const sensorPart = parts[3] ?? '';
+      const msg: HelloMessage = { type: 'hello', protocolVersion: proto, board };
+      if (sensorPart.startsWith('sensor=')) msg.sensor = sensorPart.slice('sensor='.length);
+      return msg;
     }
     case '#CH': {
       // #CH;ID;NAZEV;JEDNOTKA;MIN;MAX  (min/max optional)

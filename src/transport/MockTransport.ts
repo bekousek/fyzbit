@@ -1,13 +1,22 @@
 import type { Transport } from './Transport';
+import { SENSOR_NAMES, type SensorName } from '../protocol/Commands';
+
+const CHANNELS: Record<SensorName, string[]> = {
+  DS18B20: ['#CH;t;Temperature;°C;-40;125'],
+  HX711: ['#CH;F;Force;N;-200;200'],
+  HCSR04: ['#CH;d;Distance;cm;0;400', '#CH;v;Speed;m/s;-10;10'],
+  HX710B: ['#CH;p;Pressure;Pa;0;200000'],
+  DHT11: ['#CH;t;Temperature;°C;-20;60', '#CH;h;Humidity;%;0;100'],
+};
 
 /**
- * MockTransport — simulates a micro:bit V1 reporting temperature (DS18B20).
+ * MockTransport — simulates a micro:bit V1 with a switchable sensor.
  *
- * On connect, after a short delay emits a valid FyzBit protocol handshake:
- *   #HELLO;v1;board=V1
- *   #CH;t;Temperature;°C;-40;125
+ * On connect (and after #SELECT), emits a valid FyzBit protocol handshake:
+ *   #HELLO;v1;board=V1;sensor=<name>
+ *   #CH;...  (one or more, depending on sensor)
  *   #READY
- * Then streams data lines `t:<value>\n` at 10 Hz with a sinusoidal value around 24 °C.
+ * Then streams simulated data lines for the active sensor at 10 Hz.
  *
  * Used for development and demos before any micro:bit firmware is flashed,
  * and will also serve as the protocol parser's primary test fixture (M2).
@@ -19,6 +28,7 @@ export class MockTransport implements Transport {
   private dataTimer: number | null = null;
   private streaming = true;
   private startMs = 0;
+  private currentSensor: SensorName = 'DS18B20';
 
   async connect(): Promise<void> {
     if (this.connected) return;
@@ -27,17 +37,12 @@ export class MockTransport implements Transport {
     this.connected = true;
     this.startMs = performance.now();
 
-    // Handshake messages.
-    this.emit('#HELLO;v1;board=V1');
-    this.emit('#CH;t;Temperature;°C;-40;125');
-    this.emit('#READY');
+    this.sendHandshake();
 
     // Begin streaming.
     this.dataTimer = window.setInterval(() => {
       if (!this.connected || !this.streaming) return;
-      const tSec = (performance.now() - this.startMs) / 1000;
-      const temp = 24 + 1.5 * Math.sin(tSec / 4) + (Math.random() - 0.5) * 0.1;
-      this.emit(`t:${temp.toFixed(2)}`);
+      this.emitData();
     }, 100);
   }
 
@@ -68,9 +73,13 @@ export class MockTransport implements Transport {
       const parts = line.split(';');
       this.emit(`#CAL;${parts[1] ?? 't'};ok;1.0`);
     } else if (line === '#HELLO?') {
-      this.emit('#HELLO;v1;board=V1');
-      this.emit('#CH;t;Temperature;°C;-40;125');
-      this.emit('#READY');
+      this.sendHandshake();
+    } else if (line.startsWith('#SELECT;')) {
+      const name = line.slice('#SELECT;'.length) as SensorName;
+      if (SENSOR_NAMES.includes(name) && name !== this.currentSensor) {
+        this.currentSensor = name;
+        this.sendHandshake();
+      }
     }
   }
 
@@ -84,6 +93,45 @@ export class MockTransport implements Transport {
 
   isConnected(): boolean {
     return this.connected;
+  }
+
+  private sendHandshake(): void {
+    this.emit(`#HELLO;v1;board=V1;sensor=${this.currentSensor}`);
+    for (const ch of CHANNELS[this.currentSensor]) this.emit(ch);
+    this.emit('#READY');
+  }
+
+  private emitData(): void {
+    const tSec = (performance.now() - this.startMs) / 1000;
+    switch (this.currentSensor) {
+      case 'DS18B20': {
+        const temp = 24 + 1.5 * Math.sin(tSec / 4) + (Math.random() - 0.5) * 0.1;
+        this.emit(`t:${temp.toFixed(2)}`);
+        break;
+      }
+      case 'HX711': {
+        const force = 5 + 2 * Math.sin(tSec / 3) + (Math.random() - 0.5) * 0.2;
+        this.emit(`F:${force.toFixed(1)}`);
+        break;
+      }
+      case 'HCSR04': {
+        const dist = 50 + 20 * Math.sin(tSec / 5);
+        const speed = (20 / 5) * Math.cos(tSec / 5);
+        this.emit(`d:${dist.toFixed(0)};v:${speed.toFixed(2)}`);
+        break;
+      }
+      case 'HX710B': {
+        const pressure = 101325 + 500 * Math.sin(tSec / 6);
+        this.emit(`p:${pressure.toFixed(0)}`);
+        break;
+      }
+      case 'DHT11': {
+        const temp = 22 + 1.5 * Math.sin(tSec / 4);
+        const humidity = 55 + 10 * Math.sin(tSec / 7);
+        this.emit(`t:${temp.toFixed(1)};h:${humidity.toFixed(1)}`);
+        break;
+      }
+    }
   }
 
   /** Emits one complete protocol line, terminated with \n as a real transport would. */

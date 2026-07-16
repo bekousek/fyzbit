@@ -179,11 +179,11 @@ body {
   padding: 8px;
 }
 
-.wiring-placeholder {
+.wiring-diagram {
   flex-shrink: 0;
 }
 
-.wiring-placeholder svg {
+.wiring-diagram svg {
   width: 100%;
   height: auto;
   display: block;
@@ -686,6 +686,32 @@ textarea.field__input {
   border-radius: 6px;
   font-size: 14px;
   color: var(--status-err);
+}
+
+.connection-firmware {
+  margin-top: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.connection-firmware__hint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--fg-muted);
+}
+
+.connection-firmware__link {
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.connection-firmware__link:hover {
+  text-decoration: underline;
 }
 
 /* ---------- Calibration modal ---------- */

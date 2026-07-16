@@ -1,12 +1,13 @@
 import type { Transport } from '../transport/Transport';
 import { appState } from '../state/AppState';
 import { LineBuffer, parseLine } from '../protocol/Parser';
-import { Commands } from '../protocol/Commands';
+import { Commands, SENSOR_NAMES, type SensorName } from '../protocol/Commands';
 import { settings } from '../state/Settings';
 import { t, onLanguageChange, applyTranslations } from '../i18n/i18n';
 import { Chart, type SelectionRange } from './Chart';
 import { TopBar } from './TopBar';
 import { SensorSelect } from './SensorSelect';
+import { WiringDiagram } from './WiringDiagram';
 import { SettingsModal } from './SettingsModal';
 import { ConnectionModal } from './ConnectionModal';
 import { RunsList } from './RunsList';
@@ -33,6 +34,8 @@ import { exportChartPng, findChartCanvas } from '../export/png';
  */
 export class App {
   private chart!: Chart;
+  private sensorSelect!: SensorSelect;
+  private wiringDiagram!: WiringDiagram;
   private connectionModal!: ConnectionModal;
   private selectionStats!: SelectionStats;
   private shortcuts!: KeyboardShortcuts;
@@ -55,7 +58,8 @@ export class App {
     if (!root) throw new Error('App: #app root not found');
 
     new TopBar(root, appState);
-    new SensorSelect(root, appState, (cmd) => this.sendCommand(cmd));
+    this.sensorSelect = new SensorSelect(root, appState, (cmd) => this.sendCommand(cmd));
+    this.wiringDiagram = new WiringDiagram(root);
     new SettingsModal();
     new RunsList(appState);
     this.connectionModal = new ConnectionModal();
@@ -454,6 +458,11 @@ export class App {
         appState.setChannels([]);
         this.channelsReceived = 0;
         this.streamStartMs = 0;
+        if (msg.sensor && (SENSOR_NAMES as readonly string[]).includes(msg.sensor)) {
+          const sensor = msg.sensor as SensorName;
+          this.sensorSelect.setSensor(sensor);
+          this.wiringDiagram.setSensor(sensor);
+        }
         break;
       case 'channel': {
         const next = [...appState.channels, msg.channel];

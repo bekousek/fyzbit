@@ -29,9 +29,17 @@
   },
   "panel": {
     "wiring": "Zapojení",
-    "wiringPlaceholder": "Schéma připojení",
     "runs": "Měření",
     "exports": "Export"
+  },
+  "wiring": {
+    "data": "data",
+    "dt": "DT",
+    "sck": "SCK",
+    "trig": "Trig",
+    "echo": "Echo",
+    "power": "napájení",
+    "ground": "zem"
   },
   "connection": {
     "title": "Připojit micro:bit",
@@ -42,6 +50,8 @@
     "bluetoothPending": "Bude doplněno spolu s firmware pro V2.",
     "mock": "Demo (Mock)",
     "mockHint": "Simulovaný teploměr. Hodí se na ukázku bez hardwaru.",
+    "firmwareHint": "Ještě nemáš na micro:bitu nahraný firmware FyzBit?",
+    "downloadFirmware": "⬇ Stáhnout firmware (.hex)",
     "disconnect": "Odpojit",
     "openPicker": "Vyber port v dialogu prohlížeče…",
     "userCancelled": "Připojení zrušeno.",

@@ -1,9 +1,7 @@
-import { Commands, type SensorName } from '../protocol/Commands';
+import { Commands, SENSOR_NAMES, type SensorName } from '../protocol/Commands';
 import type { AppState, ConnectionStatus } from '../state/AppState';
 import { onLanguageChange, t } from '../i18n/i18n';
 import { required } from '../utils/dom';
-
-const SENSORS: SensorName[] = ['DS18B20', 'HX711', 'HCSR04', 'HX710B', 'DHT11'];
 
 /**
  * Sensor picker in the top bar — sends #SELECT so a teacher can switch which
@@ -29,10 +27,15 @@ export class SensorSelect {
     this.updateVisibility(this.state.status);
   }
 
+  /** Sync the shown value from a firmware-confirmed #HELLO without re-sending #SELECT. */
+  setSensor(name: SensorName): void {
+    this.select.value = name;
+  }
+
   private renderOptions(): void {
     const current = this.select.value;
     this.select.textContent = '';
-    for (const name of SENSORS) {
+    for (const name of SENSOR_NAMES) {
       const opt = document.createElement('option');
       opt.value = name;
       opt.textContent = t(`sensor.${name.toLowerCase()}`);

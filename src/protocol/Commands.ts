@@ -12,6 +12,14 @@ export type SensorName =
   | 'HX710B'
   | 'DHT11';
 
+export const SENSOR_NAMES: readonly SensorName[] = [
+  'DS18B20',
+  'HX711',
+  'HCSR04',
+  'HX710B',
+  'DHT11',
+];
+
 export const Commands = {
   /** Re-handshake — micro:bit responds with #HELLO + #CH... + #READY. */
   rehello(): string {

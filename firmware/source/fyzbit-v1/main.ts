@@ -85,9 +85,9 @@ function send(line: string): void {
 }
 
 function sendHandshake(): void {
-    // control.hardwareVersion() returns 1 on V1, 2 on V2.
-    const board = control.hardwareVersion() == 2 ? "V2" : "V1"
-    send("#HELLO;v1;board=" + board)
+    // control.hardwareVersion() returns "1" on V1, "2" on V2 (string, not number).
+    const board = control.hardwareVersion() == "2" ? "V2" : "V1"
+    send("#HELLO;v1;board=" + board + ";sensor=" + sensorName(currentSensor))
     sendChannelDefinitions()
     send("#READY")
 }
@@ -331,12 +331,10 @@ basic.pause(200)
 sendHandshake()
 
 serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function () {
-    const data = serial.readString()
-    // Some senders use \r\n; split on \n to handle batches.
-    const lines = data.split("\n")
-    for (let i = 0; i < lines.length; i++) {
-        handleCommand(lines[i])
-    }
+    // readUntil (not readString) so a command that straddles two buffer
+    // fills can't get sliced in half at the receive boundary.
+    const line = serial.readUntil(serial.delimiters(Delimiters.NewLine))
+    handleCommand(line)
 })
 
 input.onButtonPressed(Button.A, function () {

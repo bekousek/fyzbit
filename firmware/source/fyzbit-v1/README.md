@@ -5,7 +5,21 @@ Tento MakeCode projekt je **firmware pro micro:bit**, který se domlouvá s [web
 > Toto **není** rozšíření pro vlastní programy v MakeCode — to je projekt [`fyzikalni_senzory`](https://github.com/bekousek/fyzikalni_senzory).
 > Tady je *kompletní firmware*, který nahraješ na micro:bit a pak ho jen připojíš k FyzBit aplikaci.
 
-## Jak postavit `.hex`
+## Jak získat `.hex`
+
+**Nejjednodušší cesta:** stáhni hotový `.hex` přímo z [aplikace FyzBit](https://bekousek.github.io/fyzbit/) — v dialogu „Připojit micro:bit" je odkaz „⬇ Stáhnout firmware (.hex)". Přetáhni stažený soubor na disk `MICROBIT` (zapojený přes USB); LED matrice na chvilku rozsvítí během nahrávání, pak se firmware spustí. Soubor je i přímo v tomto repu: [`public/firmware/fyzbit-usb.hex`](../../../public/firmware/fyzbit-usb.hex).
+
+### Postavit `.hex` sám
+
+Přes [MakeCode CLI](https://github.com/microsoft/pxt-mkc) (`makecode`/`mkc`), bez otevírání prohlížeče:
+
+```bash
+npm run firmware   # v kořeni repa; spustí scripts/build-firmware.mjs
+```
+
+Skript sestaví univerzální `.hex` (V1 + V2 v jednom souboru) a zkopíruje ho do `public/firmware/fyzbit-usb.hex`. Vyžaduje síť (mkc si při prvním běhu stáhne toolchain z makecode.microbit.org a GitHub závislosti driverů).
+
+### Alternativa: MakeCode ve webu
 
 1. Otevři [makecode.microbit.org](https://makecode.microbit.org/).
 2. **Import → Import File…** a vyber soubor `main.ts` z této složky.
@@ -16,7 +30,7 @@ Tento MakeCode projekt je **firmware pro micro:bit**, který se domlouvá s [web
    - `pxt-DHT11_DHT22` (verze v0.0.3)
    Pokud chybí: `Extensions` → najdi a přidej.
 4. Klikni **Download**. MakeCode vyrobí `microbit-fyzbit-v1.hex`.
-5. Přetáhni `.hex` na disk `MICROBIT` (zapojený přes USB). LED matrice na chvilku rozsvítí během nahrávání, pak se firmware spustí.
+5. Přetáhni `.hex` na disk `MICROBIT`.
 
 ## Co firmware umí
 

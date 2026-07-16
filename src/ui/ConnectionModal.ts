@@ -4,6 +4,8 @@ import { SerialTransport } from '../transport/SerialTransport';
 import { t, onLanguageChange } from '../i18n/i18n';
 import { required } from '../utils/dom';
 
+const FIRMWARE_HEX_URL = `${import.meta.env.BASE_URL}firmware/fyzbit-usb.hex`;
+
 export type ConnectRequest = {
   kind: TransportKind;
   transport: Transport;
@@ -30,6 +32,7 @@ export class ConnectionModal {
     this.serialBtn = required<HTMLButtonElement>('#btn-connect-serial', this.dialog);
     this.mockBtn = required<HTMLButtonElement>('#btn-connect-mock', this.dialog);
     this.closeBtn = required<HTMLButtonElement>('#btn-close-connection', this.dialog);
+    required<HTMLAnchorElement>('#link-download-firmware', this.dialog).href = FIRMWARE_HEX_URL;
 
     if (!SerialTransport.isSupported()) {
       this.serialBtn.disabled = true;

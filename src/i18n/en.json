@@ -29,9 +29,17 @@
   },
   "panel": {
     "wiring": "Wiring",
-    "wiringPlaceholder": "Wiring diagram",
     "runs": "Runs",
     "exports": "Export"
+  },
+  "wiring": {
+    "data": "data",
+    "dt": "DT",
+    "sck": "SCK",
+    "trig": "trig",
+    "echo": "echo",
+    "power": "power",
+    "ground": "ground"
   },
   "connection": {
     "title": "Connect micro:bit",
@@ -42,6 +50,8 @@
     "bluetoothPending": "Coming alongside V2 firmware.",
     "mock": "Demo (Mock)",
     "mockHint": "Simulated thermometer. Useful for showing the app without hardware.",
+    "firmwareHint": "Don't have the FyzBit firmware on your micro:bit yet?",
+    "downloadFirmware": "⬇ Download firmware (.hex)",
     "disconnect": "Disconnect",
     "openPicker": "Pick a port in the browser dialog…",
     "userCancelled": "Connection cancelled.",

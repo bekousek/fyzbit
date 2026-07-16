@@ -74,30 +74,7 @@
         <!-- Left column: wiring + actions -->
         <aside class="panel panel--left">
           <h2 class="panel__title" data-i18n="panel.wiring">Zapojení</h2>
-          <div class="wiring-placeholder" aria-hidden="true">
-            <!-- SVG schéma zapojení doplníme později -->
-            <svg viewBox="0 0 200 120" role="img" aria-label="Schéma zapojení">
-              <rect
-                x="20"
-                y="20"
-                width="160"
-                height="80"
-                rx="8"
-                fill="var(--surface-2)"
-                stroke="var(--border)"
-              />
-              <text
-                x="100"
-                y="65"
-                text-anchor="middle"
-                fill="var(--fg-muted)"
-                font-size="12"
-                data-i18n="panel.wiringPlaceholder"
-              >
-                Schéma připojení
-              </text>
-            </svg>
-          </div>
+          <div class="wiring-diagram" id="wiring-diagram"></div>
           <div class="actions">
             <button type="button" class="btn btn--primary btn--lg" id="btn-start">
               <span data-i18n="button.start">▶ START</span>
@@ -340,6 +317,14 @@
             </span>
           </button>
           <p class="connection-error" id="connection-error" hidden></p>
+          <div class="connection-firmware">
+            <p class="connection-firmware__hint" data-i18n="connection.firmwareHint">
+              Ještě nemáš na micro:bitu nahraný firmware FyzBit?
+            </p>
+            <a class="connection-firmware__link" id="link-download-firmware" download>
+              <span data-i18n="connection.downloadFirmware">⬇ Stáhnout firmware (.hex)</span>
+            </a>
+          </div>
         </div>
       </div>
     </dialog>
