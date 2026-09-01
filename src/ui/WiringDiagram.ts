@@ -25,12 +25,39 @@ const PAD_BOTTOM_FRACTION = 0.97603;
 
 type WireRole = 'power' | 'ground' | 'signal';
 
+/**
+ * Jumper-wire colours, in the convention pupils meet on every breadboard
+ * photo. Named rather than hex at the call site so the wiring tables read
+ * like the bag of cables they describe.
+ */
+const WIRE_COLORS = {
+  red: '#e53935',
+  yellow: '#e0a800',
+  blue: '#1e88e5',
+  orange: '#fb8c00',
+  purple: '#8e24aa',
+  // Follows the theme: a black wire is invisible on the dark background.
+  black: 'var(--fg-muted)',
+} as const;
+
+type WireColorName = keyof typeof WIRE_COLORS;
+
+/** Signal colours handed out in order when a wire doesn't name its own. */
+const SIGNAL_FALLBACK: readonly WireColorName[] = ['blue', 'orange', 'purple'];
+
 type Wire = {
   /** micro:bit pad this wire leaves from. */
   pad: string;
   /** What the sensor board prints next to the hole it goes into. */
   terminal: string;
   role: WireRole;
+  /**
+   * Colour to draw this wire in. Power and ground are fixed by convention;
+   * set this on a signal when the colour matters — a set of cables prepared
+   * for a particular experiment, say, where a diagram in different colours
+   * would be worse than no diagram.
+   */
+  color?: WireColorName;
 };
 
 type SensorWiring = {
@@ -70,10 +97,11 @@ const SENSOR_WIRING: Record<SensorName, SensorWiring> = {
     nameKey: 'sensor.hcsr04',
     // Pins listed as you see them with the sensor aimed away from you, which
     // is how it sits while measuring: GND on the left, VCC on the right.
+    // Signal colours match the cables the classroom set is made up with.
     wires: [
       { pad: 'GND', terminal: 'GND', role: 'ground' },
-      { pad: 'P2', terminal: 'Echo', role: 'signal' },
-      { pad: 'P1', terminal: 'Trig', role: 'signal' },
+      { pad: 'P2', terminal: 'Echo', role: 'signal', color: 'yellow' },
+      { pad: 'P1', terminal: 'Trig', role: 'signal', color: 'blue' },
       { pad: '3V', terminal: 'VCC', role: 'power' },
     ],
     noteKeys: ['wiring.noteHcsr04'],
@@ -98,11 +126,6 @@ const SENSOR_WIRING: Record<SensorName, SensorWiring> = {
     noteKeys: ['wiring.noteDht11'],
   },
 };
-
-/** Jumper-wire colors, in the convention pupils meet on every breadboard photo. */
-const POWER_COLOR = '#e53935';
-const GROUND_COLOR = 'var(--fg-muted)';
-const SIGNAL_COLORS = ['#1e88e5', '#fb8c00', '#8e24aa'];
 
 // ── Drawing geometry (SVG user units; the viewBox is deliberately narrow so
 //    that 9–11 unit type stays legible once scaled into a 260 px panel) ──
@@ -186,17 +209,23 @@ export class WiringDiagram {
     const height = sensorTop + SENSOR_H + 4;
     const termX = spread(wiring.wires.length, 30, W - 30);
 
+    // Colours a wire asked for are taken first, so the automatic ones can't
+    // hand the same colour to a different wire further down the list.
+    const claimed = new Set<WireColorName>(
+      wiring.wires.map((w) => w.color).filter((c): c is WireColorName => c !== undefined),
+    );
+    const available = SIGNAL_FALLBACK.filter((c) => !claimed.has(c));
     let signalIdx = 0;
     const wireColors = new Map<Wire, string>();
     for (const w of wiring.wires) {
-      wireColors.set(
-        w,
-        w.role === 'power'
-          ? POWER_COLOR
+      const name: WireColorName =
+        w.color ??
+        (w.role === 'power'
+          ? 'red'
           : w.role === 'ground'
-            ? GROUND_COLOR
-            : SIGNAL_COLORS[signalIdx++ % SIGNAL_COLORS.length]!,
-      );
+            ? 'black'
+            : (available[signalIdx++ % available.length] ?? 'blue'));
+      wireColors.set(w, WIRE_COLORS[name]);
     }
 
     const chipMarkup = smallPins
