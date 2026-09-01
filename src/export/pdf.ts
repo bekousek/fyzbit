@@ -3,6 +3,7 @@ import autoTable from 'jspdf-autotable';
 
 import type { Channel, Run } from '../state/AppState';
 import { formatNumber, getLanguage, t } from '../i18n/i18n';
+import { convert, displayUnit, unitDecimals } from '../units/units';
 import { chartToDataUrl } from './png';
 import { timestampedFilename, triggerDownload } from './csv';
 import { computeRunChannelStats } from '../utils/stats';
@@ -145,14 +146,23 @@ export async function exportPdf(opts: PdfOptions): Promise<void> {
       for (const ch of opts.channels) {
         const stats = computeRunChannelStats(r, ch.id);
         if (!stats) continue;
+        // Report in the unit the chart above is drawn in, not the raw one
+        // off the wire — see SelectionStats for the same conversion.
+        const unit = displayUnit(ch.unit);
+        const decimals = unitDecimals(unit);
+        const show = (v: number): string =>
+          formatNumber(convert(v, ch.unit, unit), decimals);
         body.push([
           r.name,
-          `${t(ch.nameKey)} (${ch.unit})`,
-          formatNumber(stats.min, 2),
-          formatNumber(stats.max, 2),
-          formatNumber(stats.avg, 2),
-          formatNumber(stats.median, 2),
-          formatNumber(stats.deltaY, 2),
+          `${t(ch.nameKey)} (${unit})`,
+          show(stats.min),
+          show(stats.max),
+          show(stats.avg),
+          show(stats.median),
+          formatNumber(
+            convert(stats.deltaY, ch.unit, unit) - convert(0, ch.unit, unit),
+            decimals,
+          ),
         ]);
       }
     }

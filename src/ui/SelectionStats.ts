@@ -1,6 +1,7 @@
 import type { AppState, Run } from '../state/AppState';
 import type { SelectionRange } from './Chart';
 import { formatNumber, onLanguageChange, t } from '../i18n/i18n';
+import { convert, displayUnit, onUnitsChange, unitDecimals } from '../units/units';
 import { computeRangeStats } from '../utils/stats';
 import { escapeHtml, required } from '../utils/dom';
 
@@ -20,6 +21,8 @@ export class SelectionStats {
     this.host = required<HTMLElement>('#selection-stats');
     this.disposers.push(
       onLanguageChange(() => this.render()),
+      onUnitsChange(() => this.render()),
+      this.state.bus.on('channel-visibility-changed', () => this.render()),
       this.state.bus.on('runs-changed', () => this.render()),
       this.state.bus.on('active-run-changed', () => this.render()),
     );
@@ -49,7 +52,8 @@ export class SelectionStats {
       ...this.state.runs.filter((r) => r.visible),
       ...(this.state.activeRun ? [this.state.activeRun] : []),
     ];
-    if (visibleRuns.length === 0 || this.state.channels.length === 0) {
+    const channels = this.state.visibleChannels;
+    if (visibleRuns.length === 0 || channels.length === 0) {
       this.host.hidden = true;
       return;
     }
@@ -57,18 +61,27 @@ export class SelectionStats {
 
     const rows: string[] = [];
     for (const r of visibleRuns) {
-      for (const ch of this.state.channels) {
+      for (const ch of channels) {
         const stats = computeRangeStats(r, ch.id, tMin, tMax);
         if (!stats) continue;
+        const unit = displayUnit(ch.unit);
+        const decimals = unitDecimals(unit);
+        // Stats are computed on the stored base-unit samples and only then
+        // converted — mixing the two would make Δ and average disagree.
+        const show = (v: number): string =>
+          formatNumber(convert(v, ch.unit, unit), decimals);
+        // A difference converts without the offset: 10 K colder is 10 °C colder.
+        const showDelta = (v: number): string =>
+          formatNumber(convert(v, ch.unit, unit) - convert(0, ch.unit, unit), decimals);
         rows.push(
           `<tr>
              <td class="sel-stats__run"><span class="run-row__dot" style="background:${r.color}"></span>${escapeHtml(r.name)}</td>
-             <td>${escapeHtml(t(ch.nameKey))} (${escapeHtml(ch.unit)})</td>
-             <td>${formatNumber(stats.min, 2)}</td>
-             <td>${formatNumber(stats.max, 2)}</td>
-             <td>${formatNumber(stats.avg, 2)}</td>
-             <td>${formatNumber(stats.median, 2)}</td>
-             <td>${formatNumber(stats.deltaY, 2)}</td>
+             <td>${escapeHtml(t(ch.nameKey))} (${escapeHtml(unit)})</td>
+             <td>${show(stats.min)}</td>
+             <td>${show(stats.max)}</td>
+             <td>${show(stats.avg)}</td>
+             <td>${show(stats.median)}</td>
+             <td>${showDelta(stats.deltaY)}</td>
            </tr>`,
         );
       }

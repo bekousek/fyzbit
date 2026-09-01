@@ -31,14 +31,21 @@ npm run format    # Prettier
 
 ## Firmware
 
-Micro:bit potřebuje nahraný firmware FyzBit, aby s aplikací uměl mluvit — buď [`fyzbit-v1`](firmware/source/fyzbit-v1) (USB, V1 i V2), nebo [`fyzbit-ble`](firmware/source/fyzbit-ble) (USB *i* Bluetooth, jen V2).
+Micro:bit potřebuje nahraný firmware FyzBit, aby s aplikací uměl mluvit. Distribuuje se **jediný soubor** `public/firmware/fyzbit.hex` — je to *universal hex*, tedy dva obrazy desky v jednom souboru, ze kterých si bootloader micro:bitu vezme jen ten svůj:
 
-**Nejjednodušší cesta pro učitele/žáky:** v aplikaci → dialog „Připojit micro:bit" → „⚡ Připravit micro:bit" nahraje vybranou variantu firmwaru přímo přes WebUSB (Chrome/Edge), bez otevírání MakeCode. Kdo WebUSB nemá, stáhne `.hex` stejným dialogem a přetáhne ho ručně na disk `MICROBIT`.
+| slice | zdroj | co umí |
+| --- | --- | --- |
+| V1 (`0x9900`) | [`fyzbit-v1`](firmware/source/fyzbit-v1) | USB |
+| V2 (`0x9903`) | [`fyzbit-ble`](firmware/source/fyzbit-ble) | USB *i* Bluetooth (Nordic UART) |
+
+Uživatel tedy nic nevybírá — nahraje jeden firmware a Bluetooth se sám objeví jen tam, kde na něj deska má (V1 má 16 kB RAM a celý BLE stack se senzorovými drivery se do ní nevejde; není to volba firmwaru, ale limit hardwaru).
+
+**Nejjednodušší cesta pro učitele/žáky:** v aplikaci → dialog „Připojit micro:bit" → krok 1 „⚡ Připravit micro:bit" nahraje firmware přímo přes WebUSB (Chrome/Edge), bez otevírání MakeCode. Kdo WebUSB nemá, stáhne `.hex` stejným dialogem a přetáhne ho ručně na disk `MICROBIT`.
 
 Hex soubory se staví přes [MakeCode CLI](https://github.com/microsoft/pxt-mkc) (balíček `makecode`, ne ruční export z makecode.microbit.org):
 
 ```bash
-npm run firmware   # sestaví firmware/source/{fyzbit-v1,fyzbit-ble} a zkopíruje hexy do public/firmware/
+npm run firmware   # sestaví oba projekty a spojí je do public/firmware/fyzbit.hex
 ```
 
 Detaily zapojení senzorů, protokolu a Bluetooth (No Pairing Required) jsou v READMEs jednotlivých firmware projektů.

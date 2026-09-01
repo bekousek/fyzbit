@@ -8,6 +8,8 @@ import { Chart, type SelectionRange } from './Chart';
 import { TopBar } from './TopBar';
 import { SensorSelect } from './SensorSelect';
 import { WiringDiagram } from './WiringDiagram';
+import { ChannelControls } from './ChannelControls';
+import { MobileNav } from './MobileNav';
 import { SettingsModal } from './SettingsModal';
 import { ConnectionModal } from './ConnectionModal';
 import { RunsList } from './RunsList';
@@ -35,6 +37,7 @@ import { exportChartPng, findChartCanvas } from '../export/png';
 export class App {
   private chart!: Chart;
   private sensorSelect!: SensorSelect;
+  private mobileNav!: MobileNav;
   private wiringDiagram!: WiringDiagram;
   private connectionModal!: ConnectionModal;
   private selectionStats!: SelectionStats;
@@ -49,7 +52,6 @@ export class App {
   >();
 
   private transport: Transport | null = null;
-  private buffer: LineBuffer | null = null;
   private streamStartMs = 0;
   private channelsReceived = 0;
 
@@ -60,6 +62,7 @@ export class App {
     new TopBar(root, appState);
     this.sensorSelect = new SensorSelect(root, appState, (cmd) => this.sendCommand(cmd));
     this.wiringDiagram = new WiringDiagram(root);
+    new ChannelControls(root, appState);
     new SettingsModal();
     new RunsList(appState);
     this.connectionModal = new ConnectionModal();
@@ -87,6 +90,10 @@ export class App {
         appState.addAnnotation({ t: tSec, label });
       },
     });
+
+    // Switching sections hides/shows the chart container; uPlot has to be
+    // told its new size once it is back on screen.
+    this.mobileNav = new MobileNav(root, () => this.chart.refresh());
 
     this.shortcuts = new KeyboardShortcuts({
       start: () => {
@@ -119,6 +126,10 @@ export class App {
     // Chart wiring: react to channels/runs changes and per-sample appends.
     appState.bus.on('channels-changed', (channels) => {
       this.chart.setChannels([...channels]);
+      this.chart.setVisibleChannels(appState.visibleChannelIds);
+    });
+    appState.bus.on('channel-visibility-changed', (ids) => {
+      this.chart.setVisibleChannels(ids);
     });
     appState.bus.on('runs-changed', (runs) => {
       this.chart.setRuns(runs, appState.activeRun);
@@ -170,16 +181,37 @@ export class App {
     if (!connectBtn) return;
     connectBtn.addEventListener('click', () => void this.handleConnectClick());
     const updateLabel = () => {
-      const isConnected = this.isConnectedStatus(appState.status);
+      const mode = this.connectButtonMode();
       const span = connectBtn.querySelector('span');
       if (span) {
         span.removeAttribute('data-i18n');
-        span.textContent = isConnected ? t('connection.disconnect') : t('button.connect');
+        span.textContent = t(
+          mode === 'cancel'
+            ? 'connection.cancelConnect'
+            : mode === 'disconnect'
+              ? 'connection.disconnect'
+              : 'button.connect',
+        );
       }
-      connectBtn.classList.toggle('btn--primary', !isConnected);
+      connectBtn.classList.toggle('btn--primary', mode === 'connect');
+      connectBtn.classList.toggle('btn--danger', mode === 'cancel');
     };
+    updateLabel();
     appState.bus.on('connection-status', updateLabel);
     onLanguageChange(updateLabel);
+  }
+
+  /**
+   * What the top-bar button does right now. "connecting"/"handshake" mean the
+   * browser picker is open or the board hasn't finished announcing itself —
+   * both are states the user must be able to back out of, so the button offers
+   * to cancel rather than pretending nothing is happening.
+   */
+  private connectButtonMode(): 'connect' | 'cancel' | 'disconnect' {
+    const s = appState.status;
+    if (s === 'connecting' || s === 'handshake') return 'cancel';
+    if (this.isConnectedStatus(s)) return 'disconnect';
+    return 'connect';
   }
 
   private wireRecordButtons(): void {
@@ -301,9 +333,12 @@ export class App {
   // ──────────────────────────────────────────────────────────
 
   private async handleConnectClick(): Promise<void> {
-    if (this.transport && this.transport.isConnected()) {
+    const mode = this.connectButtonMode();
+    if (mode !== 'connect') {
       if (appState.recording) appState.stopRecording();
-      await this.transport.disconnect();
+      // disconnect() drops the reference too, so a connect() still waiting on
+      // the browser's device picker knows it has been abandoned.
+      this.disconnect();
       appState.setStatus('disconnected');
       appState.setSensorName('');
       return;
@@ -326,6 +361,7 @@ export class App {
     } else {
       appState.startRun(settings.samplingHz, (n) => t('runs.runName', { n }));
     }
+    this.mobileNav.show('chart');
     this.streamStartMs = 0; // reset clock anchor; protocol-time begins anew.
     this.sendCommand(Commands.start());
   }
@@ -390,11 +426,18 @@ export class App {
     appState.setSensorName(label);
     appState.setStatus('connecting');
 
-    this.buffer = new LineBuffer((line) => this.handleLine(line));
+    // Held by the chunk closure alone: it dies with the transport that feeds it.
+    const buffer = new LineBuffer((line) => this.handleLine(line));
     transport.onChunk((chunk) => {
-      this.buffer!.push(chunk);
+      // Bytes from a transport the user has already cancelled or replaced are
+      // not ours to parse.
+      if (this.transport !== transport) return;
+      buffer.push(chunk);
     });
     transport.onDisconnect(() => {
+      // A transport the user already walked away from must not drag the UI
+      // back to "disconnected" after a newer one has taken over.
+      if (this.transport !== transport) return;
       const wasMeasuring = appState.recording;
       appState.stopRecording();
       appState.setStatus('disconnected');
@@ -403,7 +446,13 @@ export class App {
 
     try {
       await transport.connect();
+      if (this.transport !== transport) {
+        // Cancelled while the picker was open, yet the user still chose a
+        // device — close it again rather than leaving the port held open.
+        void transport.disconnect();
+      }
     } catch (err) {
+      if (this.transport !== transport) return;
       const msg = (err as Error)?.message ?? String(err);
       // User-cancelled device/port pickers are not actual errors. Web Serial
       // says "no port selected"; Web Bluetooth (via @microbit/microbit-connection)
@@ -424,7 +473,6 @@ export class App {
       void this.transport.disconnect();
       this.transport = null;
     }
-    this.buffer = null;
     this.streamStartMs = 0;
     this.channelsReceived = 0;
   }

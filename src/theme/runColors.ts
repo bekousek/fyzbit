@@ -15,12 +15,26 @@ const FALLBACK: readonly string[] = [
 ];
 
 /**
- * Resolve a run's color from the active theme's --chart-series-N custom
- * properties (theme-light.css / theme-dark.css), cycling through the palette.
- * Single source of truth for run colors — avoids the light-mode-only hardcoded
+ * Resolve a color from the active theme's --chart-series-N custom properties
+ * (theme-light.css / theme-dark.css), cycling through the palette. Single
+ * source of truth for chart colors — avoids the light-mode-only hardcoded
  * hexes clashing with dark backgrounds.
  */
-export function runColorForIndex(index: number): string {
+function paletteColor(index: number): string {
   const n = ((index % PALETTE_SIZE) + PALETTE_SIZE) % PALETTE_SIZE;
   return cssVar(`--chart-series-${n + 1}`) || FALLBACK[n]!;
+}
+
+/** Color identifying a run (its dot in the runs list, its lines on the chart). */
+export function runColorForIndex(index: number): string {
+  return paletteColor(index);
+}
+
+/**
+ * Color identifying a measured quantity (distance vs. speed vs. …). Shares the
+ * palette with runs on purpose: only one of the two schemes is ever on the
+ * chart at a time — see Chart.buildAlignedData().
+ */
+export function channelColorForIndex(index: number): string {
+  return paletteColor(index);
 }

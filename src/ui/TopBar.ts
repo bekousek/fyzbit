@@ -1,5 +1,6 @@
 import type { AppState, Channel, ConnectionStatus } from '../state/AppState';
 import { formatNumber, onLanguageChange, t } from '../i18n/i18n';
+import { convert, displayUnit, onUnitsChange, unitDecimals } from '../units/units';
 import { required } from '../utils/dom';
 
 /**
@@ -28,6 +29,8 @@ export class TopBar {
       this.state.bus.on('channels-changed', () => this.renderValue()),
       this.state.bus.on('sensor-name', () => this.renderStatus(this.state.status)),
       this.state.bus.on('current-values', () => this.renderValue()),
+      this.state.bus.on('channel-visibility-changed', () => this.renderValue()),
+      onUnitsChange(() => this.renderValue()),
       onLanguageChange(() => {
         this.renderStatus(this.state.status);
         this.renderValue();
@@ -56,15 +59,24 @@ export class TopBar {
     this.textEl.removeAttribute('data-i18n'); // Avoid clobber by global re-scan.
   }
 
+  /**
+   * The big number follows the *first channel still switched on*, so hiding
+   * distance to look at speed alone moves the headline value too rather than
+   * leaving it stuck on a quantity that is no longer on screen.
+   */
   private renderValue(): void {
-    const primary: Channel | undefined = this.state.channels[0];
+    const primary: Channel | undefined = this.state.visibleChannels[0];
     if (!primary) {
       this.bigNumber.textContent = '—';
       this.bigUnit.textContent = '';
       return;
     }
+    const unit = displayUnit(primary.unit);
     const value = this.state.currentValues[primary.id];
-    this.bigNumber.textContent = value === undefined ? '—' : formatNumber(value, 1);
-    this.bigUnit.textContent = primary.unit;
+    this.bigNumber.textContent =
+      value === undefined
+        ? '—'
+        : formatNumber(convert(value, primary.unit, unit), unitDecimals(unit));
+    this.bigUnit.textContent = unit;
   }
 }

@@ -63,6 +63,8 @@ export type ConnectionStatus =
 export type AppStateEvents = {
   'connection-status': ConnectionStatus;
   'channels-changed': Channel[];
+  /** Ids of the channels currently drawn on the chart. */
+  'channel-visibility-changed': string[];
   'data-point': DataPoint;
   'current-values': Record<string, number>;
   'sensor-name': string;
@@ -115,6 +117,7 @@ export class AppState {
 
   private _status: ConnectionStatus = 'disconnected';
   private _channels: Channel[] = [];
+  private _hiddenChannels = new Set<string>();
   private _currentValues: Record<string, number> = {};
   private _sensorName = '';
   private _activeRun: Run | null = null;
@@ -139,7 +142,36 @@ export class AppState {
   setChannels(channels: Channel[]): void {
     this._channels = [...channels];
     this._currentValues = {};
+    // A new sensor means new channel ids — start with everything shown.
+    this._hiddenChannels.clear();
     this.bus.emit('channels-changed', this._channels);
+    this.bus.emit('channel-visibility-changed', this.visibleChannelIds);
+  }
+
+  /**
+   * Channels the user has left switched on, in protocol order. Runs keep
+   * recording every channel regardless — this only governs what is drawn and
+   * summarised, so a channel switched off mid-run loses no data.
+   */
+  get visibleChannels(): readonly Channel[] {
+    return this._channels.filter((c) => !this._hiddenChannels.has(c.id));
+  }
+
+  get visibleChannelIds(): string[] {
+    return this.visibleChannels.map((c) => c.id);
+  }
+
+  isChannelVisible(id: string): boolean {
+    return !this._hiddenChannels.has(id);
+  }
+
+  setChannelVisible(id: string, visible: boolean): void {
+    if (visible === this.isChannelVisible(id)) return;
+    // Refuse to hide the last one — an empty chart looks like a broken app.
+    if (!visible && this.visibleChannels.length <= 1) return;
+    if (visible) this._hiddenChannels.delete(id);
+    else this._hiddenChannels.add(id);
+    this.bus.emit('channel-visibility-changed', this.visibleChannelIds);
   }
 
   get currentValues(): Readonly<Record<string, number>> {
@@ -277,6 +309,7 @@ export class AppState {
   reset(): void {
     this._status = 'disconnected';
     this._channels = [];
+    this._hiddenChannels.clear();
     this._currentValues = {};
     this._sensorName = '';
     this._activeRun = null;
@@ -286,6 +319,7 @@ export class AppState {
     this.bus.emit('reset', undefined);
     this.bus.emit('connection-status', 'disconnected');
     this.bus.emit('channels-changed', []);
+    this.bus.emit('channel-visibility-changed', []);
     this.bus.emit('runs-changed', []);
     this.bus.emit('active-run-changed', null);
     this.bus.emit('recording-changed', false);
@@ -298,11 +332,13 @@ export class AppState {
    */
   hydrateRuns(channels: Channel[], runs: Run[]): void {
     this._channels = [...channels];
+    this._hiddenChannels.clear();
     this._runs = [...runs];
     this._runCounter = runs.length;
     this._activeRun = null;
     this._recording = false;
     this.bus.emit('channels-changed', this._channels);
+    this.bus.emit('channel-visibility-changed', this.visibleChannelIds);
     this.bus.emit('runs-changed', this._runs);
     this.bus.emit('active-run-changed', null);
     this.bus.emit('recording-changed', false);

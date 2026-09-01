@@ -1,13 +1,26 @@
 import uPlot from 'uplot';
-import type { Options, Series, AlignedData } from 'uplot';
+import type { Options, Series, Axis, AlignedData } from 'uplot';
 import 'uplot/dist/uPlot.min.css';
 
 import type { Channel, Run } from '../state/AppState';
 import { cssVar, onThemeChange } from '../theme/theme';
+import { channelColorForIndex } from '../theme/runColors';
 import { onLanguageChange, t } from '../i18n/i18n';
+import { convert, displayUnit, onUnitsChange } from '../units/units';
 
 const REDRAW_FPS = 30;
 const MAX_ACTIVE_POINTS = 6000;
+/** Below this container width the legend eats the plot — the channel chips
+ *  above the chart already say which color is which, so drop it. */
+const LEGEND_MIN_WIDTH = 560;
+
+/** Dash patterns used to tell apart lines that share a stroke color. */
+const DASHES: ReadonlyArray<number[] | undefined> = [
+  undefined,
+  [6, 4],
+  [2, 3],
+  [10, 4, 2, 4],
+];
 
 export type SelectionRange = { tMin: number; tMax: number } | null;
 
@@ -24,9 +37,19 @@ export type ChartCallbacks = {
 /**
  * Multi-run uPlot wrapper with selection callback and annotation painting.
  *
- * Each visible run contributes one series per channel. Runs share a common
- * X axis (seconds since each run's own start); we build a union of all time
- * points across visible runs and pad missing samples with NaN.
+ * Each visible run contributes one series per *visible* channel, and every
+ * channel gets its own y scale and its own labelled axis — two quantities
+ * with wildly different ranges (cm and m/s) can't share one.
+ *
+ * Two things are being told apart at once, runs and quantities, and only one
+ * of them may own the color:
+ *   - one run on screen  → color = quantity, dash = nothing (single line each)
+ *   - several runs       → color = run, dash = quantity
+ * That way "which line is this?" always has an answer, and the axis labels
+ * (which carry the quantity's color in the first case) never lie.
+ *
+ * Values are converted to the user's chosen display unit on the way in; runs
+ * keep storing whatever base unit the firmware reported.
  *
  * Annotations are painted on top via uPlot's `hooks.draw`. Adding a new one
  * is triggered by chart click when the caller's modifier callback returns
@@ -36,6 +59,7 @@ export class Chart {
   private plot: uPlot | null = null;
   private resizeObs: ResizeObserver | null = null;
   private channels: Channel[] = [];
+  private hiddenChannelIds = new Set<string>();
   private runs: Run[] = [];
   private activeRun: Run | null = null;
   private autoscale = true;
@@ -51,6 +75,7 @@ export class Chart {
   ) {
     this.disposers.push(onThemeChange(() => this.rebuild()));
     this.disposers.push(onLanguageChange(() => this.rebuild()));
+    this.disposers.push(onUnitsChange(() => this.rebuild()));
 
     this.resizeObs = new ResizeObserver(() => this.handleResize());
     this.resizeObs.observe(this.container);
@@ -72,6 +97,15 @@ export class Chart {
 
   setChannels(channels: Channel[]): void {
     this.channels = channels;
+    this.rebuild();
+  }
+
+  /** Restrict drawing to these channel ids (see AppState.visibleChannels). */
+  setVisibleChannels(ids: readonly string[]): void {
+    const allowed = new Set(ids);
+    this.hiddenChannelIds = new Set(
+      this.channels.map((c) => c.id).filter((id) => !allowed.has(id)),
+    );
     this.rebuild();
   }
 
@@ -101,6 +135,26 @@ export class Chart {
     this.callbacks.onSelection?.(null);
   }
 
+  /**
+   * Re-measure and redraw. Needed when the container goes from `display: none`
+   * back to visible (mobile section switch) — while hidden it has no size, so
+   * the ResizeObserver's reading was 0×0 and got ignored.
+   */
+  refresh(): void {
+    this.scheduleRedraw(true);
+  }
+
+  private get plottedChannels(): Channel[] {
+    return this.channels.filter((c) => !this.hiddenChannelIds.has(c.id));
+  }
+
+  private get visibleRuns(): Run[] {
+    return [
+      ...this.runs.filter((r) => r.visible),
+      ...(this.activeRun ? [this.activeRun] : []),
+    ];
+  }
+
   private handleKey = (e: KeyboardEvent) => {
     if (e.key === 'Escape') this.resetZoom();
   };
@@ -125,9 +179,33 @@ export class Chart {
   private handleResize(): void {
     if (!this.plot) return;
     const rect = this.container.getBoundingClientRect();
-    if (rect.width > 0 && rect.height > 0) {
-      this.plot.setSize({ width: rect.width, height: rect.height });
+    if (rect.width <= 0 || rect.height <= 0) return;
+    // The legend appears/disappears with width, and that is structural — a
+    // plain setSize() would leave the old legend in place.
+    const legendShown = this.plot.root.querySelector('.u-legend') !== null;
+    if (legendShown !== rect.width >= LEGEND_MIN_WIDTH) {
+      this.scheduleRedraw(true);
+      return;
     }
+    this.fitToContainer();
+  }
+
+  /**
+   * uPlot's `height` is the *plot* height and the legend is laid out below it,
+   * so handing it the container's full height pushes the legend out of view.
+   * Measure what the legend actually took and give the plot the rest.
+   */
+  private fitToContainer(): void {
+    const plot = this.plot;
+    if (!plot) return;
+    const rect = this.container.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return;
+    const legend = plot.root.querySelector('.u-legend');
+    const legendHeight = legend ? legend.getBoundingClientRect().height : 0;
+    const width = Math.floor(rect.width);
+    const height = Math.max(120, Math.floor(rect.height - legendHeight));
+    if (Math.abs(width - plot.width) < 1 && Math.abs(height - plot.height) < 1) return;
+    plot.setSize({ width, height });
   }
 
   private scheduleRedraw(force = false): void {
@@ -173,12 +251,10 @@ export class Chart {
 
   /** All tracks (saved visible runs + active run) merged into AlignedData. */
   private buildAlignedData(): { data: AlignedData; series: Series[] } {
-    const visibleRuns: Run[] = [
-      ...this.runs.filter((r) => r.visible),
-      ...(this.activeRun ? [this.activeRun] : []),
-    ];
+    const visibleRuns = this.visibleRuns;
+    const channels = this.plottedChannels;
 
-    if (visibleRuns.length === 0 || this.channels.length === 0) {
+    if (visibleRuns.length === 0 || channels.length === 0) {
       const series: Series[] = [
         { label: t('chart.time') },
         { label: '—', stroke: 'transparent', spanGaps: false, points: { show: false } },
@@ -194,6 +270,7 @@ export class Chart {
 
     const series: Series[] = [{ label: t('chart.time') }];
     const ys: number[][] = [];
+    const colorByRun = visibleRuns.length > 1;
 
     for (let runIdx = 0; runIdx < visibleRuns.length; runIdx++) {
       const r = visibleRuns[runIdx];
@@ -201,33 +278,39 @@ export class Chart {
       const runTimeIdx = new Map<number, number>();
       r.times.forEach((tv, i) => runTimeIdx.set(Math.round(tv * 1000) / 1000, i));
 
-      for (let chIdx = 0; chIdx < this.channels.length; chIdx++) {
-        const ch = this.channels[chIdx];
+      for (let chIdx = 0; chIdx < channels.length; chIdx++) {
+        const ch = channels[chIdx];
         if (!ch) continue;
+        const unit = displayUnit(ch.unit);
         const yArr = new Array<number>(x.length);
         const sourceCol = r.values[ch.id] ?? [];
         for (let i = 0; i < x.length; i++) {
           const xv = x[i]!;
           const sourceIdx = runTimeIdx.get(xv);
-          yArr[i] = sourceIdx === undefined ? NaN : (sourceCol[sourceIdx] ?? NaN);
+          const raw = sourceIdx === undefined ? NaN : (sourceCol[sourceIdx] ?? NaN);
+          yArr[i] = Number.isFinite(raw) ? convert(raw, ch.unit, unit) : NaN;
         }
         ys.push(yArr);
 
         const isActive = r === this.activeRun;
-        const stroke = r.color;
-        const label =
-          visibleRuns.length > 1
-            ? `${r.name} — ${t(ch.nameKey)} (${ch.unit})`
-            : `${t(ch.nameKey)} (${ch.unit})`;
+        const label = colorByRun
+          ? `${r.name} — ${t(ch.nameKey)} (${unit})`
+          : `${t(ch.nameKey)} (${unit})`;
+        // Whichever of the two dimensions doesn't own the color owns the dash.
+        const dash = colorByRun
+          ? DASHES[chIdx % DASHES.length]
+          : isActive
+            ? undefined
+            : [6, 4];
         const s: Series = {
           label,
           scale: ch.id,
-          stroke,
+          stroke: colorByRun ? r.color : channelColorForIndex(chIdx),
           width: isActive ? 2 : 1.5,
-          dash: isActive ? undefined : [4, 3],
           spanGaps: false,
           points: { show: false },
         };
+        if (dash) s.dash = dash;
         series.push(s);
       }
     }
@@ -245,6 +328,8 @@ export class Chart {
 
     const axisColor = cssVar('--chart-axis') || '#666';
     const gridColor = cssVar('--chart-grid') || '#ddd';
+    const channels = this.plottedChannels;
+    const colorByRun = this.visibleRuns.length > 1;
 
     const { data, series } = this.buildAlignedData();
 
@@ -266,36 +351,60 @@ export class Chart {
         },
       },
     };
-    for (const ch of this.channels) {
+    for (const ch of channels) {
       scales[ch.id] = { auto: this.autoscale };
     }
 
-    const callbacks = this.callbacks;
-    const visibleRuns: Run[] = [
-      ...this.runs.filter((r) => r.visible),
-      ...(this.activeRun ? [this.activeRun] : []),
+    const labelFont = '600 12px system-ui, sans-serif';
+    const axes: Axis[] = [
+      {
+        stroke: axisColor,
+        label: t('chart.time'),
+        labelFont,
+        labelSize: 22,
+        grid: { stroke: gridColor, width: 1 },
+        ticks: { stroke: axisColor, width: 1 },
+      },
+      ...channels.map((ch, idx): Axis => {
+        // The axis carries the quantity's color only while the lines do too;
+        // with several runs on screen the color means "run", so a colored
+        // axis would claim a quantity belongs to one of them.
+        const color = colorByRun ? axisColor : channelColorForIndex(idx);
+        return {
+          scale: ch.id,
+          stroke: color,
+          label: `${t(ch.nameKey)} (${displayUnit(ch.unit)})`,
+          labelFont,
+          labelSize: 20,
+          // Only the first y axis draws grid lines: one grid per quantity
+          // would overlay several inconsistent rasters on the same plot.
+          grid: { show: idx === 0, stroke: gridColor, width: 1 },
+          ticks: { stroke: color, width: 1 },
+          side: (idx % 2 === 0 ? 3 : 1) as 1 | 3,
+        };
+      }),
     ];
+
+    const callbacks = this.callbacks;
+    const visibleRuns = this.visibleRuns;
+    // Each quantity has its own scale, so "y = 0" sits at a different height
+    // for each of them. Mark the first one that actually crosses zero and
+    // paint the line in that quantity's color, so it is obvious which axis
+    // the zero belongs to instead of leaving the reader to guess.
+    const zeroLine = channels
+      .map((ch, idx) => ({ id: ch.id, color: colorByRun ? axisColor : channelColorForIndex(idx) }))
+      .find(({ id }) => {
+        const run = visibleRuns.find((r) => r.values[id]?.some((v) => v < 0));
+        return run !== undefined;
+      });
 
     const opts: Options = {
       width,
       height,
       series,
       scales,
-      axes: [
-        {
-          stroke: axisColor,
-          grid: { stroke: gridColor, width: 1 },
-          ticks: { stroke: axisColor, width: 1 },
-        },
-        ...this.channels.map((ch, idx) => ({
-          scale: ch.id,
-          stroke: axisColor,
-          grid: { stroke: gridColor, width: 1 },
-          ticks: { stroke: axisColor, width: 1 },
-          side: (idx === 0 ? 3 : 1) as 1 | 3,
-        })),
-      ],
-      legend: { show: true, live: true },
+      axes,
+      legend: { show: width >= LEGEND_MIN_WIDTH, live: true },
       cursor: { drag: { x: true, y: false, uni: 50 } },
       hooks: {
         setSelect: [
@@ -317,9 +426,34 @@ export class Chart {
         ],
         draw: [
           (u) => {
-            // Paint annotation markers as vertical lines + label across all visible runs.
             const ctx = u.ctx;
             ctx.save();
+
+            // Zero line of the first quantity's scale. With two scales the
+            // two zeros sit at different heights, so mark the one the leftmost
+            // (labelled) axis belongs to instead of leaving both implicit.
+            if (zeroLine) {
+              const scale = u.scales[zeroLine.id];
+              if (
+                scale &&
+                scale.min !== undefined &&
+                scale.max !== undefined &&
+                scale.min < 0 &&
+                scale.max > 0
+              ) {
+                const yPx = u.valToPos(0, zeroLine.id, true);
+                ctx.strokeStyle = zeroLine.color;
+                ctx.globalAlpha = 0.45;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(u.bbox.left, yPx);
+                ctx.lineTo(u.bbox.left + u.bbox.width, yPx);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+              }
+            }
+
+            // Annotation markers: vertical line + label across all visible runs.
             ctx.strokeStyle = cssVar('--accent') || '#1B5E20';
             ctx.fillStyle = cssVar('--accent') || '#1B5E20';
             ctx.lineWidth = 1.5;
@@ -348,5 +482,6 @@ export class Chart {
 
     this.container.innerHTML = '';
     this.plot = new uPlot(opts, data, this.container);
+    this.fitToContainer();
   }
 }

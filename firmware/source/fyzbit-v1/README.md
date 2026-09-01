@@ -7,7 +7,9 @@ Tento MakeCode projekt je **firmware pro micro:bit**, který se domlouvá s [web
 
 ## Jak získat `.hex`
 
-**Nejjednodušší cesta:** stáhni hotový `.hex` přímo z [aplikace FyzBit](https://bekousek.github.io/fyzbit/) — v dialogu „Připojit micro:bit" je odkaz „⬇ Stáhnout firmware (.hex)". Přetáhni stažený soubor na disk `MICROBIT` (zapojený přes USB); LED matrice na chvilku rozsvítí během nahrávání, pak se firmware spustí. Soubor je i přímo v tomto repu: [`public/firmware/fyzbit-usb.hex`](../../../public/firmware/fyzbit-usb.hex).
+**Nejjednodušší cesta:** stáhni hotový `.hex` přímo z [aplikace FyzBit](https://bekousek.github.io/fyzbit/) — v dialogu „Připojit micro:bit" je odkaz „↓ Stáhnout firmware (.hex)". Přetáhni stažený soubor na disk `MICROBIT` (zapojený přes USB); LED matrice na chvilku rozsvítí během nahrávání, pak se firmware spustí. Soubor je i přímo v tomto repu: [`public/firmware/fyzbit.hex`](../../../public/firmware/fyzbit.hex).
+
+Ten soubor je *universal hex*: obsahuje tenhle projekt jako V1 obraz a [`fyzbit-ble`](../fyzbit-ble/) jako V2 obraz. Na V1 desce se tedy nahraje to, co je v této složce; na V2 desce verze s Bluetooth.
 
 ### Postavit `.hex` sám
 
@@ -17,7 +19,7 @@ Přes [MakeCode CLI](https://github.com/microsoft/pxt-mkc) (`makecode`/`mkc`), b
 npm run firmware   # v kořeni repa; spustí scripts/build-firmware.mjs
 ```
 
-Skript sestaví univerzální `.hex` (V1 + V2 v jednom souboru) a zkopíruje ho do `public/firmware/fyzbit-usb.hex`. Vyžaduje síť (mkc si při prvním běhu stáhne toolchain z makecode.microbit.org a GitHub závislosti driverů).
+Skript sestaví oba projekty a spojí jejich obrazy do `public/firmware/fyzbit.hex`. Vyžaduje síť (mkc si při prvním běhu stáhne toolchain z makecode.microbit.org a GitHub závislosti driverů).
 
 ### Alternativa: MakeCode ve webu
 

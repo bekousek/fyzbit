@@ -1,5 +1,6 @@
 import type { Run, Channel } from '../state/AppState';
 import { csvDecimal, getLanguage, t } from '../i18n/i18n';
+import { convert, displayUnit } from '../units/units';
 
 const BOM = '﻿';
 
@@ -22,6 +23,8 @@ export type CsvOptions = {
  * - BOM (U+FEFF) for Excel UTF-8 detection.
  * - First row `sep=;` instructs Excel to use semicolon delimiter regardless of locale.
  * - Decimal: comma in CZ, dot in EN.
+ * - Values are written in the unit the app is currently showing (header says
+ *   which), so a spreadsheet matches the chart the pupil was looking at.
  * - Header text translated via i18n.
  * - Multi-run merge: union of all t values across selected runs; per (run × channel) column.
  */
@@ -39,9 +42,10 @@ export function buildRunsCsv(opts: CsvOptions): string {
 
   // Build header.
   const headers: string[] = [escapeCsvField(t('chart.time'))];
+  const units = new Map(channels.map((ch) => [ch.id, displayUnit(ch.unit)]));
   for (const r of runs) {
     for (const ch of channels) {
-      headers.push(escapeCsvField(`${r.name} - ${t(ch.nameKey)} (${ch.unit})`));
+      headers.push(escapeCsvField(`${r.name} - ${t(ch.nameKey)} (${units.get(ch.id)})`));
     }
   }
 
@@ -64,7 +68,11 @@ export function buildRunsCsv(opts: CsvOptions): string {
           cells.push('');
         } else {
           const v = run.values[ch.id]?.[srcIdx];
-          cells.push(v === undefined || !Number.isFinite(v) ? '' : csvDecimal(v, 3));
+          cells.push(
+            v === undefined || !Number.isFinite(v)
+              ? ''
+              : csvDecimal(convert(v, ch.unit, units.get(ch.id) ?? ch.unit), 3),
+          );
         }
       }
     }

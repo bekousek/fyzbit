@@ -33,13 +33,16 @@
     "exports": "Export"
   },
   "wiring": {
-    "data": "data",
-    "dt": "DT",
-    "sck": "SCK",
-    "trig": "Trig",
-    "echo": "Echo",
     "power": "napájení",
-    "ground": "zem"
+    "ground": "zem",
+    "signal": "signál",
+    "edgeConnector": "hranový konektor",
+    "noteSmallPins": "P15 a P16 jsou malé pinky — potřebuješ breakout desku nebo krokosvorky.",
+    "noteDs18b20": "Mezi DATA a VCC patří odpor 4,7 kΩ — bez něj čidlo nic nevrátí.",
+    "noteHx711": "Tenzometr se pájí na svorky E+, E−, A+, A− na druhé straně modulu.",
+    "noteHcsr04": "Některé kusy HC-SR04 chtějí 5 V. Když na 3V nic neměří, napájej modul z 5 V.",
+    "noteHx710b": "Hadičku nasaď až po zapojení, ať v čidle nezůstane přetlak.",
+    "noteDht11": "Popisky pinů se u modulů liší (S / VCC / GND). Řiď se tím, co je natištěné na desce."
   },
   "connection": {
     "title": "Připojit micro:bit",
@@ -47,28 +50,27 @@
     "serial": "USB kabel",
     "serialHint": "Web Serial · funguje na Chrome / Edge na Windows, macOS i Linuxu.",
     "bluetooth": "Bluetooth",
-    "bluetoothHint": "Web Bluetooth · jen micro:bit V2 s BLE firmwarem",
-    "mock": "Demo (Mock)",
-    "mockHint": "Simulovaný teploměr. Hodí se na ukázku bez hardwaru.",
-    "firmwareHint": "Ještě nemáš na micro:bitu nahraný firmware FyzBit?",
-    "downloadFirmware": "⬇ Stáhnout firmware (.hex)",
+    "bluetoothHint": "Bez kabelu, i na tabletu a telefonu · jen micro:bit V2",
+    "mock": "🧪 Demo bez hardwaru (simulovaný senzor)",
+    "firmwareHint": "Stačí jednou. Jeden soubor pro V1 i V2 — deska si z něj sama vezme svou část a Bluetooth se zapne jen na V2.",
+    "downloadFirmware": "↓ Stáhnout firmware (.hex)",
     "disconnect": "Odpojit",
     "openPicker": "Vyber port v dialogu prohlížeče…",
     "userCancelled": "Připojení zrušeno.",
-    "unsupportedBrowser": "Tento prohlížeč nepodporuje Web Serial. Použij Chrome nebo Edge."
+    "unsupportedBrowser": "Tento prohlížeč nepodporuje Web Serial. Použij Chrome nebo Edge.",
+    "stepFirmware": "Nahraj firmware do micro:bitu",
+    "stepConnect": "Připoj se k micro:bitu",
+    "cancelConnect": "Zrušit"
   },
   "flash": {
     "title": "Připravit micro:bit",
     "hint": "Nahraje firmware FyzBit do micro:bitu přes USB (WebUSB)",
-    "variantLabel": "Varianta firmwaru",
-    "variantUsb": "USB (V1 + V2)",
-    "variantBle": "Bluetooth (jen V2)",
     "stageInitializing": "Připravuji…",
     "stageFindingDevice": "Vyber micro:bit v dialogu prohlížeče…",
     "stageConnecting": "Připojuji se…",
     "stagePartialFlashing": "Nahrávám firmware (rychlý zápis)…",
     "stageFullFlashing": "Nahrávám firmware (plný zápis)…",
-    "success": "Firmware nahrán! Teď klikni na „Připojit“ → „USB kabel“ nebo „Bluetooth“.",
+    "success": "Firmware nahrán! Teď zvol způsob připojení — USB kabel, nebo Bluetooth (jen V2).",
     "failed": "Nahrání firmwaru selhalo"
   },
   "chart": {
@@ -94,7 +96,10 @@
     "force": "Síla",
     "distance": "Vzdálenost",
     "speed": "Rychlost",
-    "pressure": "Tlak"
+    "pressure": "Tlak",
+    "show": "Zobrazit {{name}} v grafu",
+    "hide": "Skrýt {{name}} v grafu",
+    "unitFor": "Jednotka – {{name}}"
   },
   "sensor": {
     "label": "Senzor",
@@ -219,5 +224,9 @@
     "connectionLost": "Spojení s micro:bitem ztraceno.",
     "calibrationTimeout": "Kalibrace neodpověděla. Zkus znovu.",
     "storageSaveFailed": "Automatické ukládání selhává (plné úložiště nebo režim soukromého prohlížení) — probíhající měření se neukládá."
+  },
+  "nav": {
+    "chart": "Graf",
+    "aria": "Sekce aplikace"
   }
 }

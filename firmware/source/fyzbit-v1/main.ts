@@ -92,9 +92,13 @@ function sendHandshake(): void {
     send("#READY")
 }
 
+// ASCII only on the wire: MakeCode's compiler replaces non-ASCII characters in
+// string literals with '?', so a literal "°C" reaches the app as "?C". The
+// unit is sent as "degC" and the app maps it back — see normalizeUnit() in
+// src/units/units.ts, which also still repairs "?C" from older builds.
 function sendChannelDefinitions(): void {
     if (currentSensor == Sensor.DS18B20) {
-        send("#CH;t;Temperature;°C;-40;125")
+        send("#CH;t;Temperature;degC;-40;125")
     } else if (currentSensor == Sensor.HX711) {
         send("#CH;F;Force;N;-200;200")
     } else if (currentSensor == Sensor.HCSR04) {
@@ -103,7 +107,7 @@ function sendChannelDefinitions(): void {
     } else if (currentSensor == Sensor.HX710B) {
         send("#CH;p;Pressure;Pa;0;200000")
     } else if (currentSensor == Sensor.DHT11) {
-        send("#CH;t;Temperature;°C;-20;60")
+        send("#CH;t;Temperature;degC;-20;60")
         send("#CH;h;Humidity;%;0;100")
     }
 }

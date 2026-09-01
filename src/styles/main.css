@@ -10,6 +10,12 @@
   box-sizing: border-box;
 }
 
+/* The UA's [hidden] rule loses to any class that sets `display`, and several
+   below do. Keep the attribute authoritative. */
+[hidden] {
+  display: none !important;
+}
+
 html,
 body {
   margin: 0;
@@ -27,7 +33,10 @@ body {
   display: grid;
   grid-template-rows: auto 1fr;
   height: 100vh;
-  width: 100vw;
+  /* 100dvh keeps the action bar above the phone's own browser chrome. */
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
 }
 
 /* ---------- Top bar ---------- */
@@ -137,16 +146,51 @@ body {
 
 .layout {
   display: grid;
-  grid-template-columns: 240px 1fr 260px;
+  grid-template-columns: 260px 1fr 260px;
+  grid-template-rows: 1fr auto;
+  grid-template-areas:
+    'wiring chart runs'
+    'actions chart runs';
   gap: 12px;
   padding: 12px;
   min-height: 0;
   overflow: hidden;
 }
 
+.panel--left {
+  grid-area: wiring;
+  overflow-y: auto;
+}
+
+.panel--center {
+  grid-area: chart;
+}
+
+.panel--right {
+  grid-area: runs;
+}
+
+/* Measurement controls. Their own box under the wiring on desktop; a sticky
+   bar across the bottom on phones, where they must stay reachable no matter
+   which section is on screen. */
+.actionbar {
+  grid-area: actions;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 12px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.actionbar #btn-start {
+  grid-column: 1 / -1;
+}
+
 @media (max-width: 1100px) {
   .layout {
-    grid-template-columns: 200px 1fr 220px;
+    grid-template-columns: 220px 1fr 220px;
   }
 }
 
@@ -187,6 +231,42 @@ body {
   width: 100%;
   height: auto;
   display: block;
+}
+
+.wiring-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+
+.wiring-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.wiring-legend__swatch {
+  display: inline-block;
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.wiring-notes {
+  margin: 8px 0 0;
+  padding-left: 16px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--fg-muted);
+}
+
+.wiring-notes li + li {
+  margin-top: 4px;
 }
 
 .actions {
@@ -304,6 +384,83 @@ body {
   .chart-toolbar__hint {
     display: none;
   }
+}
+
+.channel-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 2px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.channel-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 6px 2px 2px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.channel-chip--off {
+  opacity: 0.55;
+}
+
+.channel-chip__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 4px 8px;
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.channel-chip__toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.channel-chip__dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid;
+  flex-shrink: 0;
+}
+
+.channel-chip__name {
+  font-weight: 600;
+}
+
+.channel-chip__value {
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-muted);
+}
+
+.channel-chip__unit {
+  min-height: 28px;
+  padding: 2px 4px;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--fg);
+  background: var(--surface-1);
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+}
+
+.channel-chip__unit-static {
+  padding: 0 4px;
+  font-size: 12px;
+  color: var(--fg-muted);
 }
 
 .chart-container {
@@ -620,9 +777,42 @@ textarea.field__input {
 
 /* ---------- ConnectionModal ---------- */
 
-.connection-intro {
-  margin: 0 0 4px;
-  font-size: 14px;
+.connect-step {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.connect-step + .connect-step {
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.connect-step__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 15px;
+}
+
+.connect-step__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--fg-on-accent);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.connect-step__hint {
+  margin: 0;
+  font-size: 13px;
   color: var(--fg-muted);
 }
 
@@ -678,44 +868,43 @@ textarea.field__input {
   color: var(--fg-muted);
 }
 
+/* Firmware download + the Mock demo: available, but not competing with the
+   two real ways to connect. */
+.connection-secondary {
+  align-self: flex-start;
+  padding: 4px 0;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.connection-secondary:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.connection-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.connection-secondary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .connection-error {
-  margin: 6px 0 0;
+  margin: 2px 0 0;
   padding: 10px 12px;
   background: rgba(239, 83, 80, 0.12);
   border: 1px solid var(--status-err);
   border-radius: 6px;
   font-size: 14px;
   color: var(--status-err);
-}
-
-.connection-firmware {
-  margin-top: 6px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.connection-firmware__hint {
-  margin: 0;
-  font-size: 13px;
-  color: var(--fg-muted);
-}
-
-.connection-firmware__variant {
-  margin: 4px 0;
-}
-
-.connection-firmware__link {
-  color: var(--accent);
-  font-size: 14px;
-  font-weight: 500;
-  text-decoration: none;
-}
-
-.connection-firmware__link:hover {
-  text-decoration: underline;
 }
 
 .flash-progress {
@@ -938,26 +1127,204 @@ textarea.field__input {
   border-bottom: 1px solid rgba(0, 0, 0, 0.2);
 }
 
+/* ---------- Mobile section switcher ---------- */
+
+.mobile-nav {
+  display: none;
+  grid-template-columns: repeat(3, 1fr);
+  background: var(--surface-1);
+  border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.mobile-nav__btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 54px;
+  padding: 6px 4px;
+  background: transparent;
+  border: 0;
+  border-top: 3px solid transparent;
+  font: inherit;
+  font-size: 12px;
+  color: var(--fg-muted);
+  cursor: pointer;
+}
+
+.mobile-nav__btn[aria-pressed='true'] {
+  color: var(--accent);
+  background: var(--surface-2);
+  border-top-color: var(--accent);
+}
+
+.mobile-nav__btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.mobile-nav__icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
 /* ---------- Responsive ---------- */
 
-/* Tablets / small screens: stack panels instead of squeezing three columns. */
-@media (max-width: 900px) {
+/*
+ * Phones and tablets get every desktop feature, just one section at a time:
+ * the three columns become three tabs (see MobileNav), while the measurement
+ * controls stay pinned to the bottom so START is always a thumb away.
+ */
+@media (max-width: 860px) {
+  #app {
+    grid-template-rows: auto 1fr auto;
+  }
+
   .topbar {
+    min-height: 0;
+    padding: 6px 10px;
+    gap: 8px;
+  }
+
+  .topbar__left {
     flex-wrap: wrap;
-    row-gap: 8px;
+    gap: 10px;
+    flex: 1 1 auto;
   }
 
   .big-value__number {
-    font-size: 32pt;
+    font-size: 30pt;
+  }
+
+  .big-value__unit {
+    font-size: 15pt;
+  }
+
+  #btn-connect {
+    min-height: 40px;
+    padding: 6px 12px;
+    font-size: 14px;
   }
 
   .layout {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: 1fr auto;
+    grid-template-areas:
+      'main'
+      'actions';
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .panel--left,
+  .panel--center,
+  .panel--right {
+    grid-area: main;
+    display: none;
+  }
+
+  #app[data-view='wiring'] .panel--left,
+  #app[data-view='chart'] .panel--center,
+  #app[data-view='runs'] .panel--right {
+    display: flex;
+  }
+
+  .panel--right {
     overflow-y: auto;
   }
 
-  .panel--center {
-    min-height: 320px;
+  /* START across the top, the three secondary actions on one row under it —
+     three stacked rows of buttons would eat a third of a phone screen. */
+  .actionbar {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .actionbar .btn--lg {
+    min-height: 46px;
+    padding: 6px 8px;
+    font-size: 14px;
+  }
+
+  .mobile-nav {
+    display: grid;
+  }
+
+  .chart-toolbar__hint {
+    display: none;
+  }
+
+  /* Full-screen dialogs: a centred 480 px card wastes a phone screen. */
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .modal__form {
+    height: 100%;
+  }
+
+  .modal__body {
+    flex: 1 1 auto;
+    max-height: none;
+  }
+}
+
+/* Phones: reclaim the top bar by dropping the status *word* (the dot stays)
+   and giving the sensor picker its own row. */
+@media (max-width: 620px) {
+  .status-badge__text {
+    display: none;
+  }
+
+  .status-badge {
+    padding: 8px;
+  }
+
+  .big-value__number {
+    font-size: 26pt;
+  }
+
+  .sensor-select {
+    flex: 1 1 100%;
+    max-width: none;
+    order: 5;
+  }
+
+  .selection-stats {
+    overflow-x: auto;
+  }
+
+  .actionbar {
+    gap: 6px;
+  }
+}
+
+/* Landscape phone: the action bar plus tab bar would leave no chart. */
+@media (max-height: 480px) and (max-width: 860px) {
+  .actionbar {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .actionbar #btn-start {
+    grid-column: auto;
+  }
+
+  .actionbar .btn--lg {
+    min-height: 40px;
+    font-size: 14px;
+  }
+
+  .mobile-nav__btn {
+    flex-direction: row;
+    gap: 6px;
+    min-height: 42px;
   }
 }

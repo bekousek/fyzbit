@@ -5,10 +5,12 @@ import './styles/main.css';
 import { initI18n, t } from './i18n/i18n';
 import { initTheme } from './theme/theme';
 import { initSettings } from './state/Settings';
+import { initUnits } from './units/units';
 import { App } from './ui/App';
 import { SerialTransport } from './transport/SerialTransport';
 
 initSettings();
+initUnits();
 initTheme();
 initI18n();
 

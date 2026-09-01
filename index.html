@@ -32,7 +32,7 @@
     <title data-i18n="app.title">FyzBit</title>
   </head>
   <body>
-    <div id="app">
+    <div id="app" data-view="chart">
       <!-- Top bar -->
       <header class="topbar">
         <div class="topbar__left">
@@ -64,41 +64,27 @@
             title="Nastavení"
             aria-label="Nastavení"
           >
-            ⚙
+            &#9881;
           </button>
         </div>
       </header>
 
-      <!-- Main 3-column layout -->
+      <!-- Main layout: wiring / chart / runs + a persistent action bar -->
       <main class="layout">
-        <!-- Left column: wiring + actions -->
+        <!-- Wiring -->
         <aside class="panel panel--left">
           <h2 class="panel__title" data-i18n="panel.wiring">Zapojení</h2>
           <div class="wiring-diagram" id="wiring-diagram"></div>
-          <div class="actions">
-            <button type="button" class="btn btn--primary btn--lg" id="btn-start">
-              <span data-i18n="button.start">▶ START</span>
-            </button>
-            <button type="button" class="btn btn--lg" id="btn-tare" disabled>
-              <span data-i18n="button.tare">⊘ TÁRA</span>
-            </button>
-            <button type="button" class="btn btn--lg" id="btn-save-run" disabled>
-              <span data-i18n="button.saveRun">💾 Uložit</span>
-            </button>
-            <button type="button" class="btn btn--lg" id="btn-calibrate" disabled>
-              <span data-i18n="button.calibrate">⚙ Kalibrovat</span>
-            </button>
-          </div>
         </aside>
 
-        <!-- Center column: chart -->
+        <!-- Chart -->
         <section class="panel panel--center">
           <div class="chart-toolbar">
             <button type="button" class="btn btn--sm" id="btn-autoscale" aria-pressed="true">
-              <span data-i18n="chart.autoscale">⌂ Autoscale</span>
+              <span data-i18n="chart.autoscale">&#8962; Autoscale</span>
             </button>
             <button type="button" class="btn btn--sm" id="btn-reset-zoom">
-              <span data-i18n="chart.resetZoom">🔍 Reset zoom</span>
+              <span data-i18n="chart.resetZoom">&#128269; Reset zoom</span>
             </button>
             <button
               type="button"
@@ -115,6 +101,7 @@
               >Tip: podrž A a klikni do grafu pro anotaci</span
             >
           </div>
+          <div class="channel-controls" id="channel-controls" hidden></div>
           <div
             class="chart-container"
             id="chart-container"
@@ -125,7 +112,7 @@
           <div class="selection-stats" id="selection-stats" hidden></div>
         </section>
 
-        <!-- Right column: runs + exports -->
+        <!-- Runs + exports -->
         <aside class="panel panel--right">
           <h2 class="panel__title" data-i18n="panel.runs">Měření</h2>
           <ul class="runs-list" id="runs-list">
@@ -138,17 +125,49 @@
           <h2 class="panel__title panel__title--spaced" data-i18n="panel.exports">Export</h2>
           <div class="actions actions--column">
             <button type="button" class="btn btn--sm" id="btn-export-csv" disabled>
-              <span data-i18n="button.exportCsv">📥 CSV</span>
+              <span data-i18n="button.exportCsv">&#128229; CSV</span>
             </button>
             <button type="button" class="btn btn--sm" id="btn-export-pdf" disabled>
-              <span data-i18n="button.exportPdf">📄 PDF</span>
+              <span data-i18n="button.exportPdf">&#128196; PDF</span>
             </button>
             <button type="button" class="btn btn--sm" id="btn-export-png" disabled>
-              <span data-i18n="button.exportPng">🖼 PNG</span>
+              <span data-i18n="button.exportPng">&#128375; PNG</span>
             </button>
           </div>
         </aside>
+
+        <!-- Measurement controls: own row on desktop, sticky bottom bar on mobile -->
+        <div class="actionbar">
+          <button type="button" class="btn btn--primary btn--lg" id="btn-start">
+            <span data-i18n="button.start">&#9654; START</span>
+          </button>
+          <button type="button" class="btn btn--lg" id="btn-tare" disabled>
+            <span data-i18n="button.tare">&#8856; TÁRA</span>
+          </button>
+          <button type="button" class="btn btn--lg" id="btn-save-run" disabled>
+            <span data-i18n="button.saveRun">&#128190; Uložit</span>
+          </button>
+          <button type="button" class="btn btn--lg" id="btn-calibrate" disabled>
+            <span data-i18n="button.calibrate">&#9881; Kalibrovat</span>
+          </button>
+        </div>
       </main>
+
+      <!-- Phone / tablet section switcher (hidden on desktop by CSS) -->
+      <nav class="mobile-nav" id="mobile-nav" data-i18n-aria-label="nav.aria" aria-label="Sekce">
+        <button type="button" class="mobile-nav__btn" data-view="wiring" aria-pressed="false">
+          <span class="mobile-nav__icon" aria-hidden="true">&#128268;</span>
+          <span data-i18n="panel.wiring">Zapojení</span>
+        </button>
+        <button type="button" class="mobile-nav__btn" data-view="chart" aria-pressed="true">
+          <span class="mobile-nav__icon" aria-hidden="true">&#128200;</span>
+          <span data-i18n="nav.chart">Graf</span>
+        </button>
+        <button type="button" class="mobile-nav__btn" data-view="runs" aria-pressed="false">
+          <span class="mobile-nav__icon" aria-hidden="true">&#128203;</span>
+          <span data-i18n="panel.runs">Měření</span>
+        </button>
+      </nav>
     </div>
 
     <!-- Calibration wizard modal -->
@@ -252,7 +271,7 @@
     </dialog>
 
     <!-- Connection modal -->
-    <dialog id="connection-modal" class="modal">
+    <dialog id="connection-modal" class="modal connection-modal">
       <div class="modal__form">
         <header class="modal__header">
           <h2 data-i18n="connection.title">Připojit micro:bit</h2>
@@ -263,72 +282,22 @@
             data-i18n-aria-label="button.close"
             aria-label="Zavřít"
           >
-            ✕
+            &#10005;
           </button>
         </header>
         <div class="modal__body">
-          <p
-            class="connection-intro"
-            data-i18n="connection.intro"
-          >
-            Vyber způsob připojení k micro:bitu.
-          </p>
-          <button
-            type="button"
-            class="connect-option"
-            id="btn-connect-serial"
-            data-transport="serial"
-          >
-            <span class="connect-option__icon">🔌</span>
-            <span class="connect-option__body">
-              <strong data-i18n="connection.serial">USB kabel</strong>
-              <small data-i18n="connection.serialHint"
-                >Web Serial · funguje na Chrome / Edge na Windows / macOS / Linux</small
-              >
-            </span>
-          </button>
-          <button
-            type="button"
-            class="connect-option"
-            id="btn-connect-bluetooth"
-            data-transport="bluetooth"
-          >
-            <span class="connect-option__icon">📡</span>
-            <span class="connect-option__body">
-              <strong data-i18n="connection.bluetooth">Bluetooth</strong>
-              <small data-i18n="connection.bluetoothHint"
-                >Web Bluetooth · jen micro:bit V2 s BLE firmwarem</small
-              >
-            </span>
-          </button>
-          <button
-            type="button"
-            class="connect-option"
-            id="btn-connect-mock"
-            data-transport="mock"
-          >
-            <span class="connect-option__icon">🧪</span>
-            <span class="connect-option__body">
-              <strong data-i18n="connection.mock">Demo (Mock)</strong>
-              <small data-i18n="connection.mockHint"
-                >Simulovaný teploměr. Hodí se na ukázku bez hardwaru.</small
-              >
-            </span>
-          </button>
-          <p class="connection-error" id="connection-error" hidden></p>
-          <div class="connection-firmware">
-            <p class="connection-firmware__hint" data-i18n="connection.firmwareHint">
-              Ještě nemáš na micro:bitu nahraný firmware FyzBit?
+          <!-- Step 1 — firmware -->
+          <section class="connect-step">
+            <h3 class="connect-step__title">
+              <span class="connect-step__num" aria-hidden="true">1</span>
+              <span data-i18n="connection.stepFirmware">Nahraj firmware do micro:bitu</span>
+            </h3>
+            <p class="connect-step__hint" data-i18n="connection.firmwareHint">
+              Stačí jednou. Jeden soubor pro V1 i V2 — deska si z něj sama vezme svou
+              část a Bluetooth se zapne jen na V2.
             </p>
-            <label class="field connection-firmware__variant">
-              <span class="field__label" data-i18n="flash.variantLabel">Varianta firmwaru</span>
-              <select id="flash-firmware-variant" class="field__input">
-                <option value="usb" data-i18n="flash.variantUsb">USB (V1 + V2)</option>
-                <option value="ble" data-i18n="flash.variantBle">Bluetooth (jen V2)</option>
-              </select>
-            </label>
             <button type="button" class="connect-option" id="btn-flash-firmware" hidden>
-              <span class="connect-option__icon">⚡</span>
+              <span class="connect-option__icon" aria-hidden="true">&#9889;</span>
               <span class="connect-option__body">
                 <strong data-i18n="flash.title">Připravit micro:bit</strong>
                 <small data-i18n="flash.hint"
@@ -343,10 +312,55 @@
               <p class="flash-progress__label" id="flash-progress-label"></p>
             </div>
             <p class="connection-error" id="flash-error" hidden></p>
-            <a class="connection-firmware__link" id="link-download-firmware" download>
-              <span data-i18n="connection.downloadFirmware">⬇ Stáhnout firmware (.hex)</span>
+            <a class="connection-secondary" id="link-download-firmware" download>
+              <span data-i18n="connection.downloadFirmware">&#8595; Stáhnout firmware (.hex)</span>
             </a>
-          </div>
+          </section>
+
+          <!-- Step 2 — transport -->
+          <section class="connect-step">
+            <h3 class="connect-step__title">
+              <span class="connect-step__num" aria-hidden="true">2</span>
+              <span data-i18n="connection.stepConnect">Připoj se k micro:bitu</span>
+            </h3>
+            <button
+              type="button"
+              class="connect-option"
+              id="btn-connect-serial"
+              data-transport="serial"
+            >
+              <span class="connect-option__icon" aria-hidden="true">&#128268;</span>
+              <span class="connect-option__body">
+                <strong data-i18n="connection.serial">USB kabel</strong>
+                <small data-i18n="connection.serialHint"
+                  >Web Serial &middot; funguje na Chrome / Edge na Windows / macOS / Linux</small
+                >
+              </span>
+            </button>
+            <button
+              type="button"
+              class="connect-option"
+              id="btn-connect-bluetooth"
+              data-transport="bluetooth"
+            >
+              <span class="connect-option__icon" aria-hidden="true">&#128225;</span>
+              <span class="connect-option__body">
+                <strong data-i18n="connection.bluetooth">Bluetooth</strong>
+                <small data-i18n="connection.bluetoothHint"
+                  >Bez kabelu, i na tabletu a telefonu &middot; jen micro:bit V2</small
+                >
+              </span>
+            </button>
+            <p class="connection-error" id="connection-error" hidden></p>
+            <button
+              type="button"
+              class="connection-secondary"
+              id="btn-connect-mock"
+              data-transport="mock"
+            >
+              <span data-i18n="connection.mock">&#129514; Demo bez hardwaru (simulovaný senzor)</span>
+            </button>
+          </section>
         </div>
       </div>
     </dialog>

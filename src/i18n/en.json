@@ -33,13 +33,16 @@
     "exports": "Export"
   },
   "wiring": {
-    "data": "data",
-    "dt": "DT",
-    "sck": "SCK",
-    "trig": "trig",
-    "echo": "echo",
     "power": "power",
-    "ground": "ground"
+    "ground": "ground",
+    "signal": "signal",
+    "edgeConnector": "edge connector",
+    "noteSmallPins": "P15 and P16 are small pins — you need a breakout board or crocodile clips.",
+    "noteDs18b20": "A 4.7 kΩ resistor belongs between DATA and VCC — without it the probe returns nothing.",
+    "noteHx711": "The load cell solders to E+, E−, A+, A− on the other side of the module.",
+    "noteHcsr04": "Some HC-SR04 units want 5 V. If nothing reads on 3V, power the module from 5 V.",
+    "noteHx710b": "Attach the tubing after wiring, so no pressure is left trapped in the sensor.",
+    "noteDht11": "Pin labels differ between modules (S / VCC / GND). Go by what is printed on the board."
   },
   "connection": {
     "title": "Connect micro:bit",
@@ -47,28 +50,27 @@
     "serial": "USB cable",
     "serialHint": "Web Serial · works in Chrome / Edge on Windows, macOS and Linux.",
     "bluetooth": "Bluetooth",
-    "bluetoothHint": "Web Bluetooth · micro:bit V2 with BLE firmware only",
-    "mock": "Demo (Mock)",
-    "mockHint": "Simulated thermometer. Useful for showing the app without hardware.",
-    "firmwareHint": "Don't have the FyzBit firmware on your micro:bit yet?",
-    "downloadFirmware": "⬇ Download firmware (.hex)",
+    "bluetoothHint": "No cable, works on tablets and phones · micro:bit V2 only",
+    "mock": "🧪 Demo without hardware (simulated sensor)",
+    "firmwareHint": "Once is enough. One file for V1 and V2 — the board picks its own half, and Bluetooth only switches on for V2.",
+    "downloadFirmware": "↓ Download firmware (.hex)",
     "disconnect": "Disconnect",
     "openPicker": "Pick a port in the browser dialog…",
     "userCancelled": "Connection cancelled.",
-    "unsupportedBrowser": "This browser does not support Web Serial. Use Chrome or Edge."
+    "unsupportedBrowser": "This browser does not support Web Serial. Use Chrome or Edge.",
+    "stepFirmware": "Flash the firmware onto the micro:bit",
+    "stepConnect": "Connect to the micro:bit",
+    "cancelConnect": "Cancel"
   },
   "flash": {
     "title": "Prepare micro:bit",
     "hint": "Flashes the FyzBit firmware onto the micro:bit over USB (WebUSB)",
-    "variantLabel": "Firmware variant",
-    "variantUsb": "USB (V1 + V2)",
-    "variantBle": "Bluetooth (V2 only)",
     "stageInitializing": "Preparing…",
     "stageFindingDevice": "Pick a micro:bit in the browser dialog…",
     "stageConnecting": "Connecting…",
     "stagePartialFlashing": "Flashing firmware (partial write)…",
     "stageFullFlashing": "Flashing firmware (full write)…",
-    "success": "Firmware flashed! Now click \"Connect\" → \"USB cable\" or \"Bluetooth\".",
+    "success": "Firmware flashed! Now pick how to connect — USB cable, or Bluetooth (V2 only).",
     "failed": "Flashing the firmware failed"
   },
   "chart": {
@@ -94,7 +96,10 @@
     "force": "Force",
     "distance": "Distance",
     "speed": "Speed",
-    "pressure": "Pressure"
+    "pressure": "Pressure",
+    "show": "Show {{name}} on the chart",
+    "hide": "Hide {{name}} on the chart",
+    "unitFor": "Unit – {{name}}"
   },
   "sensor": {
     "label": "Sensor",
@@ -219,5 +224,9 @@
     "connectionLost": "Connection to micro:bit lost.",
     "calibrationTimeout": "Calibration did not respond. Try again.",
     "storageSaveFailed": "Auto-save is failing (full storage or private browsing mode) — the current recording is not being saved."
+  },
+  "nav": {
+    "chart": "Chart",
+    "aria": "App sections"
   }
 }

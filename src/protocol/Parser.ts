@@ -13,6 +13,7 @@
  */
 
 import type { Channel } from '../state/AppState';
+import { normalizeUnit } from '../units/units';
 
 export type HelloMessage = {
   type: 'hello';
@@ -94,7 +95,7 @@ function parseControl(line: string): ParsedMessage {
       // #CH;ID;NAZEV;JEDNOTKA;MIN;MAX  (min/max optional)
       const id = parts[1] ?? '';
       const wireName = parts[2] ?? '';
-      const unit = parts[3] ?? '';
+      const unit = normalizeUnit(parts[3] ?? '');
       const min = parseOptionalFloat(parts[4]);
       const max = parseOptionalFloat(parts[5]);
       if (!id || !wireName) return { type: 'unknown', raw: line };

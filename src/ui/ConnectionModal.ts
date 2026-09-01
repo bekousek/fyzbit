@@ -3,16 +3,12 @@ import { MockTransport } from '../transport/MockTransport';
 import { SerialTransport } from '../transport/SerialTransport';
 import { t, onLanguageChange } from '../i18n/i18n';
 import { required } from '../utils/dom';
-import type { FirmwareVariant, FlashProgress } from '../flash/Flasher';
+import { FIRMWARE_HEX_URL } from '../flash/firmware';
+import type { FlashProgress } from '../flash/Flasher';
 import { toast } from './Toast';
 
-const FIRMWARE_HEX_URL: Record<FirmwareVariant, string> = {
-  usb: `${import.meta.env.BASE_URL}firmware/fyzbit-usb.hex`,
-  ble: `${import.meta.env.BASE_URL}firmware/fyzbit-ble-v2.hex`,
-};
-
-// Not imported from Flasher.ts / BluetoothTransport.ts: both pull in
-// @microbit/microbit-connection (~50 kB), so they're loaded lazily — in
+// Flasher.ts / BluetoothTransport.ts are *not* imported at the top: both pull
+// in @microbit/microbit-connection (~50 kB), so they're loaded lazily — in
 // startFlash() and pick('bluetooth') respectively — only when actually used.
 // These checks need no library code, just the relevant browser API's presence.
 const FLASH_SUPPORTED = typeof navigator !== 'undefined' && 'usb' in navigator;
@@ -34,10 +30,16 @@ export type ConnectRequest = {
 };
 
 /**
- * ConnectionModal — lets the user pick a transport (USB serial, Bluetooth,
- * or the Mock demo), plus flash the FyzBit firmware over WebUSB or download
- * it manually. Errors during transport selection or flashing (user
- * cancelled, browser unsupported) are surfaced inside the modal, not as toasts.
+ * ConnectionModal — walks the user through the two steps in the order they
+ * happen the first time: flash the firmware (step 1), then pick a transport
+ * (step 2). There is only one firmware file — the board's bootloader decides
+ * whether it gets the Bluetooth-capable V2 image — so nothing is chosen here.
+ *
+ * The Mock demo lives below step 2 as a secondary link rather than a third
+ * equal option: it is a presentation aid, not a way to connect a micro:bit.
+ *
+ * Errors during transport selection or flashing (user cancelled, browser
+ * unsupported) are surfaced inside the modal, not as toasts.
  */
 export class ConnectionModal {
   private dialog: HTMLDialogElement;
@@ -47,7 +49,6 @@ export class ConnectionModal {
   private mockBtn: HTMLButtonElement;
   private closeBtn: HTMLButtonElement;
   private flashBtn: HTMLButtonElement;
-  private flashVariantSelect: HTMLSelectElement;
   private downloadLink: HTMLAnchorElement;
   private flashProgressEl: HTMLElement;
   private flashProgressFillEl: HTMLElement;
@@ -64,13 +65,12 @@ export class ConnectionModal {
     this.mockBtn = required<HTMLButtonElement>('#btn-connect-mock', this.dialog);
     this.closeBtn = required<HTMLButtonElement>('#btn-close-connection', this.dialog);
     this.flashBtn = required<HTMLButtonElement>('#btn-flash-firmware', this.dialog);
-    this.flashVariantSelect = required<HTMLSelectElement>('#flash-firmware-variant', this.dialog);
     this.downloadLink = required<HTMLAnchorElement>('#link-download-firmware', this.dialog);
     this.flashProgressEl = required<HTMLElement>('#flash-progress', this.dialog);
     this.flashProgressFillEl = required<HTMLElement>('#flash-progress-fill', this.dialog);
     this.flashProgressLabelEl = required<HTMLElement>('#flash-progress-label', this.dialog);
     this.flashErrorEl = required<HTMLElement>('#flash-error', this.dialog);
-    this.updateDownloadLink();
+    this.downloadLink.href = FIRMWARE_HEX_URL;
 
     if (!SerialTransport.isSupported()) {
       this.serialBtn.disabled = true;
@@ -92,7 +92,6 @@ export class ConnectionModal {
       void this.pick('mock');
     });
     this.flashBtn.addEventListener('click', () => void this.startFlash());
-    this.flashVariantSelect.addEventListener('change', () => this.updateDownloadLink());
     this.closeBtn.addEventListener('click', () => {
       if (!this.flashing) this.cancel();
     });
@@ -114,16 +113,13 @@ export class ConnectionModal {
   private async startFlash(): Promise<void> {
     this.flashing = true;
     this.clearFlashError();
+    this.setTransportButtonsEnabled(false);
     this.flashBtn.disabled = true;
-    this.serialBtn.disabled = true;
-    this.bluetoothBtn.disabled = true;
-    this.mockBtn.disabled = true;
     this.flashProgressEl.hidden = false;
     this.setFlashProgress({ stage: 'Initializing' });
     try {
       const { flashFirmware } = await import('../flash/Flasher');
-      const variant = this.flashVariantSelect.value as FirmwareVariant;
-      await flashFirmware(variant, (p) => this.setFlashProgress(p));
+      await flashFirmware((p) => this.setFlashProgress(p));
       toast.success(t('flash.success'), 6000);
     } catch (err) {
       this.showFlashError(`${t('flash.failed')}: ${String((err as Error)?.message ?? err)}`);
@@ -131,15 +127,14 @@ export class ConnectionModal {
       this.flashing = false;
       this.flashProgressEl.hidden = true;
       this.flashBtn.disabled = false;
-      this.serialBtn.disabled = !SerialTransport.isSupported();
-      this.bluetoothBtn.disabled = !BLUETOOTH_SUPPORTED;
-      this.mockBtn.disabled = false;
+      this.setTransportButtonsEnabled(true);
     }
   }
 
-  private updateDownloadLink(): void {
-    const variant = this.flashVariantSelect.value as FirmwareVariant;
-    this.downloadLink.href = FIRMWARE_HEX_URL[variant];
+  private setTransportButtonsEnabled(enabled: boolean): void {
+    this.serialBtn.disabled = !enabled || !SerialTransport.isSupported();
+    this.bluetoothBtn.disabled = !enabled || !BLUETOOTH_SUPPORTED;
+    this.mockBtn.disabled = !enabled;
   }
 
   private setFlashProgress(p: FlashProgress): void {
