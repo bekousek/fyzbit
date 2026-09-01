@@ -68,11 +68,13 @@ const SENSOR_WIRING: Record<SensorName, SensorWiring> = {
   },
   HCSR04: {
     nameKey: 'sensor.hcsr04',
+    // Pins listed as you see them with the sensor aimed away from you, which
+    // is how it sits while measuring: GND on the left, VCC on the right.
     wires: [
-      { pad: '3V', terminal: 'VCC', role: 'power' },
-      { pad: 'P1', terminal: 'Trig', role: 'signal' },
-      { pad: 'P2', terminal: 'Echo', role: 'signal' },
       { pad: 'GND', terminal: 'GND', role: 'ground' },
+      { pad: 'P2', terminal: 'Echo', role: 'signal' },
+      { pad: 'P1', terminal: 'Trig', role: 'signal' },
+      { pad: '3V', terminal: 'VCC', role: 'power' },
     ],
     noteKeys: ['wiring.noteHcsr04'],
   },
@@ -241,11 +243,26 @@ export class WiringDiagram {
       .map((w) => `${w.pad} → ${w.terminal}`)
       .join(', ')} (${sensorLabel})`;
 
+    // One entry per wire, in the order they appear left to right. Signals are
+    // named after their terminal: with two of them (Trig and Echo) a single
+    // generic "signal" swatch would leave the second colour unexplained.
+    const legend = wiring.wires
+      .map((w) => {
+        const label =
+          w.role === 'power'
+            ? t('wiring.power')
+            : w.role === 'ground'
+              ? t('wiring.ground')
+              : t('wiring.signalNamed', { name: w.terminal });
+        return `<li><span class="wiring-legend__swatch" style="background:${wireColors.get(w)!}"></span>${escapeHtml(label)}</li>`;
+      })
+      .join('');
+
     const notes = wiring.noteKeys.map((key) => `<li>${escapeHtml(t(key))}</li>`).join('');
 
     this.host.innerHTML = `
       <svg viewBox="0 0 ${W} ${round1(height)}" role="img" aria-label="${escapeHtml(ariaLabel)}">
-        <image href="${BOARD_SVG}" x="${BOARD_X}" y="${BOARD_Y}"
+        <image class="wiring-diagram__board" href="${BOARD_SVG}" x="${BOARD_X}" y="${BOARD_Y}"
                width="${BOARD_W}" height="${round1(BOARD_H)}" />
         ${wireMarkup}
         <!-- Chips last: a wire routed past a small-pin chip would otherwise
@@ -257,11 +274,7 @@ export class WiringDiagram {
         <text x="${W / 2}" y="${round1(sensorTop + SENSOR_H - 10)}" text-anchor="middle" font-size="10"
               font-weight="700" fill="var(--fg)">${escapeHtml(sensorLabel)}</text>
       </svg>
-      <ul class="wiring-legend">
-        <li><span class="wiring-legend__swatch" style="background:${POWER_COLOR}"></span>${escapeHtml(t('wiring.power'))}</li>
-        <li><span class="wiring-legend__swatch" style="background:${GROUND_COLOR}"></span>${escapeHtml(t('wiring.ground'))}</li>
-        <li><span class="wiring-legend__swatch" style="background:${SIGNAL_COLORS[0]}"></span>${escapeHtml(t('wiring.signal'))}</li>
-      </ul>
+      <ul class="wiring-legend">${legend}</ul>
       <ul class="wiring-notes">${notes}</ul>
       <p class="wiring-credit">${escapeHtml(t('wiring.boardCredit'))}</p>
     `;

@@ -35,7 +35,6 @@
   "wiring": {
     "power": "napájení",
     "ground": "zem",
-    "signal": "signál",
     "edgeConnector": "hranový konektor",
     "noteSmallPins": "P15 a P16 jsou malé pinky — potřebuješ breakout desku nebo krokosvorky.",
     "noteDs18b20": "Mezi DATA a VCC patří odpor 4,7 kΩ — bez něj čidlo nic nevrátí.",
@@ -43,7 +42,8 @@
     "noteHcsr04": "Některé kusy HC-SR04 chtějí 5 V. Když na 3V nic neměří, napájej modul z 5 V.",
     "noteHx710b": "Hadičku nasaď až po zapojení, ať v čidle nezůstane přetlak.",
     "noteDht11": "Popisky pinů se u modulů liší (S / VCC / GND). Řiď se tím, co je natištěné na desce.",
-    "boardCredit": "Kresba desky © Micro:bit Educational Foundation · CC BY-NC-SA 4.0"
+    "boardCredit": "Kresba desky © Micro:bit Educational Foundation · CC BY-NC-SA 4.0",
+    "signalNamed": "signál ({{name}})"
   },
   "connection": {
     "title": "Připojit micro:bit",

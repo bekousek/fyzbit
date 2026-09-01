@@ -35,7 +35,6 @@
   "wiring": {
     "power": "power",
     "ground": "ground",
-    "signal": "signal",
     "edgeConnector": "edge connector",
     "noteSmallPins": "P15 and P16 are small pins — you need a breakout board or crocodile clips.",
     "noteDs18b20": "A 4.7 kΩ resistor belongs between DATA and VCC — without it the probe returns nothing.",
@@ -43,7 +42,8 @@
     "noteHcsr04": "Some HC-SR04 units want 5 V. If nothing reads on 3V, power the module from 5 V.",
     "noteHx710b": "Attach the tubing after wiring, so no pressure is left trapped in the sensor.",
     "noteDht11": "Pin labels differ between modules (S / VCC / GND). Go by what is printed on the board.",
-    "boardCredit": "Board drawing © Micro:bit Educational Foundation · CC BY-NC-SA 4.0"
+    "boardCredit": "Board drawing © Micro:bit Educational Foundation · CC BY-NC-SA 4.0",
+    "signalNamed": "signal ({{name}})"
   },
   "connection": {
     "title": "Connect micro:bit",
