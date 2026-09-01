@@ -1,8 +1,14 @@
 import type { Transport } from '../transport/Transport';
-import { appState } from '../state/AppState';
+import { appState, type Channel } from '../state/AppState';
 import { LineBuffer, parseLine } from '../protocol/Parser';
-import { Commands, SENSOR_NAMES, type SensorName } from '../protocol/Commands';
-import { settings } from '../state/Settings';
+import {
+  Commands,
+  RECOMMENDED_RATE_HZ,
+  SENSOR_NAMES,
+  type SensorName,
+} from '../protocol/Commands';
+import { Deriver, planDerivedChannels, type DerivedSpec } from '../state/derive';
+import { settings, type SamplingHz } from '../state/Settings';
 import { t, onLanguageChange, applyTranslations } from '../i18n/i18n';
 import { Chart, type SelectionRange } from './Chart';
 import { TopBar } from './TopBar';
@@ -53,7 +59,10 @@ export class App {
 
   private transport: Transport | null = null;
   private streamStartMs = 0;
-  private channelsReceived = 0;
+  private currentSensor: SensorName | null = null;
+  /** Channels announced by the firmware, before derived ones are added. */
+  private reportedChannels: Channel[] = [];
+  private deriver: Deriver | null = null;
 
   start(): void {
     const root = document.getElementById('app');
@@ -165,7 +174,7 @@ export class App {
     appState.bus.on('active-run-changed', () => this.updateButtonStates());
     appState.bus.on('runs-changed', () => this.updateButtonStates());
 
-    settings.onSamplingChange((hz) => this.sendCommand(Commands.rate(hz)));
+    settings.onSamplingChange(() => this.sendCommand(Commands.rate(this.effectiveRate())));
 
     // Storage: start auto-save and offer to recover any prior session.
     this.autoSave.start();
@@ -359,10 +368,13 @@ export class App {
       // Resume an existing buffer that was paused with STOP.
       appState.resumeRecording();
     } else {
-      appState.startRun(settings.samplingHz, (n) => t('runs.runName', { n }));
+      appState.startRun(this.effectiveRate(), (n) => t('runs.runName', { n }));
     }
     this.mobileNav.show('chart');
-    this.streamStartMs = 0; // reset clock anchor; protocol-time begins anew.
+    // Protocol time begins anew, so the derivation window — whose samples are
+    // stamped in the old base — has to go with it.
+    this.streamStartMs = 0;
+    this.deriver?.reset();
     this.sendCommand(Commands.start());
   }
 
@@ -422,7 +434,8 @@ export class App {
   async connect(transport: Transport, label: string): Promise<void> {
     this.disconnect();
     this.transport = transport;
-    this.channelsReceived = 0;
+    this.reportedChannels = [];
+    this.deriver = null;
     appState.setSensorName(label);
     appState.setStatus('connecting');
 
@@ -474,7 +487,32 @@ export class App {
       this.transport = null;
     }
     this.streamStartMs = 0;
-    this.channelsReceived = 0;
+    this.reportedChannels = [];
+    this.deriver = null;
+    this.currentSensor = null;
+  }
+
+  /**
+   * Hand the firmware's channels to AppState, plus anything the app computes
+   * from them (see state/derive.ts). Derived channels start switched off.
+   */
+  private publishChannels(): void {
+    const plan = planDerivedChannels(this.reportedChannels);
+    const source = plan.specs[0]
+      ? this.reportedChannels.find((c) => c.id === plan.specs[0]!.sourceId)
+      : undefined;
+    this.deriver = source ? new Deriver(plan.specs as DerivedSpec[], source) : null;
+    appState.setChannels(plan.channels, plan.hiddenIds);
+  }
+
+  /**
+   * The rate actually asked of the firmware: the user's fixed choice, or —
+   * on "auto", the default — whatever this sensor can usefully deliver.
+   */
+  private effectiveRate(): SamplingHz {
+    const chosen = settings.sampling;
+    if (chosen !== 'auto') return chosen;
+    return this.currentSensor ? RECOMMENDED_RATE_HZ[this.currentSensor] : 10;
   }
 
   private sendCommand(cmd: string): void {
@@ -505,24 +543,26 @@ export class App {
     switch (msg.type) {
       case 'hello':
         appState.setStatus('handshake');
+        this.reportedChannels = [];
+        this.deriver = null;
         appState.setChannels([]);
-        this.channelsReceived = 0;
         this.streamStartMs = 0;
         if (msg.sensor && (SENSOR_NAMES as readonly string[]).includes(msg.sensor)) {
           const sensor = msg.sensor as SensorName;
+          this.currentSensor = sensor;
           this.sensorSelect.setSensor(sensor);
           this.wiringDiagram.setSensor(sensor);
         }
         break;
-      case 'channel': {
-        const next = [...appState.channels, msg.channel];
-        appState.setChannels(next);
-        this.channelsReceived = next.length;
+      case 'channel':
+        // Collected, not published one by one: the derived channels can only
+        // be worked out once the firmware has finished announcing its own.
+        this.reportedChannels = [...this.reportedChannels, msg.channel];
         break;
-      }
       case 'ready':
-        appState.setStatus(this.channelsReceived > 0 ? 'measuring' : 'connected');
-        this.sendCommand(Commands.rate(settings.samplingHz));
+        this.publishChannels();
+        appState.setStatus(this.reportedChannels.length > 0 ? 'measuring' : 'connected');
+        this.sendCommand(Commands.rate(this.effectiveRate()));
         break;
       case 'tare':
         if (msg.ok) toast.success(t('toast.tareOk'), 2000);
@@ -544,7 +584,11 @@ export class App {
       case 'data': {
         if (this.streamStartMs === 0) this.streamStartMs = performance.now();
         const tSec = (performance.now() - this.streamStartMs) / 1000;
-        appState.pushDataPoint({ t: tSec, values: msg.values });
+        const derived = this.deriver?.push(tSec, msg.values);
+        appState.pushDataPoint({
+          t: tSec,
+          values: derived ? { ...msg.values, ...derived } : msg.values,
+        });
         break;
       }
       case 'unknown':

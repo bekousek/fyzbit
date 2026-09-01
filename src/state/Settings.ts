@@ -4,23 +4,26 @@ import type { ThemePreference } from '../theme/theme';
 import { getThemePreference, setTheme as themeSetTheme } from '../theme/theme';
 
 export type SamplingHz = 1 | 5 | 10 | 25 | 50;
+/** A fixed rate, or "let the sensor decide" (see RECOMMENDED_RATE_HZ). */
+export type SamplingSetting = SamplingHz | 'auto';
 const VALID_SAMPLING: SamplingHz[] = [1, 5, 10, 25, 50];
 
 const STORAGE_KEY = 'fyzbit.samplingHz';
-const DEFAULT_SAMPLING: SamplingHz = 10;
+const DEFAULT_SAMPLING: SamplingSetting = 'auto';
 const SAMPLING_CHANGE_EVENT = 'fyzbit:sampling-changed';
 
-let samplingHz: SamplingHz = DEFAULT_SAMPLING;
+let sampling: SamplingSetting = DEFAULT_SAMPLING;
 
-function loadSampling(): SamplingHz {
+function loadSampling(): SamplingSetting {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return DEFAULT_SAMPLING;
+  if (raw === 'auto') return 'auto';
   const n = Number(raw) as SamplingHz;
   return VALID_SAMPLING.includes(n) ? n : DEFAULT_SAMPLING;
 }
 
 export function initSettings(): void {
-  samplingHz = loadSampling();
+  sampling = loadSampling();
 }
 
 export const settings = {
@@ -38,19 +41,22 @@ export const settings = {
     themeSetTheme(pref);
   },
 
-  get samplingHz(): SamplingHz {
-    return samplingHz;
+  /** What the user picked: a fixed rate, or "auto". */
+  get sampling(): SamplingSetting {
+    return sampling;
   },
-  setSamplingHz(hz: SamplingHz): void {
-    if (!VALID_SAMPLING.includes(hz)) return;
-    if (hz === samplingHz) return;
-    samplingHz = hz;
-    localStorage.setItem(STORAGE_KEY, String(hz));
-    window.dispatchEvent(new CustomEvent<SamplingHz>(SAMPLING_CHANGE_EVENT, { detail: hz }));
+  setSampling(value: SamplingSetting): void {
+    if (value !== 'auto' && !VALID_SAMPLING.includes(value)) return;
+    if (value === sampling) return;
+    sampling = value;
+    localStorage.setItem(STORAGE_KEY, String(value));
+    window.dispatchEvent(
+      new CustomEvent<SamplingSetting>(SAMPLING_CHANGE_EVENT, { detail: value }),
+    );
   },
 
-  onSamplingChange(handler: (hz: SamplingHz) => void): () => void {
-    const l = (e: Event) => handler((e as CustomEvent<SamplingHz>).detail);
+  onSamplingChange(handler: (value: SamplingSetting) => void): () => void {
+    const l = (e: Event) => handler((e as CustomEvent<SamplingSetting>).detail);
     window.addEventListener(SAMPLING_CHANGE_EVENT, l);
     return () => window.removeEventListener(SAMPLING_CHANGE_EVENT, l);
   },

@@ -42,7 +42,8 @@
     "noteHx711": "Tenzometr se pájí na svorky E+, E−, A+, A− na druhé straně modulu.",
     "noteHcsr04": "Některé kusy HC-SR04 chtějí 5 V. Když na 3V nic neměří, napájej modul z 5 V.",
     "noteHx710b": "Hadičku nasaď až po zapojení, ať v čidle nezůstane přetlak.",
-    "noteDht11": "Popisky pinů se u modulů liší (S / VCC / GND). Řiď se tím, co je natištěné na desce."
+    "noteDht11": "Popisky pinů se u modulů liší (S / VCC / GND). Řiď se tím, co je natištěné na desce.",
+    "boardCredit": "Kresba desky © Micro:bit Educational Foundation · CC BY-NC-SA 4.0"
   },
   "connection": {
     "title": "Připojit micro:bit",
@@ -99,7 +100,8 @@
     "pressure": "Tlak",
     "show": "Zobrazit {{name}} v grafu",
     "hide": "Skrýt {{name}} v grafu",
-    "unitFor": "Jednotka – {{name}}"
+    "unitFor": "Jednotka – {{name}}",
+    "acceleration": "Zrychlení"
   },
   "sensor": {
     "label": "Senzor",
@@ -147,7 +149,9 @@
     "about": "O aplikaci",
     "makecodeExt": "MakeCode rozšíření",
     "version": "Verze {{version}}",
-    "privacyNote": "Všechna data (měření i jména žáků) zůstávají v tomto počítači; aplikace nic neodesílá."
+    "privacyNote": "Všechna data (měření i jména žáků) zůstávají v tomto počítači; aplikace nic neodesílá.",
+    "samplingAuto": "Automaticky (podle senzoru)",
+    "samplingHint": "Sonar potřebuje co nejvíc vzorků za sekundu, teploměr si vystačí s jedním."
   },
   "calibration": {
     "title": "Kalibrace senzoru",

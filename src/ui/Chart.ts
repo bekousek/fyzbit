@@ -9,7 +9,10 @@ import { onLanguageChange, t } from '../i18n/i18n';
 import { convert, displayUnit, onUnitsChange } from '../units/units';
 
 const REDRAW_FPS = 30;
-const MAX_ACTIVE_POINTS = 6000;
+/** ~10 minutes at the sonar's 50 Hz; longer runs drop their oldest samples. */
+const MAX_ACTIVE_POINTS = 30000;
+/** Trim in one slice rather than per sample — shift() on a 30k array is a memmove. */
+const TRIM_CHUNK = 2000;
 /** Below this container width the legend eats the plot — the channel chips
  *  above the chart already say which color is which, so drop it. */
 const LEGEND_MIN_WIDTH = 560;
@@ -116,10 +119,11 @@ export class Chart {
   }
 
   notifyActivePointAppended(): void {
-    if (this.activeRun && this.activeRun.times.length > MAX_ACTIVE_POINTS) {
-      this.activeRun.times.shift();
-      for (const ch of this.activeRun.channels) {
-        this.activeRun.values[ch.id]?.shift();
+    const run = this.activeRun;
+    if (run && run.times.length > MAX_ACTIVE_POINTS + TRIM_CHUNK) {
+      run.times.splice(0, TRIM_CHUNK);
+      for (const ch of run.channels) {
+        run.values[ch.id]?.splice(0, TRIM_CHUNK);
       }
     }
     this.scheduleDataUpdate();
@@ -259,7 +263,7 @@ export class Chart {
         { label: t('chart.time') },
         { label: '—', stroke: 'transparent', spanGaps: false, points: { show: false } },
       ];
-      return { data: [[0, 1], [NaN, NaN]] as AlignedData, series };
+      return { data: [[0, 1], [null, null]] as AlignedData, series };
     }
 
     const timeKeys = new Set<number>();
@@ -269,7 +273,11 @@ export class Chart {
     const x = [...timeKeys].sort((a, b) => a - b);
 
     const series: Series[] = [{ label: t('chart.time') }];
-    const ys: number[][] = [];
+    // uPlot wants gaps as null. NaN is *not* equivalent: it survives uPlot's
+    // null check and then loses every comparison, so a series that opens with
+    // NaN (a derived channel, before its window has filled) ends up with no
+    // scale range at all and is silently never drawn.
+    const ys: (number | null)[][] = [];
     const colorByRun = visibleRuns.length > 1;
 
     for (let runIdx = 0; runIdx < visibleRuns.length; runIdx++) {
@@ -282,13 +290,13 @@ export class Chart {
         const ch = channels[chIdx];
         if (!ch) continue;
         const unit = displayUnit(ch.unit);
-        const yArr = new Array<number>(x.length);
+        const yArr = new Array<number | null>(x.length);
         const sourceCol = r.values[ch.id] ?? [];
         for (let i = 0; i < x.length; i++) {
           const xv = x[i]!;
           const sourceIdx = runTimeIdx.get(xv);
           const raw = sourceIdx === undefined ? NaN : (sourceCol[sourceIdx] ?? NaN);
-          yArr[i] = Number.isFinite(raw) ? convert(raw, ch.unit, unit) : NaN;
+          yArr[i] = Number.isFinite(raw) ? convert(raw, ch.unit, unit) : null;
         }
         ys.push(yArr);
 

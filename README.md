@@ -50,6 +50,15 @@ npm run firmware   # sestaví oba projekty a spojí je do public/firmware/fyzbit
 
 Detaily zapojení senzorů, protokolu a Bluetooth (No Pairing Required) jsou v READMEs jednotlivých firmware projektů.
 
+## Licence obrázků
+
+Kresba micro:bitu (`public/img/microbit-board.svg`) je oříznutá a odlehčená verze
+[oficiální kresby](https://github.com/microbit-foundation/microbit-svg) Micro:bit
+Educational Foundation. **Není** pod MIT licencí zbytku projektu — platí pro ni
+[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/), tedy
+uvedení autora, nekomerční užití a sdílení pod stejnou licencí. Atribuce je
+vidět přímo v aplikaci pod schématem zapojení a v hlavičce samotného souboru.
+
 ## Hosting
 
 Produkční verze běží na [bekousek.github.io/fyzbit](https://bekousek.github.io/fyzbit/) (později [fyzbit.cz](https://fyzbit.cz)). Build je v adresáři `docs/`, který slouží jako root GitHub Pages.

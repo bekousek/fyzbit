@@ -20,6 +20,25 @@ export const SENSOR_NAMES: readonly SensorName[] = [
   'DHT11',
 ];
 
+/**
+ * How fast it is worth asking each sensor to stream, used when the sampling
+ * rate is left on "auto" (the default).
+ *
+ * These are properties of the hardware, not preferences. A DS18B20 spends
+ * ~750 ms on a single 12-bit conversion and a DHT11 refuses to be read more
+ * than about twice a second, so asking either for 10 Hz just returns the same
+ * number ten times. An HC-SR04 ping, by contrast, is over in a few
+ * milliseconds — and motion is exactly the thing you cannot reconstruct from
+ * slow samples, so it gets everything the firmware can deliver.
+ */
+export const RECOMMENDED_RATE_HZ: Record<SensorName, SamplingHz> = {
+  DS18B20: 1,
+  DHT11: 1,
+  HX711: 10,
+  HX710B: 10,
+  HCSR04: 50,
+};
+
 export const Commands = {
   /** Re-handshake — micro:bit responds with #HELLO + #CH... + #READY. */
   rehello(): string {

@@ -42,7 +42,8 @@
     "noteHx711": "The load cell solders to E+, E−, A+, A− on the other side of the module.",
     "noteHcsr04": "Some HC-SR04 units want 5 V. If nothing reads on 3V, power the module from 5 V.",
     "noteHx710b": "Attach the tubing after wiring, so no pressure is left trapped in the sensor.",
-    "noteDht11": "Pin labels differ between modules (S / VCC / GND). Go by what is printed on the board."
+    "noteDht11": "Pin labels differ between modules (S / VCC / GND). Go by what is printed on the board.",
+    "boardCredit": "Board drawing © Micro:bit Educational Foundation · CC BY-NC-SA 4.0"
   },
   "connection": {
     "title": "Connect micro:bit",
@@ -99,7 +100,8 @@
     "pressure": "Pressure",
     "show": "Show {{name}} on the chart",
     "hide": "Hide {{name}} on the chart",
-    "unitFor": "Unit – {{name}}"
+    "unitFor": "Unit – {{name}}",
+    "acceleration": "Acceleration"
   },
   "sensor": {
     "label": "Sensor",
@@ -147,7 +149,9 @@
     "about": "About",
     "makecodeExt": "MakeCode extension",
     "version": "Version {{version}}",
-    "privacyNote": "All data (measurements and student names) stays on this computer; the app doesn't send anything anywhere."
+    "privacyNote": "All data (measurements and student names) stays on this computer; the app doesn't send anything anywhere.",
+    "samplingAuto": "Automatic (per sensor)",
+    "samplingHint": "A sonar needs as many samples per second as it can get; a thermometer is happy with one."
   },
   "calibration": {
     "title": "Sensor calibration",

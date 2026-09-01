@@ -139,11 +139,23 @@ export class AppState {
     return this._channels;
   }
 
-  setChannels(channels: Channel[]): void {
+  /**
+   * Replace the channel list. `hiddenIds` seeds which of them start switched
+   * off — derived quantities (speed, acceleration) do, so a sonar opens on the
+   * distance it actually measures instead of three overlaid curves.
+   */
+  setChannels(channels: Channel[], hiddenIds: readonly string[] = []): void {
     this._channels = [...channels];
     this._currentValues = {};
-    // A new sensor means new channel ids — start with everything shown.
-    this._hiddenChannels.clear();
+    // A new sensor means new channel ids — nothing carries over.
+    this._hiddenChannels = new Set(
+      hiddenIds.filter((id) => this._channels.some((c) => c.id === id)),
+    );
+    // Never hide everything: if a firmware ever reported only derived-looking
+    // channels, showing the first one beats showing an empty chart.
+    if (this._channels.length > 0 && this._hiddenChannels.size === this._channels.length) {
+      this._hiddenChannels.delete(this._channels[0]!.id);
+    }
     this.bus.emit('channels-changed', this._channels);
     this.bus.emit('channel-visibility-changed', this.visibleChannelIds);
   }

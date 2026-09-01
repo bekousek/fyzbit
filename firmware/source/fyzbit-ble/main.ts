@@ -18,7 +18,7 @@
  *     #TARE;ok | #TARE;err
  *     #CAL;<id>;ok;<factor>
  *     #ERR;<text>
- *     <id>:<value>;<id>:<value>     (data row)
+ *     <id>:<value>[;<id>:<value>]    (data row)
  *
  *   → micro:bit
  *     #HELLO?
@@ -61,7 +61,6 @@ let currentSensor: Sensor = Sensor.DS18B20
 
 let sampleHz = 10
 let streaming = true            // start streaming as soon as we hand off to the app
-let lastSampleMs = 0
 
 // HX711 (force)
 let forceOffset = 0
@@ -72,10 +71,6 @@ let tareForceRequested = false
 let pressOffset = -49207364
 let pressScale = 581.84
 let tarePressRequested = false
-
-// HC-SR04 distance/speed memory
-let lastDistanceCm = 0
-let lastDistanceMs = 0
 
 // DHT11 cache (1.5 s minimum read interval)
 let dhtLastQueryMs = 0
@@ -109,7 +104,6 @@ function sendChannelDefinitions(): void {
         send("#CH;F;Force;N;-200;200")
     } else if (currentSensor == Sensor.HCSR04) {
         send("#CH;d;Distance;cm;0;400")
-        send("#CH;v;Speed;m/s;-10;10")
     } else if (currentSensor == Sensor.HX710B) {
         send("#CH;p;Pressure;Pa;0;200000")
     } else if (currentSensor == Sensor.DHT11) {
@@ -133,24 +127,24 @@ function pingSonarCm(trig: DigitalPin, echo: DigitalPin): number {
     control.waitMicros(10)
     pins.digitalWritePin(trig, 0)
     const us = pins.pulseIn(echo, PulseValue.High, 23000)
-    return Math.idiv(us, 58)
+    // 58 us per centimetre, kept as a fraction. Rounding to whole centimetres
+    // here used to cost far more than it saved: the app differentiates this
+    // signal for speed and acceleration, and a 1 cm step is a much larger
+    // error in those than the sensor's own ~3 mm accuracy.
+    return us / 58
 }
 
 function readHCSR04(): void {
     const cm = pingSonarCm(DigitalPin.P1, DigitalPin.P2)
-    const now = control.millis()
-    let speedMs = 0
-    if (cm > 0 && cm < 400 && lastDistanceCm > 0) {
-        const dt = (now - lastDistanceMs) / 1000
-        if (dt > 0.02) {
-            speedMs = (cm - lastDistanceCm) / 100 / dt
-        }
-    }
-    if (cm > 0) {
-        lastDistanceCm = cm
-        lastDistanceMs = now
-    }
-    send("d:" + cm + ";v:" + roundTo(speedMs, 2))
+    // pulseIn returns 0 when no echo came back inside the timeout: out of
+    // range, or an angled or soft target. Reporting that as "0 cm" would put a
+    // step into the distance and a far bigger one into the speed derived from
+    // it, so send nothing and let the app see a gap in time instead.
+    if (cm <= 0 || cm > 400) return
+    // Speed and acceleration are the app's job (src/state/derive.ts): it has
+    // the whole series and can fit a curve through it, where the firmware
+    // could only ever subtract two neighbouring samples.
+    send("d:" + roundTo(cm, 1))
 }
 
 function readHX711Force(): void {
@@ -297,9 +291,6 @@ function handleCommand(rawLine: string): void {
         const next = sensorFromName(name)
         if (next != currentSensor) {
             currentSensor = next
-            // Reset HC-SR04 speed memory so next reading doesn't extrapolate.
-            lastDistanceCm = 0
-            lastDistanceMs = 0
             sendHandshake()
         }
         return
@@ -378,8 +369,6 @@ input.onButtonPressed(Button.A, function () {
 input.onButtonPressed(Button.B, function () {
     const nextS = ((currentSensor + 1) % 5) as Sensor
     currentSensor = nextS
-    lastDistanceCm = 0
-    lastDistanceMs = 0
     // Flash the new sensor name on the LED matrix briefly so the user knows
     // which mode the board is in without looking at the laptop.
     basic.showString(sensorName(currentSensor).charAt(0))
@@ -391,16 +380,24 @@ input.onButtonPressed(Button.AB, function () {
 })
 
 // Main loop — sample at the requested rate (best-effort; slow sensors will lag).
-basic.forever(function () {
-    if (!streaming) {
-        basic.pause(10)
-        return
+//
+// Deliberately control.inBackground and not basic.forever: forever sleeps a
+// fixed 20 ms after every iteration, which caps the whole loop at well under
+// the 50 Hz the sonar is asked for. Pacing by hand also subtracts the time the
+// read itself took, so a slow sensor eats into the pause rather than adding to
+// the period.
+control.inBackground(function () {
+    while (true) {
+        if (!streaming) {
+            basic.pause(20)
+        } else {
+            const started = control.millis()
+            readAndStream()
+            const periodMs = Math.idiv(1000, sampleHz)
+            const elapsed = control.millis() - started
+            // Always yield at least 1 ms, or serial, Bluetooth and the button
+            // handlers never get scheduled.
+            basic.pause(Math.max(1, periodMs - elapsed))
+        }
     }
-    const periodMs = Math.idiv(1000, sampleHz)
-    const now = control.millis()
-    if (now - lastSampleMs >= periodMs) {
-        readAndStream()
-        lastSampleMs = now
-    }
-    basic.pause(2)
 })

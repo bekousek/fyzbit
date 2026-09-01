@@ -1,4 +1,4 @@
-import { settings, type SamplingHz } from '../state/Settings';
+import { settings, type SamplingHz, type SamplingSetting } from '../state/Settings';
 import type { Language } from '../i18n/i18n';
 import type { ThemePreference } from '../theme/theme';
 import { required } from '../utils/dom';
@@ -26,8 +26,9 @@ export class SettingsModal {
       settings.setLanguage(this.langSelect.value as Language);
     });
     this.samplingSelect.addEventListener('change', () => {
-      const hz = Number(this.samplingSelect.value) as SamplingHz;
-      settings.setSamplingHz(hz);
+      const raw = this.samplingSelect.value;
+      const value: SamplingSetting = raw === 'auto' ? 'auto' : (Number(raw) as SamplingHz);
+      settings.setSampling(value);
     });
     this.themeRadios.forEach((r) => {
       r.addEventListener('change', () => {
@@ -62,7 +63,7 @@ export class SettingsModal {
 
   private syncFromSettings(): void {
     this.langSelect.value = settings.language;
-    this.samplingSelect.value = String(settings.samplingHz);
+    this.samplingSelect.value = String(settings.sampling);
     const pref = settings.theme;
     this.themeRadios.forEach((r) => {
       r.checked = r.value === pref;

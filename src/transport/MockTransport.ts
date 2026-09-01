@@ -4,7 +4,9 @@ import { SENSOR_NAMES, type SensorName } from '../protocol/Commands';
 const CHANNELS: Record<SensorName, string[]> = {
   DS18B20: ['#CH;t;Temperature;°C;-40;125'],
   HX711: ['#CH;F;Force;N;-200;200'],
-  HCSR04: ['#CH;d;Distance;cm;0;400', '#CH;v;Speed;m/s;-10;10'],
+  // Distance only — speed and acceleration are the app's job now (see
+  // state/derive.ts), exactly as with the real firmware.
+  HCSR04: ['#CH;d;Distance;cm;0;400'],
   HX710B: ['#CH;p;Pressure;Pa;0;200000'],
   DHT11: ['#CH;t;Temperature;°C;-20;60', '#CH;h;Humidity;%;0;100'],
 };
@@ -29,6 +31,7 @@ export class MockTransport implements Transport {
   private streaming = true;
   private startMs = 0;
   private currentSensor: SensorName = 'DS18B20';
+  private sampleHz = 10;
 
   async connect(): Promise<void> {
     if (this.connected) return;
@@ -38,12 +41,18 @@ export class MockTransport implements Transport {
     this.startMs = performance.now();
 
     this.sendHandshake();
+    this.startStreaming();
+  }
 
-    // Begin streaming.
-    this.dataTimer = window.setInterval(() => {
-      if (!this.connected || !this.streaming) return;
-      this.emitData();
-    }, 100);
+  private startStreaming(): void {
+    if (this.dataTimer !== null) clearInterval(this.dataTimer);
+    this.dataTimer = window.setInterval(
+      () => {
+        if (!this.connected || !this.streaming) return;
+        this.emitData();
+      },
+      Math.round(1000 / this.sampleHz),
+    );
   }
 
   async disconnect(): Promise<void> {
@@ -69,6 +78,13 @@ export class MockTransport implements Transport {
     if (line === '#STOP') this.streaming = false;
     else if (line === '#START') this.streaming = true;
     else if (line === '#TARE') this.emit('#TARE;ok');
+    else if (line.startsWith('#RATE;')) {
+      const hz = Number(line.slice('#RATE;'.length));
+      if ([1, 5, 10, 25, 50].includes(hz)) {
+        this.sampleHz = hz;
+        if (this.connected) this.startStreaming();
+      }
+    }
     else if (line.startsWith('#CAL;')) {
       const parts = line.split(';');
       this.emit(`#CAL;${parts[1] ?? 't'};ok;1.0`);
@@ -115,9 +131,11 @@ export class MockTransport implements Transport {
         break;
       }
       case 'HCSR04': {
-        const dist = 50 + 20 * Math.sin(tSec / 5);
-        const speed = (20 / 5) * Math.cos(tSec / 5);
-        this.emit(`d:${dist.toFixed(0)};v:${speed.toFixed(2)}`);
+        // Roughly a hand swinging back and forth: ±20 cm at ~0.24 Hz, so peak
+        // speed ~0.3 m/s. Rounded to whole centimetres and jittered like the
+        // real thing, so the app's smoothing is exercised, not flattered.
+        const dist = 50 + 20 * Math.sin(tSec * 1.5) + (Math.random() - 0.5) * 0.6;
+        this.emit(`d:${dist.toFixed(0)}`);
         break;
       }
       case 'HX710B': {
