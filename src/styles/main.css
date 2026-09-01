@@ -206,6 +206,14 @@ body {
   overflow: hidden;
 }
 
+.panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .panel__title {
   margin: 0;
   font-size: 14px;
@@ -213,6 +221,47 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--fg-muted);
+}
+
+.panel__expand {
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  flex-shrink: 0;
+  color: var(--fg-muted);
+  background: transparent;
+  border-color: transparent;
+}
+
+.panel__expand:hover:not(:disabled) {
+  color: var(--fg);
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+}
+
+.panel__expand[aria-pressed='true'] {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.panel__expand-icon {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.panel__expand .panel__expand-icon--in,
+.panel__expand[aria-pressed='true'] .panel__expand-icon--out {
+  display: none;
+}
+
+.panel__expand[aria-pressed='true'] .panel__expand-icon--in {
+  display: block;
 }
 
 .panel__title--spaced {
@@ -405,6 +454,16 @@ body {
   font-size: 12px;
   color: var(--fg-muted);
   margin-left: auto;
+}
+
+/* Without the hint (narrow screens hide it) the button still needs pushing
+   to the far edge. */
+.chart-toolbar .panel__expand {
+  margin-left: auto;
+}
+
+.chart-toolbar__hint + .panel__expand {
+  margin-left: 8px;
 }
 
 @media (max-width: 1100px) {
@@ -1154,6 +1213,83 @@ textarea.field__input {
   border-bottom: 1px solid rgba(0, 0, 0, 0.2);
 }
 
+/* ---------- Expanded panel (desktop) ---------- */
+
+/*
+ * Same shape as the mobile layout: one panel across the full width with the
+ * action bar underneath. Scoped above the mobile breakpoint so the two
+ * mechanisms — tabs there, expand here — never fight over the same columns.
+ */
+@media (min-width: 861px) {
+  #app[data-expanded='wiring'] .layout,
+  #app[data-expanded='chart'] .layout,
+  #app[data-expanded='runs'] .layout {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'main'
+      'actions';
+  }
+
+  #app[data-expanded='wiring'] .panel--left,
+  #app[data-expanded='chart'] .panel--center,
+  #app[data-expanded='runs'] .panel--right {
+    grid-area: main;
+  }
+
+  #app[data-expanded='wiring'] .panel--center,
+  #app[data-expanded='wiring'] .panel--right,
+  #app[data-expanded='chart'] .panel--left,
+  #app[data-expanded='chart'] .panel--right,
+  #app[data-expanded='runs'] .panel--left,
+  #app[data-expanded='runs'] .panel--center {
+    display: none;
+  }
+
+  /* The bar is a full-width row now, so the buttons sit side by side. */
+  #app:not([data-expanded='none']) .actionbar {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  #app:not([data-expanded='none']) .actionbar #btn-start {
+    grid-column: auto;
+  }
+
+  /*
+   * An expanded schematic is the one case with room to spare, but growing it
+   * by width alone runs it off the bottom of the panel. Let the drawing take
+   * whatever height is left over and derive its width from that, so legend and
+   * notes stay on screen at any window size.
+   */
+  #app[data-expanded='wiring'] .panel--left {
+    overflow: hidden;
+  }
+
+  #app[data-expanded='wiring'] .wiring-diagram {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #app[data-expanded='wiring'] .wiring-diagram svg {
+    flex: 0 1 auto;
+    min-height: 0;
+    width: auto;
+    height: 100%;
+    max-width: min(100%, 640px);
+    margin-inline: auto;
+  }
+
+  #app[data-expanded='wiring'] .wiring-legend,
+  #app[data-expanded='wiring'] .wiring-notes,
+  #app[data-expanded='wiring'] .wiring-credit {
+    flex-shrink: 0;
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
 /* ---------- Mobile section switcher ---------- */
 
 .mobile-nav {
@@ -1278,6 +1414,11 @@ textarea.field__input {
 
   .mobile-nav {
     display: grid;
+  }
+
+  /* Each panel already fills the screen here — see MobileNav. */
+  .panel__expand {
+    display: none;
   }
 
   .chart-toolbar__hint {

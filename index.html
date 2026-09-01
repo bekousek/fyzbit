@@ -32,7 +32,7 @@
     <title data-i18n="app.title">FyzBit</title>
   </head>
   <body>
-    <div id="app" data-view="chart">
+    <div id="app" data-view="chart" data-expanded="none">
       <!-- Top bar -->
       <header class="topbar">
         <div class="topbar__left">
@@ -73,7 +73,26 @@
       <main class="layout">
         <!-- Wiring -->
         <aside class="panel panel--left">
-          <h2 class="panel__title" data-i18n="panel.wiring">Zapojení</h2>
+          <div class="panel__header">
+            <h2 class="panel__title" data-i18n="panel.wiring">Zapojení</h2>
+            <button
+              type="button"
+              class="btn btn--icon panel__expand"
+              data-expand="wiring"
+              aria-pressed="false"
+              data-i18n-title="panel.expand"
+              data-i18n-aria-label="panel.expand"
+              title="Zvětšit na celou plochu"
+              aria-label="Zvětšit na celou plochu"
+            >
+              <svg class="panel__expand-icon panel__expand-icon--out" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4" />
+              </svg>
+              <svg class="panel__expand-icon panel__expand-icon--in" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path d="M6 2v4H2M10 2v4h4M6 14v-4H2M10 14v-4h4" />
+              </svg>
+            </button>
+          </div>
           <div class="wiring-diagram" id="wiring-diagram"></div>
         </aside>
 
@@ -100,6 +119,23 @@
             <span class="chart-toolbar__hint" data-i18n="chart.annotationHint"
               >Tip: podrž A a klikni do grafu pro anotaci</span
             >
+            <button
+              type="button"
+              class="btn btn--icon panel__expand"
+              data-expand="chart"
+              aria-pressed="false"
+              data-i18n-title="panel.expand"
+              data-i18n-aria-label="panel.expand"
+              title="Zvětšit na celou plochu"
+              aria-label="Zvětšit na celou plochu"
+            >
+              <svg class="panel__expand-icon panel__expand-icon--out" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4" />
+              </svg>
+              <svg class="panel__expand-icon panel__expand-icon--in" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path d="M6 2v4H2M10 2v4h4M6 14v-4H2M10 14v-4h4" />
+              </svg>
+            </button>
           </div>
           <div class="channel-controls" id="channel-controls" hidden></div>
           <div
@@ -114,7 +150,26 @@
 
         <!-- Runs + exports -->
         <aside class="panel panel--right">
-          <h2 class="panel__title" data-i18n="panel.runs">Měření</h2>
+          <div class="panel__header">
+            <h2 class="panel__title" data-i18n="panel.runs">Měření</h2>
+            <button
+              type="button"
+              class="btn btn--icon panel__expand"
+              data-expand="runs"
+              aria-pressed="false"
+              data-i18n-title="panel.expand"
+              data-i18n-aria-label="panel.expand"
+              title="Zvětšit na celou plochu"
+              aria-label="Zvětšit na celou plochu"
+            >
+              <svg class="panel__expand-icon panel__expand-icon--out" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4" />
+              </svg>
+              <svg class="panel__expand-icon panel__expand-icon--in" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path d="M6 2v4H2M10 2v4h4M6 14v-4H2M10 14v-4h4" />
+              </svg>
+            </button>
+          </div>
           <ul class="runs-list" id="runs-list">
             <li class="runs-list__empty" data-i18n="runs.empty">Zatím žádná uložená měření.</li>
           </ul>

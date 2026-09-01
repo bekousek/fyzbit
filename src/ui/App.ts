@@ -16,6 +16,7 @@ import { SensorSelect } from './SensorSelect';
 import { WiringDiagram } from './WiringDiagram';
 import { ChannelControls } from './ChannelControls';
 import { MobileNav } from './MobileNav';
+import { PanelExpand } from './PanelExpand';
 import { SettingsModal } from './SettingsModal';
 import { ConnectionModal } from './ConnectionModal';
 import { RunsList } from './RunsList';
@@ -44,6 +45,7 @@ export class App {
   private chart!: Chart;
   private sensorSelect!: SensorSelect;
   private mobileNav!: MobileNav;
+  private panelExpand!: PanelExpand;
   private wiringDiagram!: WiringDiagram;
   private connectionModal!: ConnectionModal;
   private selectionStats!: SelectionStats;
@@ -100,9 +102,13 @@ export class App {
       },
     });
 
-    // Switching sections hides/shows the chart container; uPlot has to be
-    // told its new size once it is back on screen.
-    this.mobileNav = new MobileNav(root, () => this.chart.refresh());
+    // Switching sections or expanding a panel hides/shows the chart container;
+    // uPlot has to be told its new size once it is back on screen.
+    this.mobileNav = new MobileNav(root, () => {
+      this.panelExpand.reset();
+      this.chart.refresh();
+    });
+    this.panelExpand = new PanelExpand(root, () => this.chart.refresh());
 
     this.shortcuts = new KeyboardShortcuts({
       start: () => {

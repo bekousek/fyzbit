@@ -30,7 +30,9 @@
   "panel": {
     "wiring": "Wiring",
     "runs": "Runs",
-    "exports": "Export"
+    "exports": "Export",
+    "expand": "Expand to full width",
+    "collapse": "Shrink back"
   },
   "wiring": {
     "power": "power",

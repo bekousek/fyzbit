@@ -30,7 +30,9 @@
   "panel": {
     "wiring": "Zapojení",
     "runs": "Měření",
-    "exports": "Export"
+    "exports": "Export",
+    "expand": "Zvětšit na celou plochu",
+    "collapse": "Zmenšit zpět"
   },
   "wiring": {
     "power": "napájení",
