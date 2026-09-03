@@ -31,12 +31,35 @@ body {
 
 #app {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto 1fr auto;
+  /*
+   * Named rows rather than implicit placement: focus mode hides the top bar
+   * and the tab bar, and without explicit areas the remaining <main> slides up
+   * into the `auto` row and shrinks to its content height — the exact opposite
+   * of what hiding the chrome was for. The last row is the phone tab bar,
+   * which collapses to zero wherever it is not shown.
+   */
+  grid-template-areas:
+    'bar'
+    'body'
+    'tabs';
   height: 100vh;
   /* 100dvh keeps the action bar above the phone's own browser chrome. */
   height: 100dvh;
   width: 100%;
   overflow: hidden;
+}
+
+.topbar {
+  grid-area: bar;
+}
+
+.layout {
+  grid-area: body;
+}
+
+.mobile-nav {
+  grid-area: tabs;
 }
 
 /* ---------- Top bar ---------- */
@@ -1254,40 +1277,42 @@ textarea.field__input {
     grid-column: auto;
   }
 
-  /*
-   * An expanded schematic is the one case with room to spare, but growing it
-   * by width alone runs it off the bottom of the panel. Let the drawing take
-   * whatever height is left over and derive its width from that, so legend and
-   * notes stay on screen at any window size.
-   */
-  #app[data-expanded='wiring'] .panel--left {
-    overflow: hidden;
-  }
+}
 
-  #app[data-expanded='wiring'] .wiring-diagram {
-    flex: 1 1 auto;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-  }
+/*
+ * An expanded schematic is the one case with room to spare, but growing it by
+ * width alone runs it off the bottom of the panel. Let the drawing take
+ * whatever height is left over and derive its width from that, so legend and
+ * notes stay on screen at any window size — phone included, where expanding
+ * frees the top bar and the tab bar rather than the neighbouring columns.
+ */
+#app[data-expanded='wiring'] .panel--left {
+  overflow: hidden;
+}
 
-  #app[data-expanded='wiring'] .wiring-diagram svg {
-    flex: 0 1 auto;
-    min-height: 0;
-    width: auto;
-    height: 100%;
-    max-width: min(100%, 640px);
-    margin-inline: auto;
-  }
+#app[data-expanded='wiring'] .wiring-diagram {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
 
-  #app[data-expanded='wiring'] .wiring-legend,
-  #app[data-expanded='wiring'] .wiring-notes,
-  #app[data-expanded='wiring'] .wiring-credit {
-    flex-shrink: 0;
-    max-width: 640px;
-    margin-left: auto;
-    margin-right: auto;
-  }
+#app[data-expanded='wiring'] .wiring-diagram svg {
+  flex: 0 1 auto;
+  min-height: 0;
+  width: auto;
+  height: 100%;
+  max-width: min(100%, 640px);
+  margin-inline: auto;
+}
+
+#app[data-expanded='wiring'] .wiring-legend,
+#app[data-expanded='wiring'] .wiring-notes,
+#app[data-expanded='wiring'] .wiring-credit {
+  flex-shrink: 0;
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* ---------- Mobile section switcher ---------- */
@@ -1341,10 +1366,6 @@ textarea.field__input {
  * controls stay pinned to the bottom so START is always a thumb away.
  */
 @media (max-width: 860px) {
-  #app {
-    grid-template-rows: auto 1fr auto;
-  }
-
   .topbar {
     min-height: 0;
     padding: 6px 10px;
@@ -1416,11 +1437,6 @@ textarea.field__input {
     display: grid;
   }
 
-  /* Each panel already fills the screen here — see MobileNav. */
-  .panel__expand {
-    display: none;
-  }
-
   .chart-toolbar__hint {
     display: none;
   }
@@ -1472,6 +1488,80 @@ textarea.field__input {
 
   .actionbar {
     gap: 6px;
+  }
+}
+
+/*
+ * Focus mode on a phone. Full *width* was never the problem here — every panel
+ * already had that — full *height* was: on a 390x844 screen the chart got 43%
+ * of it and the rest went to chrome, before the browser's own URL bar took its
+ * cut. Expanding a panel now also folds away the top bar and the tab bar and
+ * puts the remaining controls on one line, roughly doubling the chart. The
+ * chips stay: with uPlot's legend switched off at this width they are the only
+ * thing naming the curves, and they carry the live values too.
+ */
+@media (max-width: 860px) {
+  #app:not([data-expanded='none']) .topbar,
+  #app:not([data-expanded='none']) .mobile-nav {
+    display: none;
+  }
+
+  #app:not([data-expanded='none']) .actionbar {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    padding: 6px;
+  }
+
+  #app:not([data-expanded='none']) .actionbar #btn-start {
+    grid-column: auto;
+  }
+
+  #app:not([data-expanded='none']) .actionbar .btn--lg {
+    min-height: 42px;
+    padding: 4px 6px;
+    font-size: 12px;
+  }
+
+  /* Four labels across a phone: clip rather than reflow the whole bar. */
+  #app:not([data-expanded='none']) .actionbar .btn--lg span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  #app[data-expanded='chart'] .chart-toolbar {
+    padding: 2px 2px 4px;
+  }
+
+  #app[data-expanded='chart'] .chart-toolbar .btn--sm {
+    min-height: 30px;
+  }
+
+  /* One scrollable row instead of three wrapped ones. */
+  #app[data-expanded='chart'] .channel-controls {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 4px 2px;
+    scrollbar-width: none;
+  }
+
+  #app[data-expanded='chart'] .channel-controls::-webkit-scrollbar {
+    display: none;
+  }
+
+  #app[data-expanded='chart'] .channel-chip {
+    flex: 0 0 auto;
+  }
+
+  #app[data-expanded='chart'] .channel-chip__toggle {
+    min-height: 28px;
+    padding: 2px 6px;
+    font-size: 12px;
+  }
+
+  #app[data-expanded='chart'] .channel-chip__unit {
+    min-height: 24px;
+    font-size: 11px;
   }
 }
 
