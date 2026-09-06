@@ -8,12 +8,12 @@
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'"
     />
-    <meta name="description" content="FyzBit — webový datalogger pro micro:bit s fyzikálními senzory" />
+    <meta name="description" content="Webový datalogger pro micro:bit — měření teploty, vzdálenosti, síly, tlaku i vlhkosti přímo v prohlížeči. Bez instalace, bez programování. Zdarma pro ZŠ a SŠ." />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="FyzBit" />
     <meta
       property="og:description"
-      content="FyzBit — webový datalogger pro micro:bit s fyzikálními senzory"
+      content="Webový datalogger pro micro:bit — měření teploty, vzdálenosti, síly, tlaku i vlhkosti přímo v prohlížeči. Bez instalace, bez programování. Zdarma pro ZŠ a SŠ."
     />
     <meta property="og:url" content="https://fyzbit.cz/" />
     <meta property="og:image" content="https://fyzbit.cz/icon-512.png" />
@@ -21,7 +21,7 @@
     <meta name="twitter:title" content="FyzBit" />
     <meta
       name="twitter:description"
-      content="FyzBit — webový datalogger pro micro:bit s fyzikálními senzory"
+      content="Webový datalogger pro micro:bit — měření teploty, vzdálenosti, síly, tlaku i vlhkosti přímo v prohlížeči. Bez instalace, bez programování. Zdarma pro ZŠ a SŠ."
     />
     <meta name="twitter:image" content="https://fyzbit.cz/icon-512.png" />
     <link rel="canonical" href="https://fyzbit.cz/" />
@@ -30,7 +30,38 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="FyzBit" />
-    <title data-i18n="app.title">FyzBit</title>
+    <title data-i18n="app.documentTitle">FyzBit — datalogger pro fyzikální měření s micro:bitem</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "FyzBit",
+        "url": "https://fyzbit.cz/",
+        "description": "Webový datalogger pro micro:bit — měření teploty, vzdálenosti, síly, tlaku i vlhkosti přímo v prohlížeči. Bez instalace, bez programování. Zdarma pro ZŠ a SŠ.",
+        "applicationCategory": "EducationalApplication",
+        "browserRequirements": "Vyžaduje Chrome nebo Edge (Web Serial / Web Bluetooth).",
+        "operatingSystem": "Windows, macOS, Linux, Android, ChromeOS",
+        "inLanguage": [
+          "cs",
+          "en"
+        ],
+        "isAccessibleForFree": true,
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "CZK"
+        },
+        "author": {
+          "@type": "Person",
+          "name": "Ondřej Bek"
+        },
+        "license": "https://opensource.org/licenses/MIT",
+        "audience": {
+          "@type": "EducationalAudience",
+          "educationalRole": "teacher"
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="app" data-view="chart" data-expanded="none">

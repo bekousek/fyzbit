@@ -97,6 +97,9 @@ Web běží na vlastní doméně **fyzbit.cz** (GitHub Pages, Settings → Pages
 - **uPlot rozumí mezerám jako `null`, ne `NaN`.** `NaN` projde jeho kontrolou na null, ale prohraje každé porovnání, takže série, která začíná `NaN` (odvozený kanál, než se naplní okno), skončí bez rozsahu škály a **nevykreslí se vůbec** — bez chyby. `Chart.buildAlignedData()` proto do dat dává `null`, i když v `Run.values` je `NaN`.
 - **Vzorkovací frekvence je vlastnost senzoru, ne preference.** `RECOMMENDED_RATE_HZ` v `Commands.ts`: DS18B20 a DHT11 1 Hz (jedno 12bit měření DS18B20 trvá ~750 ms), HX711/HX710B 10 Hz, HC-SR04 50 Hz. Nastavení „Vzorkovací frekvence" je defaultně `auto` a znamená právě tuhle tabulku.
 - **`basic.forever` ve firmwaru má strop ~50 Hz a v praxi míň.** Po každé iteraci spí pevných 20 ms, takže perioda je *tělo + 20 ms*. Hlavní smyčka proto běží přes `control.inBackground` s vlastním pacingem, který od pauzy odečte dobu čtení.
+- **`<title>` má vlastní i18n klíč `app.documentTitle`, ne `app.title`.** Delší titulek je kvůli vyhledávačům; `app.title` zůstává krátká značka, protože stejný klíč používá i hlavička v aplikaci. Kdo by je sloučil, dostane do topbaru celou větu.
+- **JSON-LD projde i přes `script-src 'self'`.** Blok `<script type="application/ld+json">` je datový, ne spustitelný, takže ho CSP neřeší a nepotřebuje hash ani nonce — přidávat je zbytečné.
+- **`public/sitemap.xml` má `lastmod` napsaný ručně.** Je to jediná URL, takže se negeneruje při buildu; při větší změně obsahu ho stačí přepsat, jinak zestárne bez následků.
 - **Zrušení připojení uprostřed device pickeru.** `App.disconnect()` zahodí referenci na transport; `connect()` po `await transport.connect()` porovná `this.transport !== transport` a případně port zase zavře. Stejnou kontrolu má i `onChunk`/`onDisconnect` handler — jinak by data ze zahozeného transportu tekla do parseru (a padala na `null` bufferu).
 
 ## Firmware

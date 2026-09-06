@@ -1,7 +1,8 @@
 {
   "app": {
     "title": "FyzBit",
-    "tagline": "Physics on micro:bit"
+    "tagline": "Physics on micro:bit",
+    "documentTitle": "FyzBit — physics datalogger for micro:bit"
   },
   "status": {
     "disconnected": "Disconnected",

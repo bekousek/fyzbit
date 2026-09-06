@@ -1,7 +1,8 @@
 {
   "app": {
     "title": "FyzBit",
-    "tagline": "Fyzika na micro:bitu"
+    "tagline": "Fyzika na micro:bitu",
+    "documentTitle": "FyzBit — datalogger pro fyzikální měření s micro:bitem"
   },
   "status": {
     "disconnected": "Odpojeno",
