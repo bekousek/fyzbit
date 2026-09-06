@@ -7,6 +7,7 @@ import { cssVar, onThemeChange } from '../theme/theme';
 import { channelColorForIndex } from '../theme/runColors';
 import { onLanguageChange, t } from '../i18n/i18n';
 import { convert, displayUnit, onUnitsChange } from '../units/units';
+import { dashForChannel, drawMarker, shapeForRun, type MarkerShape } from '../theme/seriesStyles';
 
 const REDRAW_FPS = 30;
 /** ~10 minutes at the sonar's 50 Hz; longer runs drop their oldest samples. */
@@ -17,13 +18,9 @@ const TRIM_CHUNK = 2000;
  *  above the chart already say which color is which, so drop it. */
 const LEGEND_MIN_WIDTH = 560;
 
-/** Dash patterns used to tell apart lines that share a stroke color. */
-const DASHES: ReadonlyArray<number[] | undefined> = [
-  undefined,
-  [6, 4],
-  [2, 3],
-  [10, 4, 2, 4],
-];
+/** Roughly how far apart, in pixels, the run markers are spaced along a line. */
+const MARKER_SPACING_PX = 72;
+const MARKER_SIZE_PX = 9;
 
 export type SelectionRange = { tMin: number; tMax: number } | null;
 
@@ -44,12 +41,15 @@ export type ChartCallbacks = {
  * channel gets its own y scale and its own labelled axis — two quantities
  * with wildly different ranges (cm and m/s) can't share one.
  *
- * Two things are being told apart at once, runs and quantities, and only one
- * of them may own the color:
- *   - one run on screen  → color = quantity, dash = nothing (single line each)
- *   - several runs       → color = run, dash = quantity
- * That way "which line is this?" always has an answer, and the axis labels
- * (which carry the quantity's color in the first case) never lie.
+ * Two things are being told apart at once, runs and quantities, and colour may
+ * only ever own one of them:
+ *   - one run on screen  → colour = quantity
+ *   - several runs       → colour = run
+ * On top of that both dimensions carry a second, colour-independent encoding
+ * (see theme/seriesStyles.ts): the dash pattern always means the quantity and
+ * the marker shape always means the run, so "which line is this?" has an
+ * answer without seeing any hue at all. The axis labels carry the quantity's
+ * colour in the first case and stay neutral in the second, so they never lie.
  *
  * Values are converted to the user's chosen display unit on the way in; runs
  * keep storing whatever base unit the firmware reported.
@@ -253,6 +253,13 @@ export class Chart {
     this.plot.setData(data, true);
   }
 
+  /**
+   * Which run each drawn series belongs to, in uPlot series order (index 0 of
+   * this array = uPlot series 1). The draw hook needs it to stamp the run's
+   * marker shape along the right lines.
+   */
+  private seriesMeta: Array<{ shape: MarkerShape; color: string; scale: string }> = [];
+
   /** All tracks (saved visible runs + active run) merged into AlignedData. */
   private buildAlignedData(): { data: AlignedData; series: Series[] } {
     const visibleRuns = this.visibleRuns;
@@ -263,6 +270,7 @@ export class Chart {
         { label: t('chart.time') },
         { label: '—', stroke: 'transparent', spanGaps: false, points: { show: false } },
       ];
+      this.seriesMeta = [];
       return { data: [[0, 1], [null, null]] as AlignedData, series };
     }
 
@@ -279,6 +287,7 @@ export class Chart {
     // scale range at all and is silently never drawn.
     const ys: (number | null)[][] = [];
     const colorByRun = visibleRuns.length > 1;
+    const meta: Array<{ shape: MarkerShape; color: string; scale: string }> = [];
 
     for (let runIdx = 0; runIdx < visibleRuns.length; runIdx++) {
       const r = visibleRuns[runIdx];
@@ -304,25 +313,25 @@ export class Chart {
         const label = colorByRun
           ? `${r.name} — ${t(ch.nameKey)} (${unit})`
           : `${t(ch.nameKey)} (${unit})`;
-        // Whichever of the two dimensions doesn't own the color owns the dash.
-        const dash = colorByRun
-          ? DASHES[chIdx % DASHES.length]
-          : isActive
-            ? undefined
-            : [6, 4];
+        // The dash always means the quantity — independently of which of the
+        // two dimensions the colour happens to be carrying right now.
+        const dash = dashForChannel(chIdx);
+        const stroke = colorByRun ? r.color : channelColorForIndex(chIdx);
         const s: Series = {
           label,
           scale: ch.id,
-          stroke: colorByRun ? r.color : channelColorForIndex(chIdx),
+          stroke,
           width: isActive ? 2 : 1.5,
           spanGaps: false,
           points: { show: false },
         };
-        if (dash) s.dash = dash;
+        if (dash.length > 0) s.dash = [...dash];
         series.push(s);
+        meta.push({ shape: shapeForRun(runIdx), color: stroke, scale: ch.id });
       }
     }
 
+    this.seriesMeta = meta;
     return { data: [x, ...ys] as AlignedData, series };
   }
 
@@ -395,6 +404,11 @@ export class Chart {
 
     const callbacks = this.callbacks;
     const visibleRuns = this.visibleRuns;
+    // Markers only earn their keep once there is more than one run to tell
+    // apart; with a single run the dash already identifies every line.
+    const drawMarkers = visibleRuns.length > 1;
+    const chartBg = cssVar('--chart-bg') || '#ffffff';
+    const seriesMeta = this.seriesMeta;
     // Each quantity has its own scale, so "y = 0" sits at a different height
     // for each of them. Mark the first one that actually crosses zero and
     // paint the line in that quantity's color, so it is obvious which axis
@@ -436,6 +450,43 @@ export class Chart {
           (u) => {
             const ctx = u.ctx;
             ctx.save();
+
+            // Run markers: the colour-free way to see which run a line is.
+            if (drawMarkers) {
+              ctx.save();
+              ctx.beginPath();
+              ctx.rect(u.bbox.left, u.bbox.top, u.bbox.width, u.bbox.height);
+              ctx.clip();
+              for (let si = 0; si < seriesMeta.length; si++) {
+                const m = seriesMeta[si];
+                if (!m) continue;
+                const col = u.data[si + 1] as (number | null)[] | undefined;
+                if (!col) continue;
+                let lastX = -Infinity;
+                for (let i = 0; i < col.length; i++) {
+                  const v = col[i];
+                  if (v === null || v === undefined || !Number.isFinite(v)) continue;
+                  const xv = (u.data[0] as number[])[i];
+                  if (xv === undefined) continue;
+                  const xPx = u.valToPos(xv, 'x', true);
+                  if (xPx < u.bbox.left || xPx > u.bbox.left + u.bbox.width) continue;
+                  if (xPx - lastX < MARKER_SPACING_PX * devicePixelRatio) continue;
+                  lastX = xPx;
+                  const yPx = u.valToPos(v, m.scale, true);
+                  if (!Number.isFinite(yPx)) continue;
+                  drawMarker(
+                    ctx,
+                    m.shape,
+                    xPx,
+                    yPx,
+                    MARKER_SIZE_PX * devicePixelRatio,
+                    m.color,
+                    chartBg,
+                  );
+                }
+              }
+              ctx.restore();
+            }
 
             // Zero line of the first quantity's scale. With two scales the
             // two zeros sit at different heights, so mark the one the leftmost

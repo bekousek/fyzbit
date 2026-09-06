@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1B5E20" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f1410" media="(prefers-color-scheme: dark)" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'"
+    />
+    <title>Prohlášení o přístupnosti — FyzBit</title>
+    <meta
+      name="description"
+      content="Prohlášení o přístupnosti webové aplikace FyzBit ve struktuře podle zákona č. 99/2019 Sb. — stav souladu s WCAG 2.2 AA, známé výjimky a kontakt pro podněty."
+    />
+    <link rel="canonical" href="https://fyzbit.cz/pristupnost.html" />
+    <link rel="alternate" hreflang="cs" href="https://fyzbit.cz/pristupnost.html" />
+    <link rel="alternate" hreflang="x-default" href="https://fyzbit.cz/pristupnost.html" />
+    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+    <script type="module" src="/src/page.ts"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#obsah">Přeskočit na obsah</a>
+
+    <header class="page-header">
+      <div class="page-header__inner">
+        <a class="page-header__brand" href="./">FyzBit</a>
+        <span class="page-header__back"><a href="./">← Zpět do aplikace</a></span>
+      </div>
+    </header>
+
+    <main class="page" id="obsah">
+      <h1>Prohlášení o přístupnosti</h1>
+      <p class="page__lead">
+        Autor aplikace FyzBit se zavazuje ke zpřístupnění této webové aplikace v souladu
+        se zákonem č. 99/2019 Sb., o přístupnosti internetových stránek a mobilních
+        aplikací, a s technickou normou EN 301 549 (která přejímá pravidla
+        <abbr title="Web Content Accessibility Guidelines">WCAG</abbr>).
+      </p>
+
+      <div class="callout">
+        <p>
+          <strong>Kdo prohlášení vydává a proč.</strong> FyzBit je nezávislý otevřený
+          projekt jednotlivce, nikoli povinný subjekt podle § 3 zákona č. 99/2019 Sb.
+          Prohlášení proto vydáváme <em>dobrovolně</em>: aplikaci používají základní
+          a střední školy, které povinnými subjekty jsou, a potřebují vědět, nakolik
+          je nástroj, který svým žákům dávají, přístupný.
+        </p>
+      </div>
+
+      <h2>Rozsah prohlášení</h2>
+      <p>
+        Prohlášení se vztahuje na webovou aplikaci FyzBit na adrese
+        <a href="https://fyzbit.cz/">https://fyzbit.cz/</a>, včetně jejích textových
+        stránek (toto prohlášení, ochrana soukromí, licence). Nevztahuje se na obsah
+        třetích stran, na který aplikace odkazuje — zejména na
+        <a href="https://makecode.microbit.org/" rel="noopener noreferrer">MakeCode</a>
+        a na <a href="https://github.com/bekousek/fyzbit" rel="noopener noreferrer">GitHub</a>.
+      </p>
+
+      <h2>Stav souladu</h2>
+      <p>
+        Tato webová aplikace je <strong>částečně v souladu</strong> se zákonem
+        č. 99/2019 Sb. a s úrovní <strong>WCAG 2.2 AA</strong>, a to z důvodů
+        uvedených níže.
+      </p>
+
+      <h2>Nepřístupný obsah</h2>
+      <p>
+        Níže uvedený obsah není přístupný. U každé položky je uvedeno, čeho se týká
+        a proč tomu tak je.
+      </p>
+
+      <h3>1. Výběr oblasti v grafu myší</h3>
+      <p>
+        Statistiky výběru (minimum, maximum, průměr, medián za zvolený časový úsek) se
+        vyvolávají tažením myši přes graf. Klávesnicí ani dotykem tuto funkci zatím
+        vyvolat nelze — nesplňuje kritérium 2.1.1 (Klávesnice).
+      </p>
+      <p>
+        <strong>Náhradní řešení:</strong> tlačítko <em>Tabulka</em> nad grafem zobrazí
+        naměřené hodnoty jako běžnou tabulku; export do CSV obsahuje všechny vzorky
+        bez omezení. Odstranění tohoto nedostatku je v plánu.
+      </p>
+
+      <h3>2. Vyexportovaný PDF protokol není tagovaný</h3>
+      <p>
+        PDF protokol se sestavuje v prohlížeči knihovnou jsPDF, která neumí zapsat
+        strukturu dokumentu (tagy, pořadí čtení, alternativní text obrázku grafu).
+        Vzniklý soubor tedy nesplňuje <abbr title="PDF/Universal Accessibility">PDF/UA</abbr>
+        ani kritérium 1.3.1 (Informace a vzájemné vztahy).
+      </p>
+      <p>
+        <strong>Náhradní řešení:</strong> stejná data lze exportovat do CSV, které je
+        strojově čitelné a otevře se v běžném tabulkovém procesoru. Jde o omezení
+        použité knihovny; přepracování exportu by znamenalo jinou technologii sazby.
+      </p>
+
+      <h3>3. Graf jako kreslicí plátno</h3>
+      <p>
+        Průběh měření se vykresluje do prvku <code>&lt;canvas&gt;</code>, jehož obsah
+        odečítač obrazovky nepřečte. Pod grafem je proto vždy textové shrnutí (počet
+        vzorků, minimum, maximum, průměr a směr trendu pro každou veličinu a měření)
+        a graf je s ním svázán přes <code>aria-describedby</code>. Shrnutí je zjednodušení
+        — nenahradí tvar křivky, například to, že hodnota vyskočila a zase klesla.
+      </p>
+
+      <h3>4. Kresba schématu zapojení</h3>
+      <p>
+        Obrázek desky micro:bit má textovou alternativu vyjmenovávající všechny vodiče
+        (od kterého pinu ke které svorce), samotné rozmístění součástek ale text popsat
+        nedokáže. Vedle schématu jsou proto textové poznámky ke každému senzoru.
+      </p>
+
+      <h3>5. Připojení senzoru vyžaduje konkrétní prohlížeč</h3>
+      <p>
+        Připojení k desce micro:bit stojí na rozhraních Web Serial a Web Bluetooth,
+        která mají jen prohlížeče postavené na Chromiu (Chrome, Edge, Opera). Ve
+        Firefoxu a Safari se aplikace otevře a ovládá, ale k senzoru se nepřipojí.
+        Nejde o nedostatek přístupnosti podle WCAG, ale o omezení, které je poctivé
+        uvést. Aplikace na tuto situaci upozorní srozumitelnou hláškou a nabídne
+        demo režim se simulovaným senzorem.
+      </p>
+
+      <h2>Co je naopak ošetřeno</h2>
+      <ul>
+        <li>
+          Celá aplikace je ovladatelná klávesnicí, včetně spuštění a zastavení měření,
+          přepínání veličin, jednotek, přejmenování a mazání měření a všech exportů;
+          klávesové zkratky vypíše klávesa <kbd>?</kbd>.
+        </li>
+        <li>Viditelný indikátor zaměření (focus) na všech ovládacích prvcích.</li>
+        <li>
+          Kontrast textu nejméně 4,5 : 1 a kontrast ovládacích prvků nejméně 3 : 1
+          ve světlém i tmavém motivu.
+        </li>
+        <li>
+          Barva není jediným nositelem informace: každá veličina má v grafu vlastní
+          typ čáry a každé měření vlastní tvar značky; stejný klíč je vidět v legendě.
+        </li>
+        <li>
+          Změny stavu (připojeno, měřím, uloženo) se oznamují oblastí
+          <code>aria-live="polite"</code>. Průběžně měřená hodnota se záměrně
+          neoznamuje — při 50 vzorcích za sekundu by odečítač obrazovky nedomluvil.
+        </li>
+        <li>
+          Formulářová pole mají popisky svázané přes <code>for</code>, nápovědu přes
+          <code>aria-describedby</code> a chyby přes <code>aria-invalid</code>.
+        </li>
+        <li>
+          Nastavení <em>Omezit pohyb</em> v operačním systému
+          (<code>prefers-reduced-motion</code>) vypne veškeré animace.
+        </li>
+        <li>Aplikace je plně dvojjazyčná (čeština, angličtina) a atribut
+          <code>lang</code> se mění spolu s jazykem.</li>
+      </ul>
+
+      <h2>Vypracování prohlášení</h2>
+      <ul>
+        <li><strong>Datum vypracování:</strong> 7. září 2026</li>
+        <li>
+          <strong>Metoda:</strong> vlastní posouzení autorem aplikace. Proběhla ruční
+          kontrola ovládání klávesnicí, výpočet kontrastních poměrů všech barevných
+          dvojic v obou motivech a kontrola sémantiky značkování. Posouzení nezávislou
+          organizací ani testování s uživateli s postižením zatím <em>neproběhlo</em>.
+        </li>
+        <li><strong>Datum poslední revize:</strong> 7. září 2026</li>
+      </ul>
+
+      <h2>Zpětná vazba a kontaktní údaje</h2>
+      <p>
+        Narazili jste na něco, co se nedá ovládat nebo přečíst? Napište — konkrétní
+        popis („na stránce X nejde klávesnicí dosáhnout na Y“) pomůže nejvíc.
+      </p>
+      <ul>
+        <li>
+          <strong>E-mail:</strong>
+          <a href="mailto:ondrejbek8@gmail.com">ondrejbek8@gmail.com</a>
+        </li>
+        <li>
+          <strong>Hlášení chyb:</strong>
+          <a href="https://github.com/bekousek/fyzbit/issues" rel="noopener noreferrer"
+            >github.com/bekousek/fyzbit/issues</a
+          >
+        </li>
+        <li><strong>Správce obsahu:</strong> Ondřej Bek</li>
+      </ul>
+      <p>
+        Na podnět odpovím zpravidla do 30 dnů. Projekt vzniká ve volném čase, takže
+        oprava může trvat déle než odpověď.
+      </p>
+
+      <h2>Postupy pro prosazování práva</h2>
+      <p>
+        V případě neuspokojivé odpovědi na oznámení nebo žádost zaslanou podle
+        <a
+          href="https://eur-lex.europa.eu/legal-content/CS/TXT/?uri=CELEX%3A32016L2102"
+          rel="noopener noreferrer"
+          >čl. 7 odst. 1 písm. b) směrnice (EU) 2016/2102</a
+        >
+        se lze obrátit na:
+      </p>
+      <p>
+        Ministerstvo vnitra ČR<br />
+        odbor eGovernmentu<br />
+        náměstí Hrdinů 1634/3<br />
+        140 21 Praha 4<br />
+        <a href="mailto:pristupnost@mvcr.cz">pristupnost@mvcr.cz</a>
+      </p>
+      <p>
+        <em
+          >Uvedeno pro úplnost struktury podle zákona. FyzBit není povinným subjektem,
+          takže dozorový postup se na něj nevztahuje — u aplikace nasazené školou
+          směřují podněty nejprve na tuto adresu a na kontaktní osobu příslušné školy.</em
+        >
+      </p>
+
+      <h2 lang="en">Accessibility statement (English summary)</h2>
+      <div lang="en">
+        <p>
+          FyzBit is an independent open-source project, not a public-sector body, so it
+          publishes this statement voluntarily — the schools that use it <em>are</em>
+          public-sector bodies and need to know what they are handing to their pupils.
+        </p>
+        <p>
+          The application is <strong>partially conformant</strong> with WCAG 2.2
+          level AA. Known gaps: the chart's drag-to-select statistics are mouse-only
+          (a data table and CSV export are provided instead); exported PDFs are not
+          tagged, because jsPDF cannot emit document structure (CSV covers the same
+          data); the chart is a canvas, described by a generated text summary rather
+          than being readable itself. Connecting to a micro:bit needs Web Serial or
+          Web Bluetooth, which only Chromium-based browsers implement.
+        </p>
+        <p>
+          Assessed by the author on 7 September 2026 by manual keyboard testing,
+          contrast computation across both themes, and a markup review. No independent
+          audit and no testing with disabled users has taken place yet. Feedback:
+          <a href="mailto:ondrejbek8@gmail.com">ondrejbek8@gmail.com</a>.
+        </p>
+      </div>
+    </main>
+
+    <footer class="page-footer">
+      <nav aria-label="Stránky o aplikaci">
+        <a href="./">Aplikace</a>
+        <a href="./pristupnost.html" aria-current="page">Prohlášení o přístupnosti</a>
+        <a href="https://github.com/bekousek/fyzbit" rel="noopener noreferrer">GitHub</a>
+      </nav>
+      <p>
+        FyzBit © <span id="current-year">2026</span> Ondřej Bek ·
+        <a href="https://github.com/bekousek/fyzbit/blob/main/LICENSE" rel="noopener noreferrer"
+          >Licence MIT</a
+        >
+      </p>
+    </footer>
+  </body>
+</html>

@@ -1,4 +1,4 @@
-import { onLanguageChange, t } from '../i18n/i18n';
+import { applyTranslations, onLanguageChange, t } from '../i18n/i18n';
 import { escapeHtml } from '../utils/dom';
 
 /**
@@ -40,7 +40,14 @@ export class ShortcutsHelp {
       <div class="modal__form">
         <header class="modal__header">
           <h2 data-i18n="shortcuts.title">Klávesové zkratky</h2>
-          <button type="button" class="btn btn--icon" id="btn-close-help" aria-label="Close">✕</button>
+          <button
+            type="button"
+            class="btn btn--icon"
+            id="btn-close-help"
+            data-i18n-aria-label="button.close"
+          >
+            <span aria-hidden="true">✕</span>
+          </button>
         </header>
         <div class="modal__body shortcuts-body">
           <table class="shortcuts-table"></table>
@@ -48,6 +55,7 @@ export class ShortcutsHelp {
       </div>
     `;
     document.body.appendChild(dlg);
+    applyTranslations(dlg);
     dlg.addEventListener('close', () => (this.isOpen = false));
     dlg.querySelector('#btn-close-help')!.addEventListener('click', () => this.close());
     this.dialog = dlg;
@@ -55,6 +63,7 @@ export class ShortcutsHelp {
 
   private populate(): void {
     if (!this.dialog) return;
+    applyTranslations(this.dialog);
     const table = this.dialog.querySelector<HTMLTableElement>('.shortcuts-table');
     if (!table) return;
     const rows: Array<[string, string]> = [

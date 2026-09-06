@@ -9,6 +9,8 @@
  * `duration: 0` keeps the toast until explicitly dismissed.
  */
 
+import { t } from '../i18n/i18n';
+
 export type ToastKind = 'info' | 'success' | 'warn' | 'error';
 
 let host: HTMLDivElement | null = null;
@@ -33,14 +35,13 @@ export const toast = {
     el.dataset.toastId = String(id);
     el.innerHTML = `
       <span class="toast__msg"></span>
-      <button type="button" class="toast__close" aria-label="Dismiss">✕</button>
+      <button type="button" class="toast__close"><span aria-hidden="true">✕</span></button>
     `;
+    const closeBtn = el.querySelector<HTMLButtonElement>('.toast__close')!;
+    closeBtn.setAttribute('aria-label', t('button.close'));
     const msgEl = el.querySelector<HTMLElement>('.toast__msg');
     if (msgEl) msgEl.textContent = message;
-    el.querySelector<HTMLButtonElement>('.toast__close')!.addEventListener(
-      'click',
-      () => this.dismiss(id),
-    );
+    closeBtn.addEventListener('click', () => this.dismiss(id));
     h.appendChild(el);
     // Animate in.
     requestAnimationFrame(() => el.classList.add('toast--shown'));

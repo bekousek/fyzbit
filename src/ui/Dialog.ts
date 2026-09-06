@@ -9,7 +9,7 @@ import { t } from '../i18n/i18n';
 
 let dialogEl: HTMLDialogElement | null = null;
 let messageEl: HTMLParagraphElement;
-let fieldEl: HTMLLabelElement;
+let fieldEl: HTMLElement;
 let inputEl: HTMLInputElement;
 let cancelBtn: HTMLButtonElement;
 let okBtn: HTMLButtonElement;
@@ -17,13 +17,20 @@ let okBtn: HTMLButtonElement;
 function build(): void {
   const dlg = document.createElement('dialog');
   dlg.className = 'modal confirm-dialog';
+  // aria-labelledby on the dialog and on the input: the message *is* the
+  // question, so it is the accessible name for both.
   dlg.innerHTML = `
     <div class="modal__form">
       <div class="modal__body">
-        <p class="confirm-dialog__message"></p>
-        <label class="field confirm-dialog__field" hidden>
-          <input type="text" class="field__input" />
-        </label>
+        <p class="confirm-dialog__message" id="confirm-dialog-message"></p>
+        <div class="field confirm-dialog__field" hidden>
+          <input
+            type="text"
+            class="field__input"
+            id="confirm-dialog-input"
+            aria-labelledby="confirm-dialog-message"
+          />
+        </div>
       </div>
       <footer class="modal__footer">
         <button type="button" class="btn confirm-dialog__cancel"></button>
@@ -31,6 +38,7 @@ function build(): void {
       </footer>
     </div>
   `;
+  dlg.setAttribute('aria-labelledby', 'confirm-dialog-message');
   document.body.appendChild(dlg);
   dialogEl = dlg;
   messageEl = dlg.querySelector('.confirm-dialog__message')!;

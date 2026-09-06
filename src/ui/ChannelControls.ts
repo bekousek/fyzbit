@@ -1,5 +1,6 @@
 import type { AppState, Channel } from '../state/AppState';
 import { channelColorForIndex } from '../theme/runColors';
+import { dashSvg } from '../theme/seriesStyles';
 import { formatNumber, onLanguageChange, t } from '../i18n/i18n';
 import { convert, displayUnit, onUnitsChange, setDisplayUnit, unitDecimals, unitOptionsFor } from '../units/units';
 import { required } from '../utils/dom';
@@ -66,11 +67,16 @@ export class ChannelControls {
     toggle.setAttribute('aria-pressed', String(visible));
     toggle.title = t(visible ? 'channel.hide' : 'channel.show', { name });
 
-    const dot = document.createElement('span');
-    dot.className = 'channel-chip__dot';
-    dot.style.background = visible ? channelColorForIndex(idx) : 'transparent';
-    dot.style.borderColor = channelColorForIndex(idx);
-    toggle.appendChild(dot);
+    // The chip's swatch is the chart's actual line style, not a plain dot:
+    // the dash is what identifies this quantity for a reader who cannot use
+    // the colour (see theme/seriesStyles.ts).
+    const swatch = document.createElement('span');
+    swatch.className = 'channel-chip__swatch';
+    swatch.innerHTML = dashSvg(
+      idx,
+      visible ? channelColorForIndex(idx) : 'currentColor',
+    );
+    toggle.appendChild(swatch);
 
     const nameEl = document.createElement('span');
     nameEl.className = 'channel-chip__name';

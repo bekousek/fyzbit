@@ -1,7 +1,7 @@
 import type { AppState, Channel } from '../state/AppState';
 import { Commands } from '../protocol/Commands';
 import { t, onLanguageChange, formatNumber } from '../i18n/i18n';
-import { required } from '../utils/dom';
+import { escapeHtml, required } from '../utils/dom';
 import { showAlert } from './Dialog';
 
 const CAL_TIMEOUT_MS = 3000;
@@ -110,11 +110,11 @@ export class CalibrationModal {
         const input = this.body.querySelector<HTMLInputElement>('#cal-value-input');
         if (!input) return;
         const v = Number(input.value);
-        if (!Number.isFinite(v)) {
-          input.setCustomValidity(t('calibration.invalidNumber'));
-          input.reportValidity();
+        if (input.value.trim() === '' || !Number.isFinite(v)) {
+          this.showValueError(input, t('calibration.invalidNumber'));
           return;
         }
+        this.clearValueError(input);
         this.referenceValue = v;
         this.step = 'sending';
         this.sendCalibration();
@@ -234,16 +234,21 @@ export class CalibrationModal {
   private renderChoose(): void {
     const channels = this.deps.state.channels;
     this.body.innerHTML = `
-      <p>${escape(t('calibration.choose'))}</p>
-      <label class="field">
-        <span class="field__label">${escape(t('calibration.channel'))}</span>
+      <p>${escapeHtml(t('calibration.choose'))}</p>
+      <div class="field">
+        <label class="field__label" for="cal-channel-select">${escapeHtml(
+          t('calibration.channel'),
+        )}</label>
         <select id="cal-channel-select" class="field__input">
           <option value="">—</option>
           ${channels
-            .map((c) => `<option value="${escape(c.id)}">${escape(t(c.nameKey))} (${escape(c.unit)})</option>`)
+            .map(
+              (c) =>
+                `<option value="${escapeHtml(c.id)}">${escapeHtml(t(c.nameKey))} (${escapeHtml(c.unit)})</option>`,
+            )
             .join('')}
         </select>
-      </label>
+      </div>
     `;
     const select = this.body.querySelector<HTMLSelectElement>('#cal-channel-select');
     if (select) {
@@ -259,10 +264,10 @@ export class CalibrationModal {
     const ch = this.selectedChannel;
     if (!ch) return;
     this.body.innerHTML = `
-      <p>${escape(t('calibration.prepare', { name: t(ch.nameKey) }))}</p>
+      <p>${escapeHtml(t('calibration.prepare', { name: t(ch.nameKey) }))}</p>
       <ul class="cal-tips">
         ${getChannelTips(ch.id)
-          .map((tip) => `<li>${escape(tip)}</li>`)
+          .map((tip) => `<li>${escapeHtml(tip)}</li>`)
           .join('')}
       </ul>
     `;
@@ -271,33 +276,61 @@ export class CalibrationModal {
   private renderValue(): void {
     const ch = this.selectedChannel;
     if (!ch) return;
+    // The help text and the validation message are both wired to the input
+    // through aria-describedby: a screen reader reads the format hint on
+    // focus and the error the moment aria-invalid flips.
     this.body.innerHTML = `
-      <label class="field">
-        <span class="field__label">${escape(t('calibration.enterValue', { name: t(ch.nameKey) }))}</span>
+      <div class="field">
+        <label class="field__label" for="cal-value-input">${escapeHtml(
+          t('calibration.enterValue', { name: t(ch.nameKey) }),
+        )}</label>
         <div class="cal-value-row">
           <input
             type="number"
             step="any"
             id="cal-value-input"
             class="field__input"
+            aria-describedby="cal-value-help cal-value-error"
+            aria-invalid="false"
             value="${Number.isFinite(this.referenceValue) && this.referenceValue !== 0 ? this.referenceValue : ''}"
-            autofocus
           />
-          <span class="cal-value-unit">${escape(ch.unit)}</span>
+          <span class="cal-value-unit">${escapeHtml(ch.unit)}</span>
         </div>
-      </label>
-      <p class="cal-help">${escape(t('calibration.valueHelp'))}</p>
+        <p class="field__error" id="cal-value-error" role="alert" hidden></p>
+      </div>
+      <p class="cal-help" id="cal-value-help">${escapeHtml(t('calibration.valueHelp'))}</p>
     `;
     const input = this.body.querySelector<HTMLInputElement>('#cal-value-input');
-    input?.addEventListener('input', () => input.setCustomValidity(''));
+    input?.addEventListener('input', () => this.clearValueError(input));
     setTimeout(() => input?.focus(), 0);
+  }
+
+  private showValueError(input: HTMLInputElement, message: string): void {
+    const errorEl = this.body.querySelector<HTMLElement>('#cal-value-error');
+    if (errorEl) {
+      errorEl.textContent = message;
+      errorEl.hidden = false;
+    }
+    input.setAttribute('aria-invalid', 'true');
+    input.classList.add('field__input--invalid');
+    input.focus();
+  }
+
+  private clearValueError(input: HTMLInputElement): void {
+    const errorEl = this.body.querySelector<HTMLElement>('#cal-value-error');
+    if (errorEl) {
+      errorEl.textContent = '';
+      errorEl.hidden = true;
+    }
+    input.setAttribute('aria-invalid', 'false');
+    input.classList.remove('field__input--invalid');
   }
 
   private renderSending(): void {
     const ch = this.selectedChannel;
     if (!ch) return;
     this.body.innerHTML = `
-      <p>${escape(t('calibration.sending', { name: t(ch.nameKey) }))}</p>
+      <p role="status">${escapeHtml(t('calibration.sending', { name: t(ch.nameKey) }))}</p>
       <div class="cal-spinner" aria-hidden="true"></div>
     `;
   }
@@ -307,9 +340,9 @@ export class CalibrationModal {
     if (!ch) return;
     if (this.resultError) {
       this.body.innerHTML = `
-        <div class="cal-result cal-result--err">
-          <strong>${escape(t('calibration.failedTitle'))}</strong>
-          <p>${escape(this.resultError)}</p>
+        <div class="cal-result cal-result--err" role="alert">
+          <strong>${escapeHtml(t('calibration.failedTitle'))}</strong>
+          <p>${escapeHtml(this.resultError)}</p>
         </div>
       `;
       return;
@@ -317,14 +350,16 @@ export class CalibrationModal {
     const factor = this.resultFactor ?? 1;
     const showWarning = Math.abs(factor) > WARN_FACTOR_RATIO || Math.abs(factor) < 1 / WARN_FACTOR_RATIO;
     this.body.innerHTML = `
-      <div class="cal-result cal-result--ok">
-        <strong>${escape(t('calibration.doneTitle'))}</strong>
-        <p>${escape(
+      <div class="cal-result cal-result--ok" role="status">
+        <strong>${escapeHtml(t('calibration.doneTitle'))}</strong>
+        <p>${escapeHtml(
           t('calibration.doneBody', { name: t(ch.nameKey), factor: formatNumber(factor, 3) }),
         )}</p>
         ${
           showWarning
-            ? `<p class="cal-warning">⚠ ${escape(t('calibration.warningFactor'))}</p>`
+            ? `<p class="cal-warning"><span aria-hidden="true">⚠</span> ${escapeHtml(
+                t('calibration.warningFactor'),
+              )}</p>`
             : ''
         }
       </div>
@@ -347,10 +382,3 @@ function getChannelTips(channelId: string): string[] {
   }
 }
 
-function escape(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}

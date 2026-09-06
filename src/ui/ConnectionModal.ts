@@ -51,6 +51,7 @@ export class ConnectionModal {
   private flashBtn: HTMLButtonElement;
   private downloadLink: HTMLAnchorElement;
   private flashProgressEl: HTMLElement;
+  private flashProgressBarEl: HTMLElement;
   private flashProgressFillEl: HTMLElement;
   private flashProgressLabelEl: HTMLElement;
   private flashErrorEl: HTMLElement;
@@ -67,6 +68,7 @@ export class ConnectionModal {
     this.flashBtn = required<HTMLButtonElement>('#btn-flash-firmware', this.dialog);
     this.downloadLink = required<HTMLAnchorElement>('#link-download-firmware', this.dialog);
     this.flashProgressEl = required<HTMLElement>('#flash-progress', this.dialog);
+    this.flashProgressBarEl = required<HTMLElement>('#flash-progress-bar', this.dialog);
     this.flashProgressFillEl = required<HTMLElement>('#flash-progress-fill', this.dialog);
     this.flashProgressLabelEl = required<HTMLElement>('#flash-progress-label', this.dialog);
     this.flashErrorEl = required<HTMLElement>('#flash-error', this.dialog);
@@ -142,6 +144,14 @@ export class ConnectionModal {
     this.flashProgressLabelEl.textContent = key ? t(key) : p.stage;
     const pct = p.progress !== undefined ? Math.round(p.progress * 100) : null;
     this.flashProgressFillEl.style.width = pct !== null ? `${pct}%` : '30%';
+    // Stages without a percentage (connecting, finding the device) are
+    // genuinely indeterminate — dropping aria-valuenow says so, rather than
+    // claiming the 30% the bar happens to be painting.
+    if (pct !== null) {
+      this.flashProgressBarEl.setAttribute('aria-valuenow', String(pct));
+    } else {
+      this.flashProgressBarEl.removeAttribute('aria-valuenow');
+    }
   }
 
   /** Open the modal and resolve with the chosen transport, or null if cancelled. */

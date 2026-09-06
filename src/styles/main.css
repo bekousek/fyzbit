@@ -16,6 +16,67 @@
   display: none !important;
 }
 
+/* ---------- Accessibility utilities ---------- */
+
+/*
+ * Text for screen readers only. Not `display: none` — that would take it out
+ * of the accessibility tree along with the layout.
+ */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/*
+ * Bypass block (WCAG 2.4.1): first thing in the tab order, off-screen until
+ * focused. Ordinarily the chart is ~15 tab stops past the top bar.
+ */
+.skip-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  transform: translateY(-120%);
+  padding: 10px 16px;
+  background: var(--accent);
+  color: var(--fg-on-accent);
+  font-weight: 600;
+  border-radius: 0 0 8px 0;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/*
+ * Every interactive element gets a visible focus ring, including the ones
+ * with no component style of their own (links in the About block, the runs
+ * list's checkboxes, anything added later). Components that need a different
+ * offset override this; nothing may remove it.
+ */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/*
+ * Forced-colors (Windows high contrast) throws the palette away, so the ring
+ * has to be drawn in a system color to survive.
+ */
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 3px solid Highlight;
+  }
+}
+
 html,
 body {
   margin: 0;
@@ -129,14 +190,36 @@ body {
   50% { opacity: 0.4; }
 }
 
-/* Respect users who prefer reduced motion. */
+/* Respect users who prefer reduced motion. WCAG 2.3.3 / 2.2.2: the pulsing
+   status dot is the only thing here that moves on its own, and it repeats
+   forever, so it is switched off rather than merely sped up. */
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   *,
   *::before,
   *::after {
     animation-duration: 0.001s !important;
     animation-iteration-count: 1 !important;
+    animation-delay: 0s !important;
     transition-duration: 0.001s !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+
+  .status-badge[data-status='connecting'] .status-badge__dot,
+  .status-badge[data-status='handshake'] .status-badge__dot {
+    animation: none !important;
+  }
+
+  .btn:active:not(:disabled) {
+    transform: none;
+  }
+
+  .toast {
+    transform: none !important;
   }
 }
 
@@ -420,6 +503,14 @@ body {
   height: 16px;
 }
 
+/* The run's chart marker, so the list is a legend for shape as well as
+   colour. .run-row__dot is still used by the selection-stats table. */
+.run-row__marker {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 .run-row__dot {
   width: 12px;
   height: 12px;
@@ -447,7 +538,8 @@ body {
   width: 100%;
 }
 
-.run-row__delete {
+/* Rename / delete. 28x28 clears WCAG 2.5.8's 24x24 minimum target size. */
+.run-row__action {
   padding: 2px 6px !important;
   min-height: 28px !important;
   min-width: 28px !important;
@@ -455,6 +547,11 @@ body {
   background: transparent !important;
   border: 1px solid transparent !important;
   color: var(--fg-muted);
+}
+
+.run-row__action:hover {
+  color: var(--accent);
+  border-color: var(--accent) !important;
 }
 
 .run-row__delete:hover {
@@ -538,12 +635,13 @@ body {
   outline-offset: 1px;
 }
 
-.channel-chip__dot {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  border: 2px solid;
+/* The chip's line-style preview: same dash the canvas draws for this
+   quantity, so the chips read as a legend and not just as toggles. */
+.channel-chip__swatch {
+  display: inline-flex;
+  align-items: center;
   flex-shrink: 0;
+  color: var(--fg-muted);
 }
 
 .channel-chip__name {
@@ -570,6 +668,79 @@ body {
   padding: 0 4px;
   font-size: 12px;
   color: var(--fg-muted);
+}
+
+/*
+ * The chart's text alternative. Small but visible — the numbers are useful to
+ * everyone, and a summary nobody can see is a summary nobody maintains.
+ * ChartDataView.ts owns the text.
+ */
+.chart-summary {
+  flex-shrink: 0;
+  margin: 4px 2px 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--fg-muted);
+}
+
+.chart-table {
+  flex-shrink: 0;
+  max-height: 40%;
+  overflow-y: auto;
+  margin-top: 6px;
+  border-top: 1px solid var(--border);
+}
+
+.chart-table__scroll {
+  overflow-x: auto;
+}
+
+.chart-table__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-table__table caption {
+  text-align: left;
+  padding: 6px 2px;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.chart-table__table th,
+.chart-table__table td {
+  padding: 3px 8px;
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.chart-table__table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--surface-1);
+  color: var(--fg);
+  text-align: right;
+}
+
+.chart-table__table tbody th {
+  font-weight: 500;
+  color: var(--fg-muted);
+}
+
+.chart-table__note,
+.chart-table__empty {
+  margin: 6px 2px;
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+
+.about__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
 }
 
 .chart-container {
@@ -734,7 +905,18 @@ body {
 
 .btn--danger:hover:not(:disabled) {
   background: var(--status-err);
-  color: #ffffff;
+  color: var(--fg-on-status);
+}
+
+/* Decorative glyph, aria-hidden in the markup: a screen reader announcing
+   "inbox tray CSV" helps nobody. */
+.btn__icon {
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.btn__label {
+  white-space: nowrap;
 }
 
 .btn--lg {
@@ -847,6 +1029,18 @@ textarea.field__input {
   background: var(--surface-2);
   color: var(--fg);
   min-height: 40px;
+}
+
+.field__error {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--status-err);
+}
+
+.field__input--invalid,
+.field__input[aria-invalid='true'] {
+  border-color: var(--status-err);
 }
 
 .field__input:focus {
@@ -1230,7 +1424,7 @@ textarea.field__input {
   align-items: center;
   padding: 10px 16px;
   background: var(--status-warn);
-  color: #1a1a1a;
+  color: var(--fg-on-status);
   font-size: 14px;
   font-weight: 500;
   border-bottom: 1px solid rgba(0, 0, 0, 0.2);

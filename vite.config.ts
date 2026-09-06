@@ -18,6 +18,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
+        pristupnost: resolve(__dirname, 'pristupnost.html'),
         sw: resolve(__dirname, 'src/sw.ts'),
       },
       output: {
