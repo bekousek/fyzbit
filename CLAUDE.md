@@ -1,6 +1,6 @@
 # FyzBit
 
-Webová aplikace (PWA) — datalogger pro fyzikální měření na ZŠ/SŠ. Učitel nebo žák připojí micro:bit s fyzikálním senzorem (USB kabelem, nebo Bluetooth u V2 desky) a v prohlížeči v reálném čase měří teplotu, sílu, vzdálenost, tlak nebo vlhkost — bez MakeCode, bez instalace, bez programování. Nasazeno na [bekousek.github.io/fyzbit](https://bekousek.github.io/fyzbit/).
+Webová aplikace (PWA) — datalogger pro fyzikální měření na ZŠ/SŠ. Učitel nebo žák připojí micro:bit s fyzikálním senzorem (USB kabelem, nebo Bluetooth u V2 desky) a v prohlížeči v reálném čase měří teplotu, sílu, vzdálenost, tlak nebo vlhkost — bez MakeCode, bez instalace, bez programování. Nasazeno na [fyzbit.cz](https://fyzbit.cz/) (GitHub Pages s vlastní doménou; stará adresa `bekousek.github.io/fyzbit/` na ni přesměrovává).
 
 Frontend i firmware jsou v jednom repu. Frontend je čistý TypeScript bez frameworku; firmware je MakeCode/PXT projekt pro micro:bit.
 
@@ -73,6 +73,8 @@ npm run firmware  # postaví oba firmware projekty a spojí je do public/firmwar
 ```
 
 CI (`.github/workflows/deploy.yml`) běží na push do `main`: typecheck → lint → test → build → deploy na GitHub Pages. Firmware build **není** součástí CI (síťová závislost na makecode.microbit.org by mohla shazovat deploy) — `.hex` je commitnutý jako distribuční artefakt v `public/firmware/`.
+
+Web běží na vlastní doméně **fyzbit.cz** (GitHub Pages, Settings → Pages → Custom domain; `public/CNAME` drží stejnou hodnotu). Proto je `base` ve `vite.config.ts` `'/'` a `start_url`/`scope` v `manifest.json` `"/"` — kdyby se web někdy vrátil pod `bekousek.github.io/fyzbit/`, musí se změnit obojí zároveň.
 
 ### Konvence
 

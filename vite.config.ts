@@ -9,7 +9,7 @@ const pkg = JSON.parse(
 ) as { version: string };
 
 export default defineConfig({
-  base: '/fyzbit/',
+  base: '/',
   build: {
     outDir: 'docs',
     emptyOutDir: true,

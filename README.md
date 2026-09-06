@@ -61,11 +61,13 @@ vidět přímo v aplikaci pod schématem zapojení a v hlavičce samotného soub
 
 ## Hosting
 
-Produkční verze běží na [bekousek.github.io/fyzbit](https://bekousek.github.io/fyzbit/) (později [fyzbit.cz](https://fyzbit.cz)). Build je v adresáři `docs/`, který slouží jako root GitHub Pages.
+Produkční verze běží na [fyzbit.cz](https://fyzbit.cz/). Stará adresa `bekousek.github.io/fyzbit/` na ni GitHub Pages sám přesměrovává. Build je v adresáři `docs/`, který slouží jako root GitHub Pages.
 
 Deploy probíhá automaticky přes GitHub Actions (workflow `.github/workflows/deploy.yml`) při každém pushi do `main`. Workflow nainstaluje deps, projde TS check + testy, vytvoří build a nahraje ho na GitHub Pages.
 
 Pro první deploy: v Settings → Pages na GitHubu nastav source na **GitHub Actions** (ne na branch).
+
+Vlastní doména je nastavená v Settings → Pages → Custom domain na `fyzbit.cz`; `public/CNAME` nese stejnou hodnotu, aby doména přežila i případný přechod zpátky na deploy z branche. DNS u Wedosu ukazuje apex na čtyři A + čtyři AAAA záznamy GitHub Pages a `www` je CNAME na `bekousek.github.io.` (GitHub ho pak sám přesměruje na apex). Protože web běží na kořeni domény, je `base` ve `vite.config.ts` `'/'` — ne `'/fyzbit/'`.
 
 ## Pro pokročilé
 
