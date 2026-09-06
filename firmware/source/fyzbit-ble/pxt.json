@@ -17,7 +17,9 @@
     "target": "8.0.18",
     "targetId": "microbit"
   },
-  "supportedTargets": ["microbit"],
+  "supportedTargets": [
+    "microbit"
+  ],
   "preferredEditor": "tsprj",
   "yotta": {
     "config": {
@@ -29,5 +31,8 @@
         }
       }
     }
-  }
+  },
+  "disablesVariants": [
+    "mbdal"
+  ]
 }

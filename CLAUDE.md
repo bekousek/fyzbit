@@ -10,7 +10,7 @@ Frontend i firmware jsou v jednom repu. Frontend je čistý TypeScript bez frame
 
 **Fáze T** (viz konec `PLAN.md`) — testování s reálným hardwarem — proběhla zatím **částečně**: první kolo s HC-SR04 přes USB (připojení, handshake i měření v pořádku). Z něj vzešly úpravy popsané níže (sjednocený firmware, čitelný graf s přepínáním veličin a jednotek, vertikální schéma zapojení, mobilní rozvržení). **Ještě neověřeno na hardwaru:** Bluetooth na V2 desce, ostatní senzory (DS18B20, HX711, HX710B, DHT11), obnova session po pádu tabu a 15 akceptačních kritérií ze specifikace §18.
 
-Nový univerzální `public/firmware/fyzbit.hex` je poskládaný z už dřív postavených obrazů (V1 z `fyzbit-usb.hex`, V2 z `fyzbit-ble-v2.hex`), takže **neobsahuje žádnou z pozdějších změn ve zdrojích firmwaru** — `degC` místo `°C`, rychlejší hlavní smyčku (`control.inBackground` místo `basic.forever`) ani desetiny centimetru u sonaru. Než někdo pustí `npm run firmware` (potřebuje síť), běží deska pořád na starém obrazu; aplikace to snese: jednotku opravuje `normalizeUnit()`, rychlost si dopočítá sama a 50 Hz si vyžádá — starý firmware jich zvládne zhruba 25–35.
+`public/firmware/fyzbit.hex` je od 6. 9. 2026 postavený `npm run firmware` z aktuálních zdrojů, takže obsahuje `degC`, hlavní smyčku přes `control.inBackground` i desetiny centimetru u sonaru. Ověřeno rozbalením universal hexu: oba řezy (V1 `0x9900`, V2 `0x9903`) nesou řetězec `degC`, který v předchozím obrazu chyběl. **Na hardwaru zatím vyzkoušený není** — předchozí obraz ano, tenhle ne.
 
 `AUDIT.md` a `PLAN.md` zůstávají v repu jako historický záznam (nálezy auditu + krok-za-krokem plán, jak byly řešeny) — nejsou potřeba pro běžný vývoj, ale vysvětlují *proč* je kód napsaný tak, jak je (zejména netriviální opravy popsané níže).
 
@@ -119,11 +119,12 @@ Staví se přes `npm run firmware` (`scripts/build-firmware.mjs`, používá `ma
 
 Uživatel v aplikaci nikdy MakeCode neotevírá — dialog „Připojit micro:bit" má krok 1 „⚡ Připravit micro:bit" (WebUSB flash přímo z prohlížeče) a fallback odkaz „↓ Stáhnout firmware (.hex)" pro ruční přetažení na disk `MICROBIT`.
 
-Tři netriviální věci objevené při psaní firmwaru (všechny by se mohly zopakovat při jeho úpravách):
+Čtyři netriviální věci objevené při psaní a stavbě firmwaru (všechny by se mohly zopakovat při jeho úpravách):
 
 1. `control.hardwareVersion()` v aktuálním MakeCode targetu vrací **`string`** (`"1"`/`"2"`), ne `number` — porovnání `== 2` neprojde typovou kontrolou při kompilaci pro V2.
 2. Bluetooth „No Pairing Required" konfigurace v `pxt.json` musí obsahovat i `"security_level": null` (ne jen `open: 1, whitelist: 0`) — bez toho se zbytečně zkompiluje kód pro šifrované párování a V1 build selže na nedostatek flash (`program too big`). Přesný tvar configu odpovídá presetu v `core` balíčku (`userConfigs` → „No Pairing Required").
 3. **MakeCode nahrazuje ne-ASCII znaky ve stringových literálech otazníkem.** Literál `"°C"` dorazí do aplikace jako `?C`. Firmware proto posílá `degC` a aplikace to mapuje zpět (`normalizeUnit()` v `src/units/units.ts`), včetně opravy `?C` z dříve naflashovaných desek.
+4. **`fyzbit-ble` musí mít v `pxt.json` `"disablesVariants": ["mbdal"]`.** Target micro:bitu má `alwaysMultiVariant: true`, takže mkc překládá **každý** projekt pro obě desky a přepínač `--hw` ignoruje (`No such HW id`). Z `fyzbit-ble` se přitom distribuuje jen V2 řez — V1 dodává `fyzbit-v1`. Jak zdroje rostly, přestal se V1 obraz s BLE stackem vejít do flash a `program too big` shodil **celý** build, včetně V2 obrazu, který se vejde bez problémů. `disablesVariants` tu neužitečnou V1 variantu vyřadí. Připínání starší verze editoru nepomůže (zkoušeno `8.0.18` i `9.0.12`, s 8.0.18 je binárka dokonce o něco větší).
 
 ## Licence
 
