@@ -13,7 +13,19 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://fyzbit.cz/soukromi.html</loc>
+    <lastmod>2026-09-07</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://fyzbit.cz/pristupnost.html</loc>
+    <lastmod>2026-09-07</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://fyzbit.cz/licence.html</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>

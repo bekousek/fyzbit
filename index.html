@@ -54,7 +54,7 @@
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "WebApplication",
+        "@type": "SoftwareApplication",
         "name": "FyzBit",
         "url": "https://fyzbit.cz/",
         "description": "Webový datalogger pro micro:bit — měření teploty, vzdálenosti, síly, tlaku i vlhkosti přímo v prohlížeči. Bez instalace, bez programování. Zdarma pro ZŠ a SŠ.",
@@ -82,6 +82,34 @@
         }
       }
     </script>
+    <!--
+      Analytics: deliberately none. No Google Analytics, no tag manager, no
+      pixel — the privacy page promises exactly that, and every one of them
+      would need a cookie banner the app currently does not.
+
+      If visitor counts are ever wanted, GoatCounter is the cookie-free option
+      that keeps that promise: it stores nothing on the visitor's device and
+      does not build a cross-site profile, so it stays within "technically
+      necessary" and needs no consent banner under § 89 odst. 3 zákona
+      č. 127/2005 Sb.
+
+      To switch it on, three things have to happen together:
+        1. Register a site at https://www.goatcounter.com/ and put the code in
+           the data-goatcounter URL below.
+        2. Uncomment the <script> tag.
+        3. Widen the Content-Security-Policy above — the current
+           `script-src 'self'` and `connect-src 'self'` will block it:
+              script-src 'self' https://gc.zgo.at;
+              connect-src 'self' https://*.goatcounter.com;
+        4. Say so on soukromi.html. The page currently states that no
+           analytics runs at all, and that has to stay true.
+
+      <script
+        data-goatcounter="https://VASE-JMENO.goatcounter.com/count"
+        async
+        src="https://gc.zgo.at/count.js"
+      ></script>
+    -->
   </head>
   <body>
     <a class="skip-link" href="#chart-container" data-i18n="a11y.skipToChart"
@@ -493,6 +521,7 @@
               <p class="flash-progress__label" id="flash-progress-label" role="status"></p>
             </div>
             <p class="connection-error" id="flash-error" role="alert" hidden></p>
+            <p class="connection-note" id="flash-unavailable" hidden></p>
             <a class="connection-secondary" id="link-download-firmware" download>
               <span aria-hidden="true">&#8595;</span>
               <span data-i18n="connection.downloadFirmware">Stáhnout firmware (.hex)</span>
@@ -519,6 +548,7 @@
                 >
               </span>
             </button>
+            <p class="connection-note" id="serial-unavailable" hidden></p>
             <button
               type="button"
               class="connect-option"
@@ -533,6 +563,7 @@
                 >
               </span>
             </button>
+            <p class="connection-note" id="bluetooth-unavailable" hidden></p>
             <p class="connection-error" id="connection-error" role="alert" hidden></p>
             <button
               type="button"
@@ -624,9 +655,11 @@
               neodesílá.
             </p>
             <nav class="about__links" data-i18n-aria-label="a11y.aboutLinks" aria-label="Odkazy o aplikaci">
+              <a href="./soukromi.html" data-i18n="footer.privacy">Ochrana soukromí</a>
               <a href="./pristupnost.html" data-i18n="footer.accessibility"
                 >Prohlášení o přístupnosti</a
               >
+              <a href="./licence.html" data-i18n="footer.licenses">Licence a knihovny</a>
             </nav>
             <p>
               <a

@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1B5E20" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f1410" media="(prefers-color-scheme: dark)" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'"
+    />
+    <title>Licence a knihovny — FyzBit</title>
+    <meta
+      name="description"
+      content="FyzBit je open source pod licencí MIT. Přehled všech použitých knihoven třetích stran, jejich licencí a povinných atribucí — včetně kresby desky micro:bit pod CC BY-NC-SA."
+    />
+    <link rel="canonical" href="https://fyzbit.cz/licence.html" />
+    <link rel="alternate" hreflang="cs" href="https://fyzbit.cz/licence.html" />
+    <link rel="alternate" hreflang="x-default" href="https://fyzbit.cz/licence.html" />
+    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+    <script type="module" src="/src/page.ts"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#obsah">Přeskočit na obsah</a>
+
+    <header class="page-header">
+      <div class="page-header__inner">
+        <a class="page-header__brand" href="./">FyzBit</a>
+        <span class="page-header__back"><a href="./">← Zpět do aplikace</a></span>
+      </div>
+    </header>
+
+    <main class="page" id="obsah">
+      <h1>Licence a knihovny</h1>
+      <p class="page__lead">
+        FyzBit je open source pod licencí <strong>MIT</strong> — smíte ho používat,
+        upravovat i šířit, stačí zachovat uvedení autorství. Níže je úplný seznam
+        cizího kódu a materiálů, které aplikace obsahuje, a co si každý z nich
+        vymiňuje.
+      </p>
+
+      <h2>FyzBit</h2>
+      <p>
+        <strong>MIT © 2026 Ondřej Bek.</strong> Plné znění je v souboru
+        <a href="https://github.com/bekousek/fyzbit/blob/main/LICENSE" rel="noopener noreferrer"
+          >LICENSE</a
+        >
+        v repozitáři. Týká se zdrojového kódu aplikace i firmwaru v
+        <code>firmware/source/</code>.
+      </p>
+
+      <h2>Knihovny běžící v prohlížeči</h2>
+      <p>
+        Tyto balíčky se dostanou do stažené stránky. Všechny jsou permisivní
+        (MIT, Apache-2.0, BSD, Zlib) a s licencí MIT slučitelné.
+      </p>
+
+      <div class="table-scroll">
+        <table>
+          <caption>Runtime závislosti</caption>
+          <thead>
+            <tr>
+              <th scope="col">Knihovna</th>
+              <th scope="col">Licence</th>
+              <th scope="col">K čemu ji FyzBit používá</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">
+                <a href="https://github.com/leeoniya/uPlot" rel="noopener noreferrer">µPlot</a>
+                1.6
+              </th>
+              <td>MIT © Leon Sorokin</td>
+              <td>Vykreslování grafu.</td>
+            </tr>
+            <tr>
+              <th scope="row">
+                <a href="https://github.com/jakearchibald/idb-keyval" rel="noopener noreferrer"
+                  >idb-keyval</a
+                >
+                6.3
+              </th>
+              <td>Apache-2.0 © Jake Archibald</td>
+              <td>Ukládání rozpracovaného měření do IndexedDB.</td>
+            </tr>
+            <tr>
+              <th scope="row">
+                <a href="https://github.com/parallax/jsPDF" rel="noopener noreferrer">jsPDF</a>
+                4.2
+              </th>
+              <td>MIT © James Hall, yWorks GmbH a přispěvatelé</td>
+              <td>Sazba PDF protokolu v prohlížeči.</td>
+            </tr>
+            <tr>
+              <th scope="row">
+                <a href="https://github.com/simonbengtsson/jsPDF-AutoTable" rel="noopener noreferrer"
+                  >jspdf-autotable</a
+                >
+                5.0
+              </th>
+              <td>MIT © Simon Bengtsson</td>
+              <td>Tabulky statistik v PDF protokolu.</td>
+            </tr>
+            <tr>
+              <th scope="row">
+                <a href="https://github.com/microbit-foundation/microbit-connection" rel="noopener noreferrer"
+                  >@microbit/microbit-connection</a
+                >
+                1.0
+              </th>
+              <td>MIT © Micro:bit Educational Foundation a přispěvatelé</td>
+              <td>Nahrání firmwaru přes WebUSB a připojení přes Bluetooth.</td>
+            </tr>
+            <tr>
+              <th scope="row">@babel/runtime 7</th>
+              <td>MIT © Sebastian McKenzie a přispěvatelé</td>
+              <td>Pomocné funkce, které si s sebou nese jsPDF.</td>
+            </tr>
+            <tr>
+              <th scope="row">fflate 0.8, pako 2, fast-png 6, iobuffer 5</th>
+              <td>MIT (pako navíc Zlib)</td>
+              <td>Komprese a obrázky uvnitř PDF — tranzitivně přes jsPDF.</td>
+            </tr>
+            <tr>
+              <th scope="row">
+                <a href="https://github.com/NordicSemiconductor/nrf-intel-hex" rel="noopener noreferrer"
+                  >nrf-intel-hex</a
+                >
+                1.4
+              </th>
+              <td>BSD-3-Clause © 2010–2017 Nordic Semiconductor ASA</td>
+              <td>
+                Čtení souboru <code>.hex</code> při nahrávání firmwaru — tranzitivně
+                přes microbit-connection.
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">
+                <a href="https://github.com/microbit-foundation/microbit-universal-hex" rel="noopener noreferrer"
+                  >@microbit/microbit-universal-hex</a
+                >
+                0.2
+              </th>
+              <td>MIT © Micro:bit Educational Foundation</td>
+              <td>
+                Spojení obrazů pro desku V1 a V2 do jednoho souboru. Používá se
+                při stavbě firmwaru, ne v prohlížeči.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout">
+        <p>
+          <strong>Poznámka k jsPDF.</strong> Balíček uvádí volitelné závislosti
+          <code>canvg</code>, <code>html2canvas</code>, <code>dompurify</code> a
+          <code>core-js</code> pro sazbu HTML do PDF. FyzBit tuto cestu nepoužívá
+          (graf jde do PDF jako obrázek PNG) a od září 2026 jsou tyto balíčky
+          z buildu vyloučené, takže se do prohlížeče nedostanou.
+        </p>
+      </div>
+
+      <h2>Písma a obrázky</h2>
+      <div class="table-scroll">
+        <table>
+          <caption>Materiály</caption>
+          <thead>
+            <tr>
+              <th scope="col">Materiál</th>
+              <th scope="col">Licence</th>
+              <th scope="col">Kde je uvedená atribuce</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">
+                <a href="https://fonts.google.com/specimen/Roboto" rel="noopener noreferrer">Roboto</a>
+                Regular (<code>public/fonts/</code>)
+              </th>
+              <td>
+                Apache-2.0 · Font data copyright Google 2012. Roboto je ochranná
+                známka Google.
+              </td>
+              <td>
+                Tady a v <a href="https://github.com/bekousek/fyzbit/blob/main/NOTICE" rel="noopener noreferrer">NOTICE</a>.
+                Písmo je vloženo do PDF protokolu, aby v něm správně vyšla česká
+                diakritika.
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">
+                Kresba desky BBC micro:bit V2 (<code>public/img/microbit-board.svg</code>)
+              </th>
+              <td>
+                <strong>CC BY-NC-SA 4.0</strong> © Micro:bit Educational
+                Foundation. Zdroj:
+                <a href="https://github.com/microbit-foundation/microbit-svg" rel="noopener noreferrer"
+                  >microbit-svg</a
+                >. Upraveno pro FyzBit (odstraněné nepoužité vrstvy, oříznutý
+                viewBox).
+              </td>
+              <td>
+                V hlavičce samotného souboru, pod schématem zapojení v aplikaci
+                a tady.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout--warn">
+        <p>
+          <strong>Kresba desky nespadá pod MIT.</strong> Licence CC BY-NC-SA 4.0
+          znamená <em>neužívat komerčně</em> a <em>zachovat licenci u odvozenin</em>.
+          Pro školní použití je to bez problémů a přesně k tomu je určená. Kdo by
+          ale chtěl FyzBit nasadit komerčně, musí tento jeden soubor nahradit
+          vlastní kresbou — na zbytek projektu se MIT vztahuje beze změny.
+        </p>
+      </div>
+
+      <h2>Firmware pro micro:bit</h2>
+      <p>
+        Soubor <code>public/firmware/fyzbit.hex</code> je zkompilovaný v prostředí
+        MakeCode a obsahuje kromě kódu FyzBitu i tyto součásti:
+      </p>
+      <div class="table-scroll">
+        <table>
+          <caption>Součásti firmwaru</caption>
+          <thead>
+            <tr>
+              <th scope="col">Součást</th>
+              <th scope="col">Licence</th>
+              <th scope="col">K čemu</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">
+                <a href="https://github.com/microsoft/pxt-microbit" rel="noopener noreferrer"
+                  >MakeCode / pxt-microbit</a
+                >
+                (balíčky <code>core</code>, <code>bluetooth</code>)
+              </th>
+              <td>MIT © Microsoft Corporation, Micro:bit Educational Foundation</td>
+              <td>Běhové prostředí desky a Bluetooth UART.</td>
+            </tr>
+            <tr>
+              <th scope="row">
+                <a href="https://github.com/bsiever/microbit-dstemp" rel="noopener noreferrer"
+                  >microbit-dstemp</a
+                >
+                v0.1.26
+              </th>
+              <td>MIT © Bill Siever</td>
+              <td>Čtení teploměru DS18B20.</td>
+            </tr>
+            <tr>
+              <th scope="row">
+                <a href="https://github.com/daferdur/pxt-myhx711" rel="noopener noreferrer"
+                  >pxt-myhx711</a
+                >
+                v1.0.18
+              </th>
+              <td>MIT © daferdur</td>
+              <td>Čtení tenzometrického převodníku HX711.</td>
+            </tr>
+            <tr>
+              <th scope="row">
+                <a href="https://github.com/alankrantas/pxt-DHT11_DHT22" rel="noopener noreferrer"
+                  >pxt-DHT11_DHT22</a
+                >
+                v0.0.3
+              </th>
+              <td>MIT © Alan Wang</td>
+              <td>Čtení čidla teploty a vlhkosti DHT11.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Jak je to ověřeno</h2>
+      <p>
+        Licence u balíčků z npm jsou přečtené z pole <code>license</code> v jejich
+        <code>package.json</code> a z přiložených souborů LICENSE ve stromu
+        <code>node_modules</code>. Licence rozšíření pro MakeCode jsou ověřené
+        proti GitHub API u přesně těch verzí, které jsou připnuté v
+        <code>firmware/source/*/pxt.json</code>. Ověřeno 7. září 2026.
+      </p>
+
+      <h2 lang="en">Licences (English summary)</h2>
+      <div lang="en">
+        <p>
+          FyzBit itself is MIT © 2026 Ondřej Bek. Every bundled library is
+          permissive and MIT-compatible: MIT (µPlot, jsPDF, jspdf-autotable,
+          @microbit/microbit-connection, @babel/runtime, fflate, fast-png,
+          iobuffer, pako — pako also Zlib), Apache-2.0 (idb-keyval, and the
+          embedded Roboto font), BSD-3-Clause (nrf-intel-hex). The MakeCode
+          extensions compiled into the firmware are all MIT.
+        </p>
+        <p>
+          <strong>One exception:</strong> the micro:bit board drawing is
+          CC BY-NC-SA 4.0 © Micro:bit Educational Foundation — non-commercial and
+          share-alike. Fine for schools, but a commercial deployment would have to
+          replace that one file.
+        </p>
+      </div>
+    </main>
+
+    <footer class="page-footer">
+      <nav aria-label="Stránky o aplikaci">
+        <a href="./">Aplikace</a>
+        <a href="./soukromi.html">Ochrana soukromí</a>
+        <a href="./pristupnost.html">Prohlášení o přístupnosti</a>
+        <a href="./licence.html" aria-current="page">Licence a knihovny</a>
+        <a href="https://github.com/bekousek/fyzbit" rel="noopener noreferrer">GitHub</a>
+      </nav>
+      <p>
+        FyzBit © <span id="current-year">2026</span> Ondřej Bek ·
+        <a href="https://github.com/bekousek/fyzbit/blob/main/LICENSE" rel="noopener noreferrer"
+          >Licence MIT</a
+        >
+      </p>
+    </footer>
+  </body>
+</html>

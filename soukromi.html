@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1B5E20" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f1410" media="(prefers-color-scheme: dark)" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'"
+    />
+    <title>Ochrana soukromí — FyzBit</title>
+    <meta
+      name="description"
+      content="Co FyzBit ukládá a kam. Naměřená data i jména žáků zůstávají v prohlížeči, na server se neposílá nic. Přehled všech položek v úložišti prohlížeče a informace o hostingu."
+    />
+    <link rel="canonical" href="https://fyzbit.cz/soukromi.html" />
+    <link rel="alternate" hreflang="cs" href="https://fyzbit.cz/soukromi.html" />
+    <link rel="alternate" hreflang="x-default" href="https://fyzbit.cz/soukromi.html" />
+    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+    <script type="module" src="/src/page.ts"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#obsah">Přeskočit na obsah</a>
+
+    <header class="page-header">
+      <div class="page-header__inner">
+        <a class="page-header__brand" href="./">FyzBit</a>
+        <span class="page-header__back"><a href="./">← Zpět do aplikace</a></span>
+      </div>
+    </header>
+
+    <main class="page" id="obsah">
+      <h1>Ochrana soukromí</h1>
+      <p class="page__lead">
+        Krátce a bez právničiny: <strong>naměřená data ani jména žáků nikam neodcházejí.</strong>
+        Zůstávají v prohlížeči na tom počítači nebo tabletu, na kterém měříte. FyzBit
+        nemá server, na který by je posílal — žádný neexistuje.
+      </p>
+
+      <div class="callout">
+        <p><strong>To nejdůležitější ve třech větách:</strong></p>
+        <ul>
+          <li>Aplikace nepoužívá <strong>žádné cookies</strong> — ani vlastní, ani cizí.</li>
+          <li>
+            Neběží tu <strong>žádná analytika</strong>, žádný Google Analytics,
+            žádné sledovací skripty, žádné reklamní sítě.
+          </li>
+          <li>
+            Data z měření se ukládají <strong>jen do úložiště vašeho prohlížeče</strong>,
+            aby vám je nesmazal spadlý panel. Kdykoli je smažete jedním tlačítkem.
+          </li>
+        </ul>
+      </div>
+
+      <h2>Co se ukládá do prohlížeče a proč</h2>
+      <p>
+        FyzBit používá dvě běžná úložiště prohlížeče —
+        <code>localStorage</code> na drobná nastavení a
+        <code>IndexedDB</code> na rozpracované měření. Tohle je úplný seznam;
+        nic dalšího tam aplikace nezapisuje.
+      </p>
+
+      <div class="table-scroll">
+        <table>
+          <caption>Položky v localStorage</caption>
+          <thead>
+            <tr>
+              <th scope="col">Klíč</th>
+              <th scope="col">Co obsahuje</th>
+              <th scope="col">Proč</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row"><code>fyzbit.language</code></th>
+              <td><code>cs</code> nebo <code>en</code></td>
+              <td>Aby se aplikace příště otevřela ve vámi zvoleném jazyce.</td>
+            </tr>
+            <tr>
+              <th scope="row"><code>fyzbit.theme</code></th>
+              <td><code>light</code>, <code>dark</code> nebo <code>auto</code></td>
+              <td>Zvolený světlý / tmavý motiv.</td>
+            </tr>
+            <tr>
+              <th scope="row"><code>fyzbit.samplingHz</code></th>
+              <td>Číslo (1–50) nebo <code>auto</code></td>
+              <td>Vzorkovací frekvence nastavená v Nastavení.</td>
+            </tr>
+            <tr>
+              <th scope="row"><code>fyzbit.units</code></th>
+              <td>
+                Dvojice veličina → jednotka, například
+                <code>{"cm":"m"}</code>
+              </td>
+              <td>Aby si graf pamatoval, že chcete metry místo centimetrů.</td>
+            </tr>
+            <tr>
+              <th scope="row"><code>fyzbit.studentInfo</code></th>
+              <td>
+                <strong>Třída, jména žáků, název experimentu a poznámky</strong> —
+                přesně to, co jste naposledy vyplnili v okně pro export PDF.
+              </td>
+              <td>
+                Aby se při dalším exportu protokolu nemusela stejná jména psát znovu.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-scroll">
+        <table>
+          <caption>Položky v IndexedDB (databáze <code>keyval-store</code>)</caption>
+          <thead>
+            <tr>
+              <th scope="col">Klíč</th>
+              <th scope="col">Co obsahuje</th>
+              <th scope="col">Proč</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row"><code>fyzbit.session</code></th>
+              <td>
+                Rozpracované měření: názvy měření, časy a naměřené hodnoty všech
+                vzorků, anotace a název senzoru.
+              </td>
+              <td>
+                Aby se po zavření panelu, pádu prohlížeče nebo výpadku proudu dalo
+                měření obnovit. Při dalším spuštění se aplikace zeptá, jestli
+                pokračovat, nebo data zahodit.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        Prohlížeč si navíc ukládá samotné soubory aplikace do
+        <em>Cache Storage</em> (klíč začíná na <code>fyzbit-</code>), aby FyzBit
+        fungoval i bez internetu — ve třídě, kde vypadne wifi. Jsou to jen soubory
+        webu, žádná vaše data.
+      </p>
+
+      <div class="callout callout--warn">
+        <p>
+          <strong>Na jméno žáka pozor na sdíleném počítači.</strong> Klíč
+          <code>fyzbit.studentInfo</code> obsahuje jména, která jste zadali do
+          protokolu, a zůstane v tom prohlížeči, dokud ho někdo nesmaže. Na
+          počítači v učebně, na který sedá další třída, je proto rozumné po hodině
+          zmáčknout <em>Nastavení → Smazat všechna data</em>. FyzBit se k těm
+          jménům nikdy nedostane — ale ten, kdo si k počítači sedne po vás, ano.
+        </p>
+      </div>
+
+      <h2>Jak data smazat</h2>
+      <ul>
+        <li>
+          <strong>V aplikaci:</strong> ozubené kolo vpravo nahoře →
+          <em>Smazat všechna data</em>. Smaže uložená měření, jména žáků, motiv
+          i jazyk — všechno výše uvedené.
+        </li>
+        <li>
+          <strong>V prohlížeči:</strong> mazání dat webových stránek pro
+          <code>fyzbit.cz</code> udělá totéž.
+        </li>
+        <li>
+          <strong>Anonymní okno:</strong> nic nepřežije jeho zavření. Hodí se pro
+          jednorázové měření na cizím počítači.
+        </li>
+      </ul>
+
+      <h2>Hosting a serverové logy</h2>
+      <p>
+        Web běží na <strong>GitHub Pages</strong> (GitHub, Inc., společnost skupiny
+        Microsoft) na vlastní doméně fyzbit.cz. Je to statický hosting: server jen
+        posílá soubory a nemá kam přijímat data.
+      </p>
+      <p>
+        Jako každý webový server ale GitHub <strong>vidí IP adresu</strong>, ze
+        které stránku otevřete, a technické údaje požadavku — čas, adresu stránky,
+        typ prohlížeče. Tyto záznamy si drží GitHub pro provoz a bezpečnost podle
+        svého
+        <a
+          href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement"
+          rel="noopener noreferrer"
+          >prohlášení o ochraně soukromí</a
+        >. <strong>Autor FyzBitu k nim nemá přístup</strong> — GitHub Pages
+        provozovateli webu žádné logy návštěvnosti nezpřístupňuje, takže autor
+        neví ani kolik lidí web navštívilo, natož odkud.
+      </p>
+
+      <h2>Připojení k micro:bitu</h2>
+      <p>
+        Připojení běží přes rozhraní prohlížeče Web Serial (USB kabel) nebo Web
+        Bluetooth. Prohlížeč se vždy zeptá, které zařízení mu smíte vybrat, a
+        FyzBit vidí jen to jedno, které mu ukážete. Naměřená čísla putují z desky
+        rovnou do stránky a dál nikam.
+      </p>
+      <p>
+        Když v aplikaci zmáčknete <em>Připravit micro:bit</em>, stáhne se ze
+        stejné adresy soubor firmwaru a přes WebUSB se nahraje do desky. I to je
+        jednosměrná cesta — z desky se neodesílá nic.
+      </p>
+
+      <h2>Kdo je správce a na koho se obrátit</h2>
+      <p>
+        FyzBit provozuje jako otevřený projekt <strong>Ondřej Bek</strong>.
+        Protože aplikace žádné osobní údaje nesbírá ani nepřijímá, nevzniká
+        zpracování osobních údajů, ke kterému by bylo potřeba pověřence nebo
+        zpracovatelskou smlouvu. Data zadaná do protokolu zůstávají výhradně na
+        počítači školy a spravuje si je škola sama.
+      </p>
+      <p>
+        Dotazy a připomínky:
+        <a href="mailto:ondrejbek8@gmail.com">ondrejbek8@gmail.com</a> nebo
+        <a href="https://github.com/bekousek/fyzbit/issues" rel="noopener noreferrer"
+          >GitHub Issues</a
+        >.
+      </p>
+
+      <h2>Změny</h2>
+      <p class="page__updated">
+        Tato stránka platí od 7. září 2026. Kdyby se cokoli z toho změnilo —
+        například kdyby přibyla měřená návštěvnost — bude to napsané tady a
+        v <a href="https://github.com/bekousek/fyzbit" rel="noopener noreferrer">historii repozitáře</a>,
+        kde je vidět každá úprava.
+      </p>
+
+      <h2 lang="en">Privacy (English summary)</h2>
+      <div lang="en">
+        <p>
+          Measurements and pupils' names never leave the browser — FyzBit has no
+          server to send them to. No cookies, no analytics, no trackers.
+        </p>
+        <p>
+          Stored locally: five <code>localStorage</code> keys (language, theme,
+          sampling rate, unit choices and the last PDF report metadata, which
+          <em>includes pupil names</em>), one IndexedDB entry holding the run in
+          progress so a crashed tab does not lose it, and a Cache Storage entry
+          holding the app's own files for offline use. All of it is cleared by
+          Settings → Delete all data.
+        </p>
+        <p>
+          Hosted on GitHub Pages. GitHub, as the server operator, sees visitor IP
+          addresses and request metadata under its own privacy statement; the
+          author of FyzBit has no access to those logs.
+        </p>
+      </div>
+    </main>
+
+    <footer class="page-footer">
+      <nav aria-label="Stránky o aplikaci">
+        <a href="./">Aplikace</a>
+        <a href="./soukromi.html" aria-current="page">Ochrana soukromí</a>
+        <a href="./pristupnost.html">Prohlášení o přístupnosti</a>
+        <a href="./licence.html">Licence a knihovny</a>
+        <a href="https://github.com/bekousek/fyzbit" rel="noopener noreferrer">GitHub</a>
+      </nav>
+      <p>
+        FyzBit © <span id="current-year">2026</span> Ondřej Bek ·
+        <a href="https://github.com/bekousek/fyzbit/blob/main/LICENSE" rel="noopener noreferrer"
+          >Licence MIT</a
+        >
+      </p>
+    </footer>
+  </body>
+</html>

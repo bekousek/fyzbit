@@ -1,0 +1,111 @@
+FyzBit
+Copyright (c) 2026 Ondřej Bek
+Licensed under the MIT License — see LICENSE.
+
+This file collects the attributions that FyzBit's third-party components
+require when the built site is redistributed. The human-readable version,
+with links and an explanation of what each component is used for, lives at
+https://fyzbit.cz/licence.html.
+
+Everything bundled into the browser is permissive and MIT-compatible, with
+one deliberate exception noted at the bottom.
+
+--------------------------------------------------------------------------
+Apache License 2.0
+--------------------------------------------------------------------------
+
+idb-keyval
+  Copyright Jake Archibald
+  https://github.com/jakearchibald/idb-keyval
+  Licensed under the Apache License, Version 2.0. Included unmodified.
+
+Roboto Regular (public/fonts/Roboto-Regular.ttf)
+  Font data copyright Google 2012.
+  Licensed under the Apache License, Version 2.0.
+  Roboto is a trademark of Google. Included unmodified; embedded into the
+  PDF report so Czech diacritics render correctly.
+
+A copy of the Apache License, Version 2.0 is available at
+http://www.apache.org/licenses/LICENSE-2.0
+
+--------------------------------------------------------------------------
+BSD 3-Clause License
+--------------------------------------------------------------------------
+
+nrf-intel-hex
+  Copyright (c) 2010 - 2017, Nordic Semiconductor ASA
+  All rights reserved.
+  https://github.com/NordicSemiconductor/nrf-intel-hex
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+  1. Redistributions of source code must retain the above copyright notice,
+     this list of conditions and the following disclaimer.
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in the
+     documentation and/or other materials provided with the distribution.
+  3. Neither the name of Nordic Semiconductor ASA nor the names of its
+     contributors may be used to endorse or promote products derived from
+     this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+  THE IMPLIED WARRANTIES OF MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
+  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL NORDIC SEMICONDUCTOR ASA OR
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+--------------------------------------------------------------------------
+MIT License
+--------------------------------------------------------------------------
+
+The following are used under the MIT License. Their full texts are in the
+respective packages under node_modules/, and in each project's repository.
+
+  uPlot                              Copyright (c) Leon Sorokin
+  jsPDF                              Copyright (c) James Hall, yWorks GmbH
+                                     and contributors
+  jspdf-autotable                    Copyright (c) Simon Bengtsson
+  @microbit/microbit-connection      Copyright (c) 2024-2025 Micro:bit
+                                     Educational Foundation and contributors
+  @microbit/microbit-universal-hex   Copyright (c) Micro:bit Educational
+                                     Foundation
+  @babel/runtime                     Copyright (c) Sebastian McKenzie and
+                                     contributors
+  fflate                             Copyright (c) Arjun Barrett
+  fast-png, iobuffer                 Copyright (c) Michaël Zasso and
+                                     contributors
+  pako                               Copyright (c) Vitaly Puzrin and Andrei
+                                     Tuputcyn (MIT AND Zlib)
+
+Compiled into public/firmware/fyzbit.hex, also under the MIT License:
+
+  MakeCode / pxt-microbit            Copyright (c) Microsoft Corporation,
+    (core, bluetooth)                Micro:bit Educational Foundation
+  microbit-dstemp v0.1.26            Copyright (c) Bill Siever
+  pxt-myhx711 v1.0.18                Copyright (c) daferdur
+  pxt-DHT11_DHT22 v0.0.3             Copyright (c) Alan Wang
+
+--------------------------------------------------------------------------
+Creative Commons BY-NC-SA 4.0 — NOT covered by FyzBit's MIT licence
+--------------------------------------------------------------------------
+
+public/img/microbit-board.svg
+  Drawing of the BBC micro:bit V2.
+  Copyright (c) Micro:bit Educational Foundation — https://microbit.org
+  Source: https://github.com/microbit-foundation/microbit-svg
+  Licensed CC BY-NC-SA 4.0
+  https://creativecommons.org/licenses/by-nc-sa/4.0/
+  Modified for FyzBit: unused layers and editor metadata removed, viewBox
+  cropped to the board.
+
+  This one file carries non-commercial and share-alike terms. Educational
+  use — what FyzBit exists for — is exactly what the licence permits. A
+  commercial redistribution of FyzBit would have to replace this file with
+  its own artwork; the rest of the project stays MIT either way.

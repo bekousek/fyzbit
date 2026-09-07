@@ -1200,6 +1200,22 @@ textarea.field__input {
   outline-offset: 2px;
 }
 
+/*
+ * Why a connection option is greyed out. A title tooltip alone would not do:
+ * it is unreachable by keyboard and invisible on a touch screen, which is
+ * exactly the iPad this message is most often about.
+ */
+.connection-note {
+  margin: -4px 0 0;
+  padding: 8px 10px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--fg);
+  background: var(--surface-2);
+  border-left: 3px solid var(--status-warn);
+  border-radius: 0 6px 6px 0;
+}
+
 .connection-error {
   margin: 2px 0 0;
   padding: 10px 12px;

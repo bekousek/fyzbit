@@ -22,6 +22,8 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         pristupnost: resolve(__dirname, 'pristupnost.html'),
+        soukromi: resolve(__dirname, 'soukromi.html'),
+        licence: resolve(__dirname, 'licence.html'),
         notfound: resolve(__dirname, '404.html'),
         sw: resolve(__dirname, 'src/sw.ts'),
       },

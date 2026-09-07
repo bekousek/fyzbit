@@ -114,14 +114,14 @@
     "stepFirmware": "Flash the firmware onto the micro:bit",
     "title": "Connect micro:bit",
     "unsupportedBluetooth": "This browser has no Web Bluetooth. Chrome or Edge on Windows, macOS, Linux, Android and ChromeOS work; Firefox and Safari (including every browser on iPhone and iPad) do not implement it. On a desktop, use the USB cable.",
-    "unsupportedBrowser": "This browser does not support Web Serial. Use Chrome or Edge.",
     "unsupportedSerial": "This browser has no Web Serial, so connecting over a USB cable is not possible. Chrome, Edge or Opera on a desktop work; Firefox and Safari do not implement it. On a tablet or phone, choose Bluetooth.",
     "unsupportedUsb": "This browser has no WebUSB, so the firmware cannot be flashed from here. Download the .hex file below and drop it onto the MICROBIT drive that appears when you plug the board in."
   },
   "error": {
-    "browserUnsupported": "This browser does not support connecting to micro:bit. Use Chrome or Edge.",
+    "browserUnsupported": "This browser has neither Web Serial nor Web Bluetooth, so it cannot connect to a micro:bit. Chrome, Edge and Opera work; Firefox and Safari (and every browser on iPhone and iPad) do not implement them. You can still try the app in demo mode with a simulated sensor.",
     "calibrationTimeout": "Calibration did not respond. Try again.",
     "connectionLost": "Connection to micro:bit lost.",
+    "insecureContext": "This page is not served over a secure connection (https), so the browser blocked access to the micro:bit. Open the app at https://fyzbit.cz/.",
     "storageSaveFailed": "Auto-save is failing (full storage or private browsing mode) — the current recording is not being saved."
   },
   "flash": {

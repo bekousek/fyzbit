@@ -114,14 +114,14 @@
     "stepFirmware": "Nahraj firmware do micro:bitu",
     "title": "Připojit micro:bit",
     "unsupportedBluetooth": "Tento prohlížeč neumí Web Bluetooth. Funguje Chrome nebo Edge na Windows, macOS, Linuxu, Androidu a ChromeOS; Firefox ani Safari (včetně všech prohlížečů na iPhonu a iPadu) toto rozhraní nemají. Na počítači použij USB kabel.",
-    "unsupportedBrowser": "Tento prohlížeč nepodporuje Web Serial. Použij Chrome nebo Edge.",
     "unsupportedSerial": "Tento prohlížeč neumí Web Serial, takže se přes USB kabel připojit nedá. Funguje Chrome, Edge nebo Opera na počítači; Firefox ani Safari toto rozhraní nemají. Na tabletu a telefonu zvol Bluetooth.",
     "unsupportedUsb": "Tento prohlížeč neumí WebUSB, takže firmware odsud nahrát nejde. Stáhni si soubor .hex níže a přetáhni ho na disk MICROBIT, který se objeví po připojení desky kabelem."
   },
   "error": {
-    "browserUnsupported": "Tento prohlížeč nepodporuje připojení k micro:bitu. Použij Chrome nebo Edge.",
+    "browserUnsupported": "Tento prohlížeč neumí Web Serial ani Web Bluetooth, takže se k micro:bitu nepřipojí. Funguje Chrome, Edge nebo Opera; Firefox a Safari (a všechny prohlížeče na iPhonu a iPadu) tato rozhraní nemají. Aplikaci si můžeš projít v demo režimu se simulovaným senzorem.",
     "calibrationTimeout": "Kalibrace neodpověděla. Zkus znovu.",
     "connectionLost": "Spojení s micro:bitem ztraceno.",
+    "insecureContext": "Stránka neběží po zabezpečeném spojení (https), takže prohlížeč zakázal přístup k micro:bitu. Otevři aplikaci na https://fyzbit.cz/.",
     "storageSaveFailed": "Automatické ukládání selhává (plné úložiště nebo režim soukromého prohlížení) — probíhající měření se neukládá."
   },
   "flash": {

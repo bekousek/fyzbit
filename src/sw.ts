@@ -27,6 +27,8 @@ sw.addEventListener('install', (event) => {
         SHELL_URL,
         './',
         './pristupnost.html',
+        './soukromi.html',
+        './licence.html',
         './manifest.json',
         './icon.svg',
         './icon-192.png',
