@@ -12,7 +12,7 @@
     <title>FyzBit — návod a přehled senzorů</title>
     <meta
       name="description"
-      content="Jak měřit s micro:bitem teplotu, vzdálenost, rychlost, sílu, tlak a vlhkost přímo v prohlížeči. Zapojení všech pěti senzorů, tára a kalibrace, export do CSV a PDF, řešení problémů."
+      content="Levná alternativa ke školním dataloggerům: čidlo za desetikorunu místo sady za desítky tisíc. Zapojení všech pěti senzorů k micro:bitu, měření v prohlížeči, kalibrace a export do CSV i PDF."
     />
     <link rel="canonical" href="https://fyzbit.cz/home/" />
     <link rel="alternate" hreflang="cs" href="https://fyzbit.cz/home/" />
@@ -23,7 +23,7 @@
     <meta property="og:title" content="FyzBit — návod a přehled senzorů" />
     <meta
       property="og:description"
-      content="Jak měřit s micro:bitem teplotu, vzdálenost, rychlost, sílu, tlak a vlhkost přímo v prohlížeči. Zapojení, kalibrace, export dat."
+      content="Levná alternativa ke školním dataloggerům. Zapojení pěti senzorů k micro:bitu, měření v prohlížeči, kalibrace a export dat."
     />
     <meta property="og:url" content="https://fyzbit.cz/home/" />
     <meta property="og:image" content="https://fyzbit.cz/og-image.png" />
@@ -37,7 +37,7 @@
     <meta name="twitter:title" content="FyzBit — návod a přehled senzorů" />
     <meta
       name="twitter:description"
-      content="Jak měřit s micro:bitem teplotu, vzdálenost, rychlost, sílu, tlak a vlhkost přímo v prohlížeči."
+      content="Levná alternativa ke školním dataloggerům. Pět senzorů na micro:bitu, měření přímo v prohlížeči."
     />
     <meta name="twitter:image" content="https://fyzbit.cz/og-image.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png" />
@@ -93,9 +93,10 @@
         <img class="hero__logo" src="../logo.png" width="96" height="96" alt="" />
         <h1>Fyzikální měření s micro:bitem, rovnou v prohlížeči</h1>
         <p class="hero__claim">
-          Připoj micro:bit se senzorem, otevři stránku a měř. Žádná instalace,
-          žádné programování, žádné přihlašování — a naměřená data zůstávají
-          v počítači, na kterém měříš.
+          Levné čidlo za pár desetikorun místo školní měřicí sady za desítky
+          tisíc. Připoj micro:bit se senzorem, otevři stránku a měř — bez
+          instalace, bez programování, a naměřená data zůstávají v počítači,
+          na kterém měříš.
         </p>
         <div class="page-actions">
           <a class="is-primary" href="../">Spustit FyzBit</a>
@@ -125,12 +126,34 @@
 
       <h2 id="proc">Proč FyzBit</h2>
       <p>
-        Měření ve fyzice na ZŠ a SŠ obvykle uvázne na tom, že než se stihne
-        rozběhnout, hodina skončí. FyzBit vznikl proto, aby mezi žákem a naměřenou
-        křivkou nestálo nic než kabel.
+        <strong>Hlavní důvod je cena.</strong> Komerční školní dataloggery se
+        prodávají jako uzavřené sady: ke krabičce s rozhraním se dokupuje každé
+        čidlo zvlášť a jedno vyjde na několik tisíc korun. Vybavit kabinet tak,
+        aby se dala odučit teplota, síla, tlak, vzdálenost i vlhkost, spolkne
+        desítky tisíc — na běžné základní škole rozpočet na několik let dopředu.
+      </p>
+      <p>
+        Přitom čidlo uvnitř té krabičky je běžná součástka. DS18B20, HX711,
+        HC-SR04, HX710B i DHT11 koupíš v každém obchodě s elektronikou za
+        desítky až nižší stovky korun a všechna dohromady i s micro:bitem se
+        vejdou pod cenu <em>jediného</em> komerčního čidla. U některých veličin
+        je ten rozdíl stonásobný.
+      </p>
+      <p>
+        Co té levné součástce oproti drahé sadě chybělo, byl software — něco,
+        co z ní udělá graf na plátně, aniž by učitel musel programovat. Přesně
+        to je FyzBit. Druhý důvod, proč vznikl: měření ve fyzice obvykle uvázne
+        na tom, že než se stihne rozběhnout, hodina skončí.
       </p>
 
       <div class="cards">
+        <div class="card card--wide">
+          <h3>Levné senzory místo drahé sady</h3>
+          <p>
+            Čidlo za desetikorunu až stokorunu dělá totéž co to za tři tisíce.
+            Micro:bit, který škola nejspíš už má, poslouží všem pěti.
+          </p>
+        </div>
         <div class="card">
           <h3>Bez instalace</h3>
           <p>
@@ -178,11 +201,26 @@
           kde je breakout deska pohodlnější.
         </li>
         <li>
-          <strong>Prohlížeč Chrome, Edge nebo Opera.</strong> Firefox ani Safari
-          neumí rozhraní, kterým se prohlížeč připojuje k zařízení — viz
-          <a href="#problemy">Řešení problémů</a>.
+          <strong>Počítač nebo tablet s Androidem a prohlížečem Chrome, Edge
+          nebo Opera.</strong> Firefox ani Safari neumí rozhraní, kterým se
+          prohlížeč připojuje k zařízení.
         </li>
       </ul>
+
+      <div class="callout callout--warn">
+        <p>
+          <strong>Na iPadu ani iPhonu FyzBit nefunguje.</strong> Apple v iOS
+          a iPadOS nepovoluje Web Serial ani Web Bluetooth a nechystá se to
+          změnit. Nepomůže ani nainstalovat Chrome — na iPadu je uvnitř pořád
+          Safari, takže má stejné omezení. Aplikace se otevře a projít se dá,
+          ale k micro:bitu se nepřipojí.
+        </p>
+        <p>
+          Než tedy pořídíte sadu čidel do školy, kde se učí na iPadech,
+          přečtěte si <a href="#ipad">Máme ve škole iPady</a> níže — jedna
+          cesta existuje, ale má svoje ale.
+        </p>
+      </div>
 
       <h2 id="jak-zacit">Jak začít</h2>
       <ol class="steps">
@@ -572,12 +610,48 @@
         <p>
           FyzBit se k desce připojuje rozhraními Web Serial (USB) a Web Bluetooth.
           Ta mají jen prohlížeče postavené na Chromiu — <strong>Chrome, Edge a
-          Opera</strong>. Firefox ani Safari je nemají, a na iPhonu a iPadu je
-          nemá ani Chrome, protože tam všechny prohlížeče používají jádro Safari.
+          Opera</strong>. Firefox ani Safari je neimplementují.
         </p>
         <p>
           Aplikace se v nich otevře a projít se dá, jen připojení k senzoru
           nefunguje. Demo režim se simulovaným senzorem funguje všude.
+        </p>
+      </details>
+
+      <details class="faq" id="ipad">
+        <summary>Máme ve škole iPady — dá se to nějak obejít?</summary>
+        <p>
+          Napřímo ne. Apple v iOS a iPadOS neimplementuje Web Serial ani Web
+          Bluetooth a
+          <a
+            href="https://github.com/WebBluetoothCG/web-bluetooth/blob/main/implementation-status.md"
+            rel="noopener noreferrer"
+            >dlouhodobě uvádí, že to nemá v plánu</a
+          >. Instalace Chromu nepomůže: na iPadu i iPhonu musí každý prohlížeč
+          používat jádro Safari, takže zdědí přesně stejné omezení.
+        </p>
+        <p>
+          <strong>Jedna cesta ale existuje.</strong> Na App Storu jsou
+          prohlížeče, které si Bluetooth přinášejí vlastní — nejznámější je
+          <a
+            href="https://apps.apple.com/cz/app/bluefy-web-ble-browser/id1492822055"
+            rel="noopener noreferrer"
+            >Bluefy</a
+          >. Otevřou webovou stránku a doplní jí chybějící rozhraní Web
+          Bluetooth. Ve FyzBitu by pak měl fungovat způsob připojení
+          <em>Bluetooth</em> — tedy jen s deskou <strong>micro:bit V2</strong>,
+          protože V1 Bluetooth neumí. USB kabel na iPadu nepůjde tak jako tak.
+        </p>
+        <p>
+          Poctivě: <strong>tuhle cestu jsem netestoval</strong> a nemůžu za ni
+          ručit. Je to aplikace třetí strany. Než na ní postavíte výuku,
+          vyzkoušejte ji na jednom iPadu s jedním čidlem. Kdyby to fungovalo,
+          napište mi a doplním to sem jako ověřené.
+        </p>
+        <p>
+          Spolehlivá varianta pro školu s iPady je vzít na měření jakýkoli
+          notebook nebo tablet s Androidem — tam funguje USB i Bluetooth bez
+          obezliček.
         </p>
       </details>
 

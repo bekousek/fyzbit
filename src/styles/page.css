@@ -338,6 +338,11 @@ body {
   border-radius: 10px;
 }
 
+/* The headline reason gets the full width; the rest pair off below it. */
+.card--wide {
+  grid-column: 1 / -1;
+}
+
 .card h3 {
   margin: 0 0 6px;
   font-size: 16px;
