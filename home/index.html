@@ -12,7 +12,7 @@
     <title>FyzBit — návod a přehled senzorů</title>
     <meta
       name="description"
-      content="Levná alternativa ke školním dataloggerům: čidlo za desetikorunu místo sady za desítky tisíc. Zapojení všech pěti senzorů k micro:bitu, měření v prohlížeči, kalibrace a export do CSV i PDF."
+      content="Levná alternativa ke školním dataloggerům: čidlo za desetikorunu místo sady za desítky tisíc. Zapojení všech čtyř senzorů k micro:bitu, měření v prohlížeči, kalibrace a export do CSV i PDF."
     />
     <link rel="canonical" href="https://fyzbit.cz/home/" />
     <link rel="alternate" hreflang="cs" href="https://fyzbit.cz/home/" />
@@ -23,7 +23,7 @@
     <meta property="og:title" content="FyzBit — návod a přehled senzorů" />
     <meta
       property="og:description"
-      content="Levná alternativa ke školním dataloggerům. Zapojení pěti senzorů k micro:bitu, měření v prohlížeči, kalibrace a export dat."
+      content="Levná alternativa ke školním dataloggerům. Zapojení čtyř senzorů k micro:bitu, měření v prohlížeči, kalibrace a export dat."
     />
     <meta property="og:url" content="https://fyzbit.cz/home/" />
     <meta property="og:image" content="https://fyzbit.cz/og-image.png" />
@@ -31,13 +31,13 @@
     <meta property="og:image:height" content="630" />
     <meta
       property="og:image:alt"
-      content="FyzBit — Fyzika na micro:bitu. Datalogger v prohlížeči pro teplotu, vzdálenost, sílu, tlak a vlhkost."
+      content="FyzBit — Fyzika na micro:bitu. Datalogger v prohlížeči pro teplotu, vzdálenost, sílu a tlak."
     />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="FyzBit — návod a přehled senzorů" />
     <meta
       name="twitter:description"
-      content="Levná alternativa ke školním dataloggerům. Pět senzorů na micro:bitu, měření přímo v prohlížeči."
+      content="Levná alternativa ke školním dataloggerům. Čtyři senzory na micro:bitu, měření přímo v prohlížeči."
     />
     <meta name="twitter:image" content="https://fyzbit.cz/og-image.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png" />
@@ -53,7 +53,7 @@
         "@id": "https://fyzbit.cz/#app",
         "name": "FyzBit",
         "url": "https://fyzbit.cz/",
-        "description": "Webový datalogger pro micro:bit — měření teploty, vzdálenosti, rychlosti, síly, tlaku i vlhkosti přímo v prohlížeči. Bez instalace, bez programování. Zdarma pro ZŠ a SŠ.",
+        "description": "Webový datalogger pro micro:bit — měření teploty, vzdálenosti, rychlosti, síly i tlaku přímo v prohlížeči. Bez instalace, bez programování. Zdarma pro ZŠ a SŠ.",
         "applicationCategory": "EducationalApplication",
         "browserRequirements": "Vyžaduje Chrome, Edge nebo Operu (Web Serial / Web Bluetooth).",
         "operatingSystem": "Windows, macOS, Linux, Android, ChromeOS",
@@ -129,12 +129,12 @@
         <strong>Hlavní důvod je cena.</strong> Komerční školní dataloggery se
         prodávají jako uzavřené sady: ke krabičce s rozhraním se dokupuje každé
         čidlo zvlášť a jedno vyjde na několik tisíc korun. Vybavit kabinet tak,
-        aby se dala odučit teplota, síla, tlak, vzdálenost i vlhkost, spolkne
+        aby se dala odučit teplota, síla, tlak i vzdálenost, spolkne
         desítky tisíc — na běžné základní škole rozpočet na několik let dopředu.
       </p>
       <p>
         Přitom čidlo uvnitř té krabičky je běžná součástka. DS18B20, HX711,
-        HC-SR04, HX710B i DHT11 koupíš v každém obchodě s elektronikou za
+        HC-SR04 i HX710B koupíš v každém obchodě s elektronikou za
         desítky až nižší stovky korun a všechna dohromady i s micro:bitem se
         vejdou pod cenu <em>jediného</em> komerčního čidla. U některých veličin
         je ten rozdíl stonásobný.
@@ -151,7 +151,7 @@
           <h3>Levné senzory místo drahé sady</h3>
           <p>
             Čidlo za desetikorunu až stokorunu dělá totéž co to za tři tisíce.
-            Micro:bit, který škola nejspíš už má, poslouží všem pěti.
+            Micro:bit, který škola nejspíš už má, poslouží všem čtyřem.
           </p>
         </div>
         <div class="card">
@@ -192,13 +192,13 @@
           bezdrátově přes Bluetooth — na tabletu nebo telefonu, kde USB není.
         </li>
         <li>
-          <strong>Jeden z pěti senzorů</strong> níže. Všechny jsou běžně dostupné
+          <strong>Jeden ze čtyř senzorů</strong> níže. Všechny jsou běžně dostupné
           a stojí řádově desítky až nižší stovky korun.
         </li>
         <li>
-          <strong>Krokosvorky nebo breakout deska.</strong> Na velké pady (0, 1, 2,
-          3V, GND) stačí krokosvorky; siloměr a tlakoměr sahají i na malé pinky,
-          kde je breakout deska pohodlnější.
+          <strong>Krokosvorky.</strong> Všechny čtyři senzory se připojují jen na
+          velké pady 0, 1, 2, 3V a GND, na které krokosvorka dosáhne. Breakout
+          deska není potřeba.
         </li>
         <li>
           <strong>Počítač nebo tablet s Androidem a prohlížečem Chrome, Edge
@@ -268,7 +268,7 @@
 
       <h2 id="senzory">Podporované senzory</h2>
       <p>
-        Pět senzorů, stejných jako v
+        Čtyři senzory, stejné jako v
         <a href="https://github.com/bekousek/fyzikalni_senzory" rel="noopener noreferrer"
           >rozšíření Fyzikální senzory pro MakeCode</a
         >, ze kterého FyzBit vychází. Čísla pinů odpovídají firmwaru — jsou pevná,
@@ -283,8 +283,8 @@
           <li>Vzorkování: <strong>1 Hz</strong></li>
         </ul>
         <p>
-          Teplota kapalin i vzduchu vodotěsnou sondou. Ze všech pěti senzorů měří
-          teplotu nejpřesněji — na chladnutí vody nebo tání ledu je to ten správný.
+          Teplota kapalin i vzduchu vodotěsnou sondou. Měří na desetiny stupně a
+          sonda snese ponoření — na chladnutí vody nebo tání ledu je to ten správný.
         </p>
         <div class="table-scroll">
           <table class="wiring-table">
@@ -339,16 +339,17 @@
             </thead>
             <tbody>
               <tr><th scope="row">3V</th><td>VCC</td></tr>
-              <tr><th scope="row">P15</th><td>DT (data)</td></tr>
-              <tr><th scope="row">P16</th><td>SCK (hodiny)</td></tr>
+              <tr><th scope="row">P0</th><td>DT (data)</td></tr>
+              <tr><th scope="row">P1</th><td>SCK (hodiny)</td></tr>
               <tr><th scope="row">GND</th><td>GND</td></tr>
             </tbody>
           </table>
         </div>
         <div class="callout callout--warn">
           <p>
-            <strong>P15 a P16 jsou malé pinky</strong> — krokosvorka se na ně
-            nechytne. Potřebuješ breakout desku, nebo krokosvorky s hrotem.
+            <strong>Stejné pady jako tlakoměr</strong> — DT a SCK jsou u obou
+            modulů P0 a P1, protože uvnitř je stejný převodník. Připoj vždy jen
+            jeden modul; dva na jedné sběrnici si navzájem přebijí data.
           </p>
         </div>
         <p>
@@ -437,48 +438,6 @@
           Pro meteorologii se hodí hPa (běžný atmosférický tlak je kolem
           1013 hPa), pro školní pokusy spíš Pa. Jednotku přepneš v čipu nad
           grafem kdykoli, i uprostřed měření.
-        </p>
-      </section>
-
-      <section class="sensor" aria-labelledby="s-dht11">
-        <h3 id="s-dht11">5. Teploměr a vlhkoměr DHT11</h3>
-        <ul class="sensor__meta">
-          <li>Měří: <strong>teplotu i vlhkost</strong> současně</li>
-          <li>Jednotky: °C · %</li>
-          <li>Vzorkování: <strong>1 Hz</strong></li>
-        </ul>
-        <p>
-          Jediné čidlo vrací obě veličiny najednou — v grafu tedy uvidíš dvě
-          křivky vedle sebe. Ideální na klima ve třídě, dýchání, sušení nebo
-          odpařování.
-        </p>
-        <div class="table-scroll">
-          <table class="wiring-table">
-            <caption>Zapojení</caption>
-            <thead>
-              <tr>
-                <th scope="col">Pin micro:bitu</th>
-                <th scope="col">Svorka modulu</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><th scope="row">3V</th><td>VCC nebo +</td></tr>
-              <tr><th scope="row">P0</th><td>DATA, OUT nebo S</td></tr>
-              <tr><th scope="row">GND</th><td>GND nebo −</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="callout callout--warn">
-          <p>
-            <strong>Popisky pinů se u modulů liší</strong> (S / VCC / GND, nebo
-            + / OUT / −). Řiď se tím, co je natištěné na desce, ne pořadím.
-          </p>
-        </div>
-        <p>
-          DHT11 měří s přesností přibližně ±2 °C a ±5 %. Když potřebuješ teplotu
-          přesněji — hlavně u kapalin — sáhni po DS18B20. Hotový modul na
-          destičce má pull-up rezistor už zabudovaný; u holého čidla se hodí
-          přidat 4,7–10 kΩ mezi DATA a 3V.
         </p>
       </section>
 
@@ -725,7 +684,7 @@
         <a href="https://bekousek.github.io/fyzikalni_senzory/" rel="noopener noreferrer"
           >Fyzikální senzory pro micro:bit</a
         >
-        — stejný autor, stejných pět senzorů, stejné zapojení. Rozdíl je v tom,
+        — stejný autor, stejná čidla, stejné zapojení. Rozdíl je v tom,
         kde se pracuje:
       </p>
       <div class="table-scroll">

@@ -210,7 +210,6 @@
     "title": "Selection"
   },
   "sensor": {
-    "dht11": "Temperature + humidity (DHT11)",
     "ds18b20": "Thermometer (DS18B20)",
     "hcsr04": "Sonar (HC-SR04)",
     "hx710b": "Pressure sensor (HX710B)",
@@ -272,12 +271,10 @@
   "wiring": {
     "boardCredit": "Board drawing © Micro:bit Educational Foundation · CC BY-NC-SA 4.0",
     "ground": "ground",
-    "noteDht11": "Pin labels differ between modules (S / VCC / GND). Go by what is printed on the board.",
     "noteDs18b20": "A 4.7 kΩ resistor belongs between DATA and VCC — without it the probe returns nothing.",
     "noteHcsr04": "Some HC-SR04 units want 5 V. If nothing reads on 3V, power the module from 5 V.",
     "noteHx710b": "Attach the tubing after wiring, so no pressure is left trapped in the sensor.",
     "noteHx711": "The load cell solders to E+, E−, A+, A− on the other side of the module.",
-    "noteSmallPins": "P15 and P16 are small pins — you need a breakout board or crocodile clips.",
     "power": "power",
     "signalNamed": "signal ({{name}})"
   }

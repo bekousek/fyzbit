@@ -2,7 +2,7 @@
 
 > **Fyzika na micro:bitu** — webový datalogger pro fyzikální měření na ZŠ/SŠ.
 
-FyzBit je webová aplikace, ve které učitel nebo žák připojí micro:bit s fyzikálním senzorem (kabelem nebo Bluetooth) a měří v reálném čase teplotu, sílu, vzdálenost, tlak nebo vlhkost. Žádné MakeCode, žádné programování, žádná instalace.
+FyzBit je webová aplikace, ve které učitel nebo žák připojí micro:bit s fyzikálním senzorem (kabelem nebo Bluetooth) a měří v reálném čase teplotu, sílu, vzdálenost nebo tlak. Žádné MakeCode, žádné programování, žádná instalace.
 
 ## Funkce
 

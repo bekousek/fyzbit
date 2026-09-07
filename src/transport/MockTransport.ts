@@ -8,7 +8,6 @@ const CHANNELS: Record<SensorName, string[]> = {
   // state/derive.ts), exactly as with the real firmware.
   HCSR04: ['#CH;d;Distance;cm;0;400'],
   HX710B: ['#CH;p;Pressure;Pa;0;200000'],
-  DHT11: ['#CH;t;Temperature;°C;-20;60', '#CH;h;Humidity;%;0;100'],
 };
 
 /**
@@ -141,12 +140,6 @@ export class MockTransport implements Transport {
       case 'HX710B': {
         const pressure = 101325 + 500 * Math.sin(tSec / 6);
         this.emit(`p:${pressure.toFixed(0)}`);
-        break;
-      }
-      case 'DHT11': {
-        const temp = 22 + 1.5 * Math.sin(tSec / 4);
-        const humidity = 55 + 10 * Math.sin(tSec / 7);
-        this.emit(`t:${temp.toFixed(1)};h:${humidity.toFixed(1)}`);
         break;
       }
     }

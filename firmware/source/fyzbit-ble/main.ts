@@ -25,7 +25,7 @@
  *     #TARE
  *     #CAL;<id>;<value>
  *     #RATE;<hz>           (1, 5, 10, 25, 50)
- *     #SELECT;<sensorName> (DS18B20, HX711, HCSR04, HX710B, DHT11)
+ *     #SELECT;<sensorName> (DS18B20, HX711, HCSR04, HX710B)
  *     #START               (resume streaming)
  *     #STOP                (pause streaming)
  *
@@ -34,15 +34,20 @@
  *   B    = next sensor (cycles)
  *   A+B  = re-send handshake (#HELLO + #CH... + #READY)
  *
- * Default pins (match the fyzikalni_senzory MakeCode extension):
+ * Pins — every sensor lives on P0/P1/P2:
  *   DS18B20      P0          (data)
- *   HX711 force  P15 (DT) / P16 (SCK)
+ *   HX711 force  P0 (DT)   / P1 (SCK)
  *   HC-SR04      P1 (Trig) / P2 (Echo)
- *   HX710B press P0 (DT) / P1 (SCK)
- *   DHT11        P0          (data)
+ *   HX710B press P0 (OUT)  / P1 (SCK)
  *
- * Sensors sharing pins (DS18B20/DHT11/HX710B/HC-SR04 all touch P0 or P1) are
- * mutually exclusive at any moment — switch with button B or `#SELECT`.
+ * Only P0, P1, P2, 3V and GND have the wide pads with the 4 mm hole that a
+ * crocodile clip can grip; P3-P16 are 1 mm strips that need a breakout board.
+ * The load cell used to sit on P15/P16, where the fyzikalni_senzory extension
+ * puts it, and could not be wired at all without one — so it moved onto the
+ * pressure module's pads: same chip, same two wires, same clips.
+ *
+ * Every sensor therefore overlaps every other one, which costs nothing: only
+ * one is ever plugged in. Switch with button B or `#SELECT`.
  */
 
 // === Sensor selection =====================================================
@@ -52,10 +57,17 @@ enum Sensor {
     HX711 = 1,
     HCSR04 = 2,
     HX710B = 3,
-    DHT11 = 4,
 }
 
 let currentSensor: Sensor = Sensor.DS18B20
+
+// === Pins =================================================================
+
+// Both HX711-family modules — the load cell and the pressure sensor — are the
+// same converter reached over the same two wires, so they share one pair of
+// pads. See the header for why those pads have to be P0/P1.
+const HX_DOUT = DigitalPin.P0
+const HX_SCK = DigitalPin.P1
 
 // === Runtime state ========================================================
 
@@ -67,15 +79,11 @@ let forceOffset = 0
 let forceScale = -10578
 let tareForceRequested = false
 
-// HX710B (pressure) — defaults from the fyzikalni_senzory extension
-let pressOffset = -49207364
+// HX710B (pressure) — scale from the fyzikalni_senzory extension; its offset
+// carried the +2^23 that hxRead() now takes off, so it moves with it.
+let pressOffset = -57595972
 let pressScale = 581.84
 let tarePressRequested = false
-
-// DHT11 cache (1.5 s minimum read interval)
-let dhtLastQueryMs = 0
-let dhtTempC = -999
-let dhtHumidity = -999
 
 // === Serial + Bluetooth UART helpers ======================================
 
@@ -106,9 +114,6 @@ function sendChannelDefinitions(): void {
         send("#CH;d;Distance;cm;0;400")
     } else if (currentSensor == Sensor.HX710B) {
         send("#CH;p;Pressure;Pa;0;200000")
-    } else if (currentSensor == Sensor.DHT11) {
-        send("#CH;t;Temperature;degC;-20;60")
-        send("#CH;h;Humidity;%;0;100")
     }
 }
 
@@ -147,22 +152,72 @@ function readHCSR04(): void {
     send("d:" + roundTo(cm, 1))
 }
 
-function readHX711Force(): void {
-    HX711.SetPIN_DOUT(DigitalPin.P15)
-    HX711.SetPIN_SCK(DigitalPin.P16)
+/**
+ * Point the driver at the pads and start a conversion.
+ *
+ * Both load-cell sensors go through the one driver, which keeps its pins in
+ * globals, so no read may assume the previous caller left them the way it
+ * needs them.
+ */
+function hxBegin(): void {
+    HX711.SetPIN_DOUT(HX_DOUT)
+    HX711.SetPIN_SCK(HX_SCK)
     HX711.begin()
+}
+
+/**
+ * One ADC sample, in honest 24-bit two's-complement counts.
+ *
+ * The HX711 extension does not hand those over: it sign-extends the reading to
+ * 32 bits and *then* flips the sign bit, so what comes back is raw + 2^23 for a
+ * non-negative sample and raw - 2^23 for a negative one. A constant offset
+ * would be harmless — tare and calibration absorb it — but this one changes
+ * sign with the reading, so the value jumps by 2^24 counts the moment a
+ * measurement crosses the ADC's electrical zero: about 29 kPa on the pressure
+ * module, about 1600 N on the load cell. Undo it once, here, and everything
+ * downstream (tare, calibration, the reads below) works on a continuous scale.
+ */
+function hxRead(): number {
+    const v = HX711.read()
+    return v >= 0 ? v - 8388608 : v + 8388608
+}
+
+/** Median of 5 samples — a clean zero, immune to a single noisy read. */
+function hxMedian5(): number {
+    let s: number[] = []
+    for (let i = 0; i < 5; i++) s.push(hxRead())
+    s.sort((a, b) => a - b)
+    return s[2]
+}
+
+/**
+ * Zero whichever load-cell sensor asked for it.
+ *
+ * Called from the sampling loop rather than straight from the #TARE handler:
+ * the loop is the only owner of the HX711's bit-banged bus, and taring from
+ * the serial handler's fiber could interleave two reads. The loop runs it
+ * whether or not it is streaming, because zeroing a sensor is exactly what you
+ * want to do *before* starting a measurement.
+ */
+function applyPendingTare(): void {
     if (tareForceRequested) {
         tareForceRequested = false
-        // Median of 5 reads for a clean zero.
-        let s: number[] = []
-        for (let i = 0; i < 5; i++) s.push(HX711.read())
-        s.sort((a, b) => a - b)
-        forceOffset = s[2]
+        hxBegin()
+        forceOffset = hxMedian5()
     }
+    if (tarePressRequested) {
+        tarePressRequested = false
+        hxBegin()
+        pressOffset = hxMedian5()
+    }
+}
+
+function readHX711Force(): void {
+    hxBegin()
     // Median of 3 for stable measurement.
-    const a = HX711.read()
-    const b = HX711.read()
-    const c = HX711.read()
+    const a = hxRead()
+    const b = hxRead()
+    const c = hxRead()
     const mx = Math.max(a, Math.max(b, c))
     const mn = Math.min(a, Math.min(b, c))
     const median = a + b + c - mx - mn
@@ -172,38 +227,16 @@ function readHX711Force(): void {
 }
 
 function readHX710BPressure(): void {
-    HX711.SetPIN_DOUT(DigitalPin.P0)
-    HX711.SetPIN_SCK(DigitalPin.P1)
-    HX711.begin()
-    if (tarePressRequested) {
-        tarePressRequested = false
-        let s: number[] = []
-        for (let i = 0; i < 5; i++) s.push(HX711.read())
-        s.sort((a, b) => a - b)
-        pressOffset = s[2]
-    }
-    const a = HX711.read()
-    const b = HX711.read()
-    const c = HX711.read()
+    hxBegin()
+    const a = hxRead()
+    const b = hxRead()
+    const c = hxRead()
     const mx = Math.max(a, Math.max(b, c))
     const mn = Math.min(a, Math.min(b, c))
     const median = a + b + c - mx - mn
     if (pressScale == 0) pressScale = 1
     const Pa = (median - pressOffset) / pressScale
     send("p:" + Math.round(Pa))
-}
-
-function readDHT11(): void {
-    const now = control.millis()
-    if (now - dhtLastQueryMs >= 1500) {
-        dht11_dht22.queryData(DHTtype.DHT11, DigitalPin.P0, true, false, false)
-        if (dht11_dht22.readDataSuccessful()) {
-            dhtTempC = dht11_dht22.readData(dataType.temperature)
-            dhtHumidity = dht11_dht22.readData(dataType.humidity)
-        }
-        dhtLastQueryMs = now
-    }
-    send("t:" + roundTo(dhtTempC, 1) + ";h:" + roundTo(dhtHumidity, 1))
 }
 
 function readAndStream(): void {
@@ -215,15 +248,13 @@ function readAndStream(): void {
         readHCSR04()
     } else if (currentSensor == Sensor.HX710B) {
         readHX710BPressure()
-    } else if (currentSensor == Sensor.DHT11) {
-        readDHT11()
     }
 }
 
 // === Helpers ==============================================================
 
 function roundTo(value: number, decimals: number): number {
-    if (value < -998) return value  // sentinel pass-through (DHT11 'not yet read')
+    if (value < -998) return value  // driver error sentinel — pass through unrounded
     const factor = Math.pow(10, decimals)
     return Math.round(value * factor) / factor
 }
@@ -241,8 +272,7 @@ function sensorName(s: Sensor): string {
     if (s == Sensor.DS18B20) return "DS18B20"
     if (s == Sensor.HX711) return "HX711"
     if (s == Sensor.HCSR04) return "HCSR04"
-    if (s == Sensor.HX710B) return "HX710B"
-    return "DHT11"
+    return "HX710B"
 }
 
 function sensorFromName(name: string): Sensor {
@@ -250,7 +280,6 @@ function sensorFromName(name: string): Sensor {
     if (name == "HX711") return Sensor.HX711
     if (name == "HCSR04") return Sensor.HCSR04
     if (name == "HX710B") return Sensor.HX710B
-    if (name == "DHT11") return Sensor.DHT11
     return currentSensor
 }
 
@@ -304,12 +333,12 @@ function handleCommand(rawLine: string): void {
             // For HX711 / HX710B we can compute a new scale factor from current
             // raw reading. For other sensors there's no app-side calibration yet.
             if (currentSensor == Sensor.HX711 && id == "F" && target != 0) {
-                const raw = HX711.read()
+                const raw = hxRead()
                 const newScale = (raw - forceOffset) / target
                 if (newScale != 0) forceScale = newScale
                 send("#CAL;F;ok;" + roundTo(forceScale, 3))
             } else if (currentSensor == Sensor.HX710B && id == "p" && target != 0) {
-                const raw = HX711.read()
+                const raw = hxRead()
                 const newScale = (raw - pressOffset) / target
                 if (newScale != 0) pressScale = newScale
                 send("#CAL;p;ok;" + roundTo(pressScale, 3))
@@ -367,7 +396,7 @@ input.onButtonPressed(Button.A, function () {
 })
 
 input.onButtonPressed(Button.B, function () {
-    const nextS = ((currentSensor + 1) % 5) as Sensor
+    const nextS = ((currentSensor + 1) % 4) as Sensor
     currentSensor = nextS
     // Flash the new sensor name on the LED matrix briefly so the user knows
     // which mode the board is in without looking at the laptop.
@@ -388,6 +417,7 @@ input.onButtonPressed(Button.AB, function () {
 // the period.
 control.inBackground(function () {
     while (true) {
+        applyPendingTare()
         if (!streaming) {
             basic.pause(20)
         } else {

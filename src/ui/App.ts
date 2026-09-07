@@ -405,33 +405,38 @@ export class App {
     await this.connect(req.transport, req.label);
   }
 
+  /**
+   * START/STOP is a decision about *recording*, not about the board: the
+   * firmware streams from the moment it is connected (see the READY branch of
+   * handleLine) and keeps streaming between runs. That is what keeps the live
+   * value alive with nothing recording — and it is the only way TARE can work
+   * before a measurement, because the firmware applies a pending tare inside
+   * its sampling loop, so a board told to stop has nothing to zero.
+   */
   private toggleRecording(): void {
     if (!this.isConnectedStatus(appState.status)) return;
     if (appState.recording) {
       appState.stopRecording();
-      this.sendCommand(Commands.stop());
       return;
     }
     if (appState.activeRun) {
-      // Resume an existing buffer that was paused with STOP.
+      // Resume an existing buffer. Its samples are stamped in the time base
+      // that has been running all along, so that base has to survive the
+      // pause — restarting it would append times that run backwards.
       appState.resumeRecording();
     } else {
       appState.startRun(this.effectiveRate(), (n) => t('runs.runName', { n }));
+      // A fresh run starts at t = 0, and the derivation window still holds
+      // samples stamped in the old base.
+      this.streamStartMs = 0;
+      this.deriver?.reset();
     }
     this.mobileNav.show('chart');
-    // Protocol time begins anew, so the derivation window — whose samples are
-    // stamped in the old base — has to go with it.
-    this.streamStartMs = 0;
-    this.deriver?.reset();
-    this.sendCommand(Commands.start());
   }
 
   private saveCurrentRun(): void {
     if (!appState.activeRun) return;
-    if (appState.recording) {
-      appState.stopRecording();
-      this.sendCommand(Commands.stop());
-    }
+    if (appState.recording) appState.stopRecording();
     const saved = appState.saveActiveRun();
     if (saved) announce(t('a11y.liveRunSaved', { name: saved.name }));
   }
@@ -651,6 +656,11 @@ export class App {
         this.publishChannels();
         appState.setStatus(this.reportedChannels.length > 0 ? 'measuring' : 'connected');
         this.sendCommand(Commands.rate(this.effectiveRate()));
+        // Connected means streaming, for the whole session. A board powered
+        // over USB survives a page reload, so it can still be sitting in the
+        // stopped state an earlier session left it in — say so rather than
+        // waiting for the first START and showing a frozen value until then.
+        this.sendCommand(Commands.start());
         break;
       case 'tare':
         if (msg.ok) toast.success(t('toast.tareOk'), 2000);

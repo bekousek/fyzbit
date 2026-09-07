@@ -213,7 +213,7 @@ const ogSvg = Buffer.from(`
   <text x="92" y="268" font-family="Segoe UI, Roboto, DejaVu Sans, sans-serif"
         font-size="40" font-weight="600" fill="#C8E6C9">Fyzika na micro:bitu</text>
   <text x="92" y="556" font-family="Segoe UI, Roboto, DejaVu Sans, sans-serif"
-        font-size="30" fill="#E8EFE9">Datalogger v prohlížeči · teplota, vzdálenost, síla, tlak, vlhkost</text>
+        font-size="30" fill="#E8EFE9">Datalogger v prohlížeči · teplota, vzdálenost, síla, tlak</text>
   <text x="92" y="600" font-family="Segoe UI, Roboto, DejaVu Sans, sans-serif"
         font-size="28" fill="#A5D6A7">Bez instalace · bez programování · zdarma pro ZŠ a SŠ</text>
 </svg>`);

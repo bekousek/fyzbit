@@ -210,7 +210,6 @@
     "title": "Výběr"
   },
   "sensor": {
-    "dht11": "Teplota + vlhkost (DHT11)",
     "ds18b20": "Teploměr (DS18B20)",
     "hcsr04": "Sonar (HC-SR04)",
     "hx710b": "Tlakoměr (HX710B)",
@@ -272,12 +271,10 @@
   "wiring": {
     "boardCredit": "Kresba desky © Micro:bit Educational Foundation · CC BY-NC-SA 4.0",
     "ground": "zem",
-    "noteDht11": "Popisky pinů se u modulů liší (S / VCC / GND). Řiď se tím, co je natištěné na desce.",
     "noteDs18b20": "Mezi DATA a VCC patří odpor 4,7 kΩ — bez něj čidlo nic nevrátí.",
     "noteHcsr04": "Některé kusy HC-SR04 chtějí 5 V. Když na 3V nic neměří, napájej modul z 5 V.",
     "noteHx710b": "Hadičku nasaď až po zapojení, ať v čidle nezůstane přetlak.",
     "noteHx711": "Tenzometr se pájí na svorky E+, E−, A+, A− na druhé straně modulu.",
-    "noteSmallPins": "P15 a P16 jsou malé pinky — potřebuješ breakout desku nebo krokosvorky.",
     "power": "napájení",
     "signalNamed": "signál ({{name}})"
   }

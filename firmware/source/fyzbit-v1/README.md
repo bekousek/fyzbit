@@ -29,7 +29,6 @@ Skript sestaví oba projekty a spojí jejich obrazy do `public/firmware/fyzbit.h
 3. V Settings (ozubené kolo) → Project Settings se ujisti, že jsou tyto závislosti:
    - `microbit-dstemp` (verze v0.1.26)
    - `pxt-myhx711` (verze v1.0.18)
-   - `pxt-DHT11_DHT22` (verze v0.0.3)
    Pokud chybí: `Extensions` → najdi a přidej.
 4. Klikni **Download**. MakeCode vyrobí `microbit-fyzbit-v1.hex`.
 5. Přetáhni `.hex` na disk `MICROBIT`.
@@ -39,10 +38,16 @@ Skript sestaví oba projekty a spojí jejich obrazy do `public/firmware/fyzbit.h
 | Senzor | Kanál | Výchozí piny |
 |---|---|---|
 | DS18B20 (teploměr) | `t` °C | P0 (data) |
-| HX711 (siloměr) | `F` N | P15 DT / P16 SCK |
-| HC-SR04 (sonar) | `d` cm + `v` m/s | P1 Trig / P2 Echo |
-| HX710B (tlakoměr) | `p` Pa | P0 DT / P1 SCK |
-| DHT11 | `t` °C + `h` % | P0 (data) |
+| HX711 (siloměr) | `F` N | P0 DT / P1 SCK |
+| HC-SR04 (sonar) | `d` cm | P1 Trig / P2 Echo |
+| HX710B (tlakoměr) | `p` Pa | P0 OUT / P1 SCK |
+
+Všechno se vejde na **P0, P1 a P2** — jediné piny, které mají velký pad s dírou
+pro krokosvorku. P3–P16 jsou milimetrové proužky a bez breakout desky se na ně
+nedá nic pověsit, takže siloměr, který podle rozšíření `fyzikalni_senzory` patří
+na P15/P16, sedí na stejných padech jako tlakoměr: je to tentýž převodník na
+tomtéž páru drátů. Že si senzory piny přebírají, nevadí — připojený je vždycky
+jen jeden.
 
 **Po startu** firmware odešle handshake (`#HELLO;v1;board=V1` nebo `V2`, `#CH;…`, `#READY`) a začne streamovat data zvoleného senzoru s frekvencí 10 Hz.
 

@@ -90,7 +90,6 @@ Compiled into public/firmware/fyzbit.hex, also under the MIT License:
     (core, bluetooth)                Micro:bit Educational Foundation
   microbit-dstemp v0.1.26            Copyright (c) Bill Siever
   pxt-myhx711 v1.0.18                Copyright (c) daferdur
-  pxt-DHT11_DHT22 v0.0.3             Copyright (c) Alan Wang
 
 --------------------------------------------------------------------------
 Creative Commons BY-NC-SA 4.0 — NOT covered by FyzBit's MIT licence

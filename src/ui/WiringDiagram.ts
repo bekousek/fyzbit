@@ -14,14 +14,23 @@ import { escapeHtml, required } from '../utils/dom';
  */
 const BOARD_SVG = `${import.meta.env.BASE_URL}img/microbit-board.svg`;
 const BOARD_ASPECT = 191.8 / 155.6;
-const PAD_X_FRACTION: Record<string, number> = {
+const PAD_X_FRACTION = {
   P0: 0.08087,
   P1: 0.27497,
   P2: 0.49083,
   '3V': 0.70866,
   GND: 0.9013,
-};
+} as const;
 const PAD_BOTTOM_FRACTION = 0.97603;
+
+/**
+ * The five wide pads, and deliberately nothing else: they are the only ones
+ * with a 4 mm hole a crocodile clip can grip, so a sensor that needs anything
+ * else cannot be wired without a breakout board the school may not own. The
+ * firmware keeps to the same five (see firmware/source), and this type is what
+ * stops the two from drifting apart.
+ */
+type Pad = keyof typeof PAD_X_FRACTION;
 
 type WireRole = 'power' | 'ground' | 'signal';
 
@@ -47,7 +56,7 @@ const SIGNAL_FALLBACK: readonly WireColorName[] = ['blue', 'orange', 'purple'];
 
 type Wire = {
   /** micro:bit pad this wire leaves from. */
-  pad: string;
+  pad: Pad;
   /** What the sensor board prints next to the hole it goes into. */
   terminal: string;
   role: WireRole;
@@ -85,13 +94,16 @@ const SENSOR_WIRING: Record<SensorName, SensorWiring> = {
   },
   HX711: {
     nameKey: 'sensor.hx711',
+    // Terminals in the order the module prints them along its digital side.
+    // The pads are the pressure module's: same converter, same two wires, so
+    // one set of clips serves both — only ever one of them at a time.
     wires: [
       { pad: 'GND', terminal: 'GND', role: 'ground' },
-      { pad: 'P15', terminal: 'DT', role: 'signal' },
-      { pad: 'P16', terminal: 'SCK', role: 'signal' },
+      { pad: 'P0', terminal: 'DT', role: 'signal' },
+      { pad: 'P1', terminal: 'SCK', role: 'signal' },
       { pad: '3V', terminal: 'VCC', role: 'power' },
     ],
-    noteKeys: ['wiring.noteSmallPins', 'wiring.noteHx711'],
+    noteKeys: ['wiring.noteHx711'],
   },
   HCSR04: {
     nameKey: 'sensor.hcsr04',
@@ -108,22 +120,16 @@ const SENSOR_WIRING: Record<SensorName, SensorWiring> = {
   },
   HX710B: {
     nameKey: 'sensor.hx710b',
+    // Terminals in the order they are printed on the module, read with the
+    // hose nipple pointing away: GND, SCK, OUT, VCC. The wires cross on their
+    // way to the edge connector, which is what the real cables do too.
     wires: [
-      { pad: '3V', terminal: 'VCC', role: 'power' },
-      { pad: 'P0', terminal: 'OUT', role: 'signal' },
-      { pad: 'P1', terminal: 'SCK', role: 'signal' },
       { pad: 'GND', terminal: 'GND', role: 'ground' },
+      { pad: 'P1', terminal: 'SCK', role: 'signal' },
+      { pad: 'P0', terminal: 'OUT', role: 'signal' },
+      { pad: '3V', terminal: 'VCC', role: 'power' },
     ],
     noteKeys: ['wiring.noteHx710b'],
-  },
-  DHT11: {
-    nameKey: 'sensor.dht11',
-    wires: [
-      { pad: '3V', terminal: 'VCC', role: 'power' },
-      { pad: 'P0', terminal: 'DATA', role: 'signal' },
-      { pad: 'GND', terminal: 'GND', role: 'ground' },
-    ],
-    noteKeys: ['wiring.noteDht11'],
   },
 };
 
@@ -140,9 +146,6 @@ const BOARD_H = BOARD_W / BOARD_ASPECT;
  * marker placed there covers the very label the wire is pointing at.
  */
 const PAD_Y = BOARD_Y + PAD_BOTTOM_FRACTION * BOARD_H + 1.5;
-const CHIP_W = 22;
-const CHIP_GAP = 4;
-const CHIP_H = 13;
 const BUS_GAP = 12;
 const SENSOR_GAP = 16;
 const SENSOR_H = 48;
@@ -176,35 +179,16 @@ export class WiringDiagram {
     const wiring = SENSOR_WIRING[this.current];
     const sensorLabel = t(wiring.nameKey);
 
-    // Pins that aren't one of the five big pads (P15/P16) get a labelled chip
-    // under the edge connector rather than a false-precision arrow at one of
-    // the ~20 tiny strips nobody can hit without a breakout board.
-    const smallPins = [...new Set(wiring.wires.map((w) => w.pad))].filter(
-      (pad) => !(pad in PAD_X_FRACTION),
-    );
-    // Laid out side by side around the midpoint of the small-pin stretch
-    // (between pads 2 and 3V) rather than spread across it: the gap is barely
-    // two chips wide, and spreading inside it makes them overlap each other.
-    const chipSpan = smallPins.length * CHIP_W + Math.max(0, smallPins.length - 1) * CHIP_GAP;
-    const chipCentre =
-      BOARD_X + ((PAD_X_FRACTION.P2! + PAD_X_FRACTION['3V']!) / 2) * BOARD_W;
-    const chipX = smallPins.map(
-      (_, i) => chipCentre - chipSpan / 2 + CHIP_W / 2 + i * (CHIP_W + CHIP_GAP),
-    );
-    const chipBottom = PAD_Y + 8 + CHIP_H;
-
-    const sourceOf = (pad: string): { x: number; y: number } => {
-      const frac = PAD_X_FRACTION[pad];
-      if (frac !== undefined) return { x: BOARD_X + frac * BOARD_W, y: PAD_Y };
-      const i = smallPins.indexOf(pad);
-      return { x: chipX[i] ?? W / 2, y: chipBottom };
-    };
+    const sourceOf = (pad: Pad): { x: number; y: number } => ({
+      x: BOARD_X + PAD_X_FRACTION[pad] * BOARD_W,
+      y: PAD_Y,
+    });
 
     // One bus row per wire so no two horizontal runs share a line.
     const wires = [...wiring.wires].sort(
       (a, b) => sourceOf(a.pad).x - sourceOf(b.pad).x,
     );
-    const busTop = (smallPins.length > 0 ? chipBottom : PAD_Y) + 14;
+    const busTop = PAD_Y + 14;
     const sensorTop = busTop + (wires.length - 1) * BUS_GAP + SENSOR_GAP;
     const height = sensorTop + SENSOR_H + 4;
     const termX = spread(wiring.wires.length, 30, W - 30);
@@ -227,18 +211,6 @@ export class WiringDiagram {
             : (available[signalIdx++ % available.length] ?? 'blue'));
       wireColors.set(w, WIRE_COLORS[name]);
     }
-
-    const chipMarkup = smallPins
-      .map((pad, i) => {
-        const x = chipX[i]!;
-        const color = wireColors.get(wiring.wires.find((w) => w.pad === pad)!)!;
-        return `
-          <rect x="${x - CHIP_W / 2}" y="${PAD_Y + 8}" width="${CHIP_W}" height="${CHIP_H}" rx="3"
-                fill="var(--surface-2)" stroke="${color}" stroke-width="1.2" />
-          <text x="${x}" y="${PAD_Y + 17.5}" text-anchor="middle" font-size="8" font-weight="700"
-                fill="var(--fg)">${escapeHtml(pad)}</text>`;
-      })
-      .join('');
 
     const wireMarkup = wires
       .map((w, i) => {
@@ -294,9 +266,6 @@ export class WiringDiagram {
         <image class="wiring-diagram__board" href="${BOARD_SVG}" x="${BOARD_X}" y="${BOARD_Y}"
                width="${BOARD_W}" height="${round1(BOARD_H)}" />
         ${wireMarkup}
-        <!-- Chips last: a wire routed past a small-pin chip would otherwise
-             be drawn across its label. -->
-        ${chipMarkup}
         <rect x="12" y="${round1(sensorTop)}" width="${W - 24}" height="${SENSOR_H}" rx="6"
               fill="var(--surface-2)" stroke="var(--accent)" />
         ${terminalMarkup}
