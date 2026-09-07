@@ -93,10 +93,19 @@ body {
 }
 
 .page-header__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
   font-size: 20px;
   font-weight: 700;
   color: var(--accent);
   text-decoration: none;
+}
+
+.page-header__logo {
+  display: block;
+  width: 28px;
+  height: 28px;
 }
 
 .page-header__back {
@@ -282,6 +291,16 @@ body {
   max-width: 46rem;
   margin: 0 auto;
   padding: 40px 20px 36px;
+}
+
+/* The only place the full logo is shown large enough for its detail — the
+   crocodile clip and the sample dots — to actually be visible. */
+.hero__logo {
+  display: block;
+  width: 96px;
+  height: 96px;
+  margin: 0 0 18px;
+  border-radius: 20px;
 }
 
 .hero h1 {

@@ -84,13 +84,19 @@ export class ChartDataView {
 
   private syncToggleLabel(): void {
     this.toggleBtn.setAttribute('aria-pressed', String(this.tableShown));
+    const text = t(this.tableShown ? 'chart.hideTable' : 'chart.showTable');
     const label = this.toggleBtn.querySelector('.btn__label');
     if (label) {
       // The global re-scan would otherwise put "Tabulka" back on a button that
       // currently hides one.
       label.removeAttribute('data-i18n');
-      label.textContent = t(this.tableShown ? 'chart.hideTable' : 'chart.showTable');
+      label.textContent = text;
     }
+    // Narrow screens hide the visible label, so the accessible name is the
+    // only wording left — it has to say the same thing.
+    this.toggleBtn.removeAttribute('data-i18n-aria-label');
+    this.toggleBtn.setAttribute('aria-label', text);
+    this.toggleBtn.title = text;
   }
 
   private scheduleRefresh(): void {

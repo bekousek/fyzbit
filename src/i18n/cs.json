@@ -1,6 +1,7 @@
 {
   "a11y": {
     "aboutLinks": "Odkazy o aplikaci",
+    "brandHome": "FyzBit — návod a přehled senzorů",
     "currentValue": "Aktuální hodnota",
     "liveConnected": "Připojeno k micro:bitu, senzor {{sensor}}.",
     "liveConnecting": "Připojuji se k micro:bitu, vyber zařízení v dialogu prohlížeče.",

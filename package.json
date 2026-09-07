@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\"",
     "format": "prettier --write \"src/**/*.{ts,css,json,html}\" \"tests/**/*.ts\" \"*.{json,html,md,ts}\"",
-    "firmware": "node scripts/build-firmware.mjs"
+    "firmware": "node scripts/build-firmware.mjs",
+    "icons": "node scripts/make-icons.mjs"
   },
   "keywords": [
     "microbit",

@@ -31,11 +31,12 @@ sw.addEventListener('install', (event) => {
         './soukromi.html',
         './licence.html',
         './manifest.json',
-        './icon.svg',
         './icon-192.png',
         './icon-512.png',
         './favicon-32.png',
         './apple-touch-icon.png',
+        './mark.png',
+        './logo.png',
         './fonts/Roboto-Regular.ttf',
         './img/microbit-board.svg',
         // So "Prepare micro:bit" (WebUSB flash) works offline in a classroom

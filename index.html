@@ -43,7 +43,6 @@
     <link rel="alternate" hreflang="cs" href="https://fyzbit.cz/?lang=cs" />
     <link rel="alternate" hreflang="en" href="https://fyzbit.cz/?lang=en" />
     <link rel="alternate" hreflang="x-default" href="https://fyzbit.cz/" />
-    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
     <link rel="manifest" href="./manifest.json" />
@@ -126,6 +125,22 @@
       <!-- Top bar -->
       <header class="topbar">
         <div class="topbar__left">
+          <!--
+            Logo doubles as the way back to the guide. No wordmark beside it:
+            the bar already carries the status badge, the connect button, a
+            48pt live value and the sensor picker, and on a phone it wraps as
+            it is. alt="" because the link itself is named.
+          -->
+          <a
+            class="topbar__brand"
+            href="./home/"
+            data-i18n-aria-label="a11y.brandHome"
+            data-i18n-title="a11y.brandHome"
+            aria-label="FyzBit — návod a přehled senzorů"
+            title="FyzBit — návod a přehled senzorů"
+          >
+            <img class="topbar__logo" src="./mark.png" width="40" height="40" alt="" />
+          </a>
           <div class="status-badge" id="status-badge">
             <span class="status-badge__dot" aria-hidden="true"></span>
             <span class="status-badge__text" data-i18n="status.disconnected">Odpojeno</span>
@@ -190,11 +205,24 @@
         <!-- Chart -->
         <section class="panel panel--center">
           <div class="chart-toolbar">
-            <button type="button" class="btn btn--sm" id="btn-autoscale" aria-pressed="true">
+            <button
+              type="button"
+              class="btn btn--sm"
+              id="btn-autoscale"
+              aria-pressed="true"
+              data-i18n-aria-label="chart.autoscale"
+              aria-label="Automatické měřítko"
+            >
               <span class="btn__icon" aria-hidden="true">&#8962;</span>
               <span class="btn__label" data-i18n="chart.autoscale">Automatické měřítko</span>
             </button>
-            <button type="button" class="btn btn--sm" id="btn-reset-zoom">
+            <button
+              type="button"
+              class="btn btn--sm"
+              id="btn-reset-zoom"
+              data-i18n-aria-label="chart.resetZoom"
+              aria-label="Zrušit přiblížení"
+            >
               <span class="btn__icon" aria-hidden="true">&#128269;</span>
               <span class="btn__label" data-i18n="chart.resetZoom">Zrušit přiblížení</span>
             </button>
@@ -204,6 +232,8 @@
               id="btn-toggle-table"
               aria-pressed="false"
               aria-controls="chart-table"
+              data-i18n-aria-label="chart.showTable"
+              aria-label="Tabulka"
             >
               <span class="btn__icon" aria-hidden="true">&#9636;</span>
               <span class="btn__label" data-i18n="chart.showTable">Tabulka</span>

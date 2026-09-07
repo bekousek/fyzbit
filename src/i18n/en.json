@@ -1,6 +1,7 @@
 {
   "a11y": {
     "aboutLinks": "About links",
+    "brandHome": "FyzBit — guide and sensor reference",
     "currentValue": "Current value",
     "liveConnected": "Connected to the micro:bit, sensor {{sensor}}.",
     "liveConnecting": "Connecting to the micro:bit, pick a device in the browser dialog.",

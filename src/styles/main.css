@@ -149,6 +149,22 @@ body {
   gap: 8px;
 }
 
+/* Logo + link to the guide. Sized in CSS rather than left to the intrinsic
+   image size so the 160px source stays crisp on a 4x display. */
+.topbar__brand {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  border-radius: 10px;
+  text-decoration: none;
+}
+
+.topbar__logo {
+  display: block;
+  width: 40px;
+  height: 40px;
+}
+
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -568,6 +584,22 @@ body {
   padding: 4px 4px 8px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
+}
+
+/*
+ * Below this width the four labels ("Automatické měřítko", "Zrušit
+ * přiblížení", "Tabulka", "?") no longer fit side by side and start colliding.
+ * Drop to icons only; each button carries the same wording in aria-label, so
+ * nothing is lost for a screen reader or for a tooltip.
+ */
+@media (max-width: 720px) {
+  .chart-toolbar .btn__label {
+    display: none;
+  }
+
+  .chart-toolbar .btn--sm {
+    padding: 6px 12px;
+  }
 }
 
 .chart-toolbar__hint {
@@ -1586,6 +1618,13 @@ textarea.field__input {
     flex-wrap: wrap;
     gap: 10px;
     flex: 1 1 auto;
+  }
+
+  /* The bar already wraps on a phone; the logo gives up a third of its size
+     rather than a whole row. */
+  .topbar__logo {
+    width: 28px;
+    height: 28px;
   }
 
   .big-value__number {
