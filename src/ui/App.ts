@@ -15,6 +15,8 @@ import { TopBar } from './TopBar';
 import { SensorSelect } from './SensorSelect';
 import { WiringDiagram } from './WiringDiagram';
 import { ChannelControls } from './ChannelControls';
+import { ChartDataView } from './ChartDataView';
+import { announce } from './LiveRegion';
 import { MobileNav } from './MobileNav';
 import { PanelExpand } from './PanelExpand';
 import { SettingsModal } from './SettingsModal';
@@ -90,6 +92,7 @@ export class App {
     });
     this.autoSave = new AutoSave(appState, () => toast.warn(t('error.storageSaveFailed'), 0));
     this.recoveryModal = new RecoveryModal(appState, this.autoSave);
+    new ChartDataView(appState, announce);
 
     const chartHost = document.getElementById('chart-container');
     if (!chartHost) throw new Error('App: #chart-container not found');
@@ -158,6 +161,8 @@ export class App {
 
     onLanguageChange(() => applyTranslations(document));
 
+    this.wireAnnouncements();
+
     // About / version label.
     const versionEl = document.getElementById('about-version');
     const renderVersion = () => {
@@ -197,7 +202,7 @@ export class App {
     connectBtn.addEventListener('click', () => void this.handleConnectClick());
     const updateLabel = () => {
       const mode = this.connectButtonMode();
-      const span = connectBtn.querySelector('span');
+      const span = connectBtn.querySelector('.btn__label');
       if (span) {
         span.removeAttribute('data-i18n');
         span.textContent = t(
@@ -244,10 +249,12 @@ export class App {
 
     const updateStartLabel = () => {
       if (!startBtn) return;
-      const span = startBtn.querySelector('span');
+      const span = startBtn.querySelector('.btn__label');
       if (!span) return;
       span.removeAttribute('data-i18n');
       span.textContent = appState.recording ? t('button.stop') : t('button.start');
+      const icon = startBtn.querySelector('.btn__icon');
+      if (icon) icon.textContent = appState.recording ? '\u25A0' : '\u25B6';
       startBtn.classList.toggle('btn--primary', !appState.recording);
       startBtn.classList.toggle('btn--danger', appState.recording);
     };
@@ -390,7 +397,8 @@ export class App {
       appState.stopRecording();
       this.sendCommand(Commands.stop());
     }
-    appState.saveActiveRun();
+    const saved = appState.saveActiveRun();
+    if (saved) announce(t('a11y.liveRunSaved', { name: saved.name }));
   }
 
   private newRun(): void {
@@ -411,6 +419,42 @@ export class App {
     const label = await this.promptAnnotationLabel();
     if (!label) return;
     appState.addAnnotation({ t: tSec, label });
+  }
+
+  /**
+   * Everything a sighted user reads off the status badge and the START button,
+   * spoken once per change. Deliberately excludes the streaming value — see
+   * LiveRegion.ts.
+   */
+  private wireAnnouncements(): void {
+    appState.bus.on('connection-status', (status) => {
+      switch (status) {
+        case 'connecting':
+          announce(t('a11y.liveConnecting'));
+          break;
+        case 'connected':
+        case 'measuring':
+          announce(t('a11y.liveConnected', { sensor: appState.sensorName || '—' }));
+          break;
+        case 'disconnected':
+          announce(t('a11y.liveDisconnected'));
+          break;
+        case 'error':
+          announce(t('a11y.liveError'));
+          break;
+        default:
+          break;
+      }
+    });
+    appState.bus.on('recording-changed', (recording) => {
+      if (recording) {
+        announce(t('a11y.liveRecordingStarted'));
+      } else {
+        announce(
+          t('a11y.liveRecordingStopped', { count: appState.activeRun?.times.length ?? 0 }),
+        );
+      }
+    });
   }
 
   private updateButtonStates(): void {
@@ -525,13 +569,16 @@ export class App {
     if (!this.transport || !this.transport.isConnected()) return;
     const transport = this.transport;
     transport.send(cmd).catch((err) => {
-      console.error('[App] send failed:', err);
       if (!transport.isConnected() && this.transport === transport) {
+        // The cable was pulled or the board reset. Expected, already told to
+        // the user as a toast — logging an error on top is just noise.
         const wasMeasuring = appState.recording;
         appState.stopRecording();
         appState.setStatus('disconnected');
         if (wasMeasuring) toast.error(t('error.connectionLost'));
+        return;
       }
+      console.error('[App] send failed:', err);
     });
   }
 
@@ -599,7 +646,11 @@ export class App {
       }
       case 'unknown':
       default:
-        if (msg.type === 'unknown' && msg.raw.trim() !== '') {
+        // A board that has just been reset spits boot noise and half-lines
+        // down the wire before its first #HELLO; the app resynchronises on
+        // the next newline by itself. It is useful while working on the
+        // firmware and pure confusion in a classroom, so: dev only.
+        if (import.meta.env.DEV && msg.type === 'unknown' && msg.raw.trim() !== '') {
           console.warn('[App] unknown protocol line:', msg.raw);
         }
         break;

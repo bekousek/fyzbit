@@ -5,7 +5,12 @@ import { FIRMWARE_HEX_URL } from './firmware';
 
 export type FlashProgress = { stage: ProgressStage; progress?: number };
 
-export function isFlashSupported(): boolean {
+/**
+ * Not exported: ConnectionModal deliberately repeats this one-line check
+ * rather than importing it, because importing anything from this module would
+ * pull @microbit/microbit-connection into the main bundle.
+ */
+function isFlashSupported(): boolean {
   return typeof navigator !== 'undefined' && 'usb' in navigator;
 }
 

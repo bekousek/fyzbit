@@ -1,239 +1,273 @@
 {
-  "app": {
-    "title": "FyzBit",
-    "tagline": "Fyzika na micro:bitu",
-    "documentTitle": "FyzBit — datalogger pro fyzikální měření s micro:bitem"
-  },
-  "status": {
-    "disconnected": "Odpojeno",
-    "connecting": "Připojuji…",
-    "handshake": "Domlouvání…",
-    "connected": "Připojeno",
-    "measuring": "Měřím",
-    "calibrating": "Kalibruji"
-  },
-  "button": {
-    "connect": "Připojit micro:bit",
-    "start": "▶ START",
-    "stop": "■ STOP",
-    "tare": "⊘ TÁRA",
-    "saveRun": "💾 Uložit",
-    "newRun": "+ Nové",
-    "calibrate": "⚙ Kalibrovat",
-    "exportCsv": "📥 CSV",
-    "exportPdf": "📄 PDF",
-    "exportPng": "🖼 PNG",
-    "settings": "Nastavení",
-    "cancel": "Zrušit",
-    "close": "Zavřít",
-    "ok": "OK"
-  },
-  "panel": {
-    "wiring": "Zapojení",
-    "runs": "Měření",
-    "exports": "Export",
-    "expand": "Zvětšit na celou plochu",
-    "collapse": "Zmenšit zpět"
-  },
-  "wiring": {
-    "power": "napájení",
-    "ground": "zem",
-    "edgeConnector": "hranový konektor",
-    "noteSmallPins": "P15 a P16 jsou malé pinky — potřebuješ breakout desku nebo krokosvorky.",
-    "noteDs18b20": "Mezi DATA a VCC patří odpor 4,7 kΩ — bez něj čidlo nic nevrátí.",
-    "noteHx711": "Tenzometr se pájí na svorky E+, E−, A+, A− na druhé straně modulu.",
-    "noteHcsr04": "Některé kusy HC-SR04 chtějí 5 V. Když na 3V nic neměří, napájej modul z 5 V.",
-    "noteHx710b": "Hadičku nasaď až po zapojení, ať v čidle nezůstane přetlak.",
-    "noteDht11": "Popisky pinů se u modulů liší (S / VCC / GND). Řiď se tím, co je natištěné na desce.",
-    "boardCredit": "Kresba desky © Micro:bit Educational Foundation · CC BY-NC-SA 4.0",
-    "signalNamed": "signál ({{name}})"
-  },
-  "connection": {
-    "title": "Připojit micro:bit",
-    "intro": "Vyber způsob připojení k micro:bitu.",
-    "serial": "USB kabel",
-    "serialHint": "Web Serial · funguje na Chrome / Edge na Windows, macOS i Linuxu.",
-    "bluetooth": "Bluetooth",
-    "bluetoothHint": "Bez kabelu, i na tabletu a telefonu · jen micro:bit V2",
-    "mock": "🧪 Demo bez hardwaru (simulovaný senzor)",
-    "firmwareHint": "Stačí jednou. Jeden soubor pro V1 i V2 — deska si z něj sama vezme svou část a Bluetooth se zapne jen na V2.",
-    "downloadFirmware": "↓ Stáhnout firmware (.hex)",
-    "disconnect": "Odpojit",
-    "openPicker": "Vyber port v dialogu prohlížeče…",
-    "userCancelled": "Připojení zrušeno.",
-    "unsupportedBrowser": "Tento prohlížeč nepodporuje Web Serial. Použij Chrome nebo Edge.",
-    "stepFirmware": "Nahraj firmware do micro:bitu",
-    "stepConnect": "Připoj se k micro:bitu",
-    "cancelConnect": "Zrušit"
-  },
-  "flash": {
-    "title": "Připravit micro:bit",
-    "hint": "Nahraje firmware FyzBit do micro:bitu přes USB (WebUSB)",
-    "stageInitializing": "Připravuji…",
-    "stageFindingDevice": "Vyber micro:bit v dialogu prohlížeče…",
-    "stageConnecting": "Připojuji se…",
-    "stagePartialFlashing": "Nahrávám firmware (rychlý zápis)…",
-    "stageFullFlashing": "Nahrávám firmware (plný zápis)…",
-    "success": "Firmware nahrán! Teď zvol způsob připojení — USB kabel, nebo Bluetooth (jen V2).",
-    "failed": "Nahrání firmwaru selhalo"
-  },
-  "chart": {
-    "autoscale": "⌂ Autoscale",
-    "resetZoom": "🔍 Reset zoom",
-    "annotation": "📍 Anotace",
-    "annotationHint": "Tip: podrž A a klikni do grafu pro anotaci",
-    "time": "Čas (s)",
-    "noData": "Zatím žádná data — stiskni START.",
-    "aria": "Graf v reálném čase s naměřenými hodnotami"
-  },
-  "runs": {
-    "empty": "Zatím žádná uložená měření.",
-    "runName": "Měření {{n}}",
-    "active": "(probíhá)",
-    "dblclickRename": "Dvojklikem přejmenuješ",
-    "delete": "Smazat",
-    "confirmDelete": "Opravdu smazat „{{name}}“?"
-  },
-  "channel": {
-    "temperature": "Teplota",
-    "humidity": "Vlhkost",
-    "force": "Síla",
-    "distance": "Vzdálenost",
-    "speed": "Rychlost",
-    "pressure": "Tlak",
-    "show": "Zobrazit {{name}} v grafu",
-    "hide": "Skrýt {{name}} v grafu",
-    "unitFor": "Jednotka – {{name}}",
-    "acceleration": "Zrychlení"
-  },
-  "sensor": {
-    "label": "Senzor",
-    "ds18b20": "Teploměr (DS18B20)",
-    "hx711": "Siloměr (HX711)",
-    "hcsr04": "Sonar (HC-SR04)",
-    "hx710b": "Tlakoměr (HX710B)",
-    "dht11": "Teplota + vlhkost (DHT11)"
-  },
-  "stats": {
-    "min": "Minimum",
-    "max": "Maximum",
-    "avg": "Průměr",
-    "median": "Medián",
-    "deltaT": "Δt",
-    "deltaY": "Δ"
-  },
-  "pdf": {
-    "title": "Protokol měření",
-    "className": "Třída",
-    "students": "Žáci",
-    "date": "Datum",
-    "experimentTitle": "Název experimentu",
-    "notes": "Poznámky",
-    "generatedBy": "Vytvořeno aplikací FyzBit"
-  },
-  "pdfModal": {
-    "title": "Export PDF protokolu",
-    "classPlaceholder": "např. 8.A",
-    "studentsPlaceholder": "Jeden žák na řádek, nebo oddělené čárkami",
-    "experimentPlaceholder": "např. Chladnutí vody",
-    "notesPlaceholder": "Pozorování, závěry…",
-    "download": "Stáhnout PDF",
-    "noDataYet": "Nemáš žádné měření k exportu. Nejdřív něco změř."
-  },
-  "settings": {
-    "title": "Nastavení",
-    "language": "Jazyk",
-    "theme": "Motiv",
-    "themeLight": "Světlý",
-    "themeDark": "Tmavý",
-    "themeAuto": "Podle systému",
-    "samplingRate": "Vzorkovací frekvence",
-    "resetData": "Smazat všechna data",
-    "about": "O aplikaci",
-    "makecodeExt": "MakeCode rozšíření",
-    "version": "Verze {{version}}",
-    "privacyNote": "Všechna data (měření i jména žáků) zůstávají v tomto počítači; aplikace nic neodesílá.",
-    "samplingAuto": "Automaticky (podle senzoru)",
-    "samplingHint": "Sonar potřebuje co nejvíc vzorků za sekundu, teploměr si vystačí s jedním."
-  },
-  "calibration": {
-    "title": "Kalibrace senzoru",
-    "noChannels": "Nejdřív se připoj k micro:bitu, ať vím, co kalibrovat.",
-    "choose": "Vyber, který kanál chceš kalibrovat.",
-    "channel": "Kanál",
-    "prepare": "Připrav si známou referenci pro {{name}} (např. tabulkovou hodnotu nebo etalon).",
-    "enterValue": "Zadej skutečnou hodnotu pro {{name}}",
-    "valueHelp": "Použij desetinnou tečku. Hodnota se pošle do micro:bitu, který spočítá nový kalibrační faktor.",
-    "sending": "Posílám kalibraci pro {{name}}, čekám na odpověď…",
-    "waiting": "Čekám…",
-    "send": "Odeslat kalibraci",
-    "back": "← Zpět",
-    "next": "Pokračovat →",
-    "failed": "Kalibrace selhala.",
-    "failedTitle": "Kalibrace neproběhla",
-    "doneTitle": "Hotovo",
-    "doneBody": "Nový kalibrační faktor pro {{name}} je {{factor}}.",
-    "warningFactor": "Pozor: nový faktor je výrazně mimo obvyklý rozsah. Zkontroluj zadanou hodnotu a zapojení čidla.",
-    "invalidNumber": "Zadej platné číslo.",
-    "tipTemperature1": "Použij teploměr s ověřenou stupnicí nebo známou bod (tání ledu = 0 °C, var vody = 100 °C).",
-    "tipTemperature2": "Nechej čidlo aspoň 30 s ustálit v médiu, než zadáš referenční hodnotu.",
-    "tipForce1": "Pověs známé závaží (např. 1 N = 100 g) na háček siloměru.",
-    "tipForce2": "Siloměr musí být svisle a v klidu.",
-    "tipPressure1": "Použij atmosférický tlak z ČHMÚ pro danou nadmořskou výšku.",
-    "tipPressure2": "Pro hydrostatický kalibrační bod změř výšku vodního sloupce nad čidlem.",
-    "tipDistance1": "Změř známou vzdálenost metrem a ujisti se, že čidlo míří kolmo.",
-    "tipGeneric": "Připrav referenční hodnotu, kterou znáš s dostatečnou přesností."
-  },
-  "toast": {
-    "tareOk": "Vynulováno.",
-    "tareErr": "Tárování selhalo.",
-    "deviceError": "Chyba senzoru"
-  },
-  "shortcuts": {
-    "title": "Klávesové zkratky",
-    "click": "klik na graf",
-    "start": "Spustit / zastavit měření",
-    "tare": "Vynulovat (tára)",
-    "save": "Uložit měření",
-    "newRun": "Nové měření",
-    "annotation": "Přidat anotaci",
-    "annotationKeyboard": "Přidat anotaci na aktuální pozici (bez myši)",
-    "exportCsv": "Export CSV",
-    "exportPdf": "Export PDF",
-    "escape": "Reset zoomu / zavřít okno",
-    "help": "Tato nápověda"
-  },
-  "selection": {
-    "title": "Výběr",
-    "noChannels": "Připoj micro:bit pro statistiky výběru.",
-    "noSelection": "Tažením v grafu vyber oblast pro výpočet statistik."
+  "a11y": {
+    "aboutLinks": "Odkazy o aplikaci",
+    "currentValue": "Aktuální hodnota",
+    "liveConnected": "Připojeno k micro:bitu, senzor {{sensor}}.",
+    "liveConnecting": "Připojuji se k micro:bitu, vyber zařízení v dialogu prohlížeče.",
+    "liveDisconnected": "Odpojeno od micro:bitu.",
+    "liveError": "Připojení k micro:bitu selhalo.",
+    "liveRecordingStarted": "Měření spuštěno.",
+    "liveRecordingStopped": "Měření zastaveno. Zaznamenáno vzorků: {{count}}.",
+    "liveRunSaved": "Měření uloženo: {{name}}.",
+    "liveTableHidden": "Tabulka s daty skryta.",
+    "liveTableShown": "Tabulka s daty zobrazena pod grafem.",
+    "skipToChart": "Přeskočit na graf"
   },
   "annotation": {
-    "promptLabel": "Popis anotace:",
-    "defaultLabel": "Anotace"
+    "defaultLabel": "Anotace",
+    "promptLabel": "Popis anotace:"
+  },
+  "app": {
+    "documentTitle": "FyzBit — datalogger pro fyzikální měření s micro:bitem",
+    "title": "FyzBit"
+  },
+  "button": {
+    "calibrate": "Kalibrovat",
+    "cancel": "Zrušit",
+    "close": "Zavřít",
+    "connect": "Připojit micro:bit",
+    "exportCsv": "CSV",
+    "exportCsvLong": "Exportovat naměřená data do CSV",
+    "exportPdf": "PDF",
+    "exportPdfLong": "Exportovat protokol do PDF",
+    "exportPng": "PNG",
+    "exportPngLong": "Exportovat graf do PNG",
+    "newRun": "Nové měření",
+    "ok": "OK",
+    "saveRun": "Uložit",
+    "settings": "Nastavení",
+    "start": "START",
+    "stop": "STOP",
+    "tare": "TÁRA"
+  },
+  "calibration": {
+    "back": "← Zpět",
+    "channel": "Kanál",
+    "choose": "Vyber, který kanál chceš kalibrovat.",
+    "doneBody": "Nový kalibrační faktor pro {{name}} je {{factor}}.",
+    "doneTitle": "Hotovo",
+    "enterValue": "Zadej skutečnou hodnotu pro {{name}}",
+    "failed": "Kalibrace selhala.",
+    "failedTitle": "Kalibrace neproběhla",
+    "invalidNumber": "Zadej platné číslo.",
+    "next": "Pokračovat →",
+    "noChannels": "Nejdřív se připoj k micro:bitu, ať vím, co kalibrovat.",
+    "prepare": "Připrav si známou referenci pro {{name}} (např. tabulkovou hodnotu nebo etalon).",
+    "send": "Odeslat kalibraci",
+    "sending": "Posílám kalibraci pro {{name}}, čekám na odpověď…",
+    "tipDistance1": "Změř známou vzdálenost metrem a ujisti se, že čidlo míří kolmo.",
+    "tipForce1": "Pověs známé závaží (např. 1 N = 100 g) na háček siloměru.",
+    "tipForce2": "Siloměr musí být svisle a v klidu.",
+    "tipGeneric": "Připrav referenční hodnotu, kterou znáš s dostatečnou přesností.",
+    "tipPressure1": "Použij atmosférický tlak z ČHMÚ pro danou nadmořskou výšku.",
+    "tipPressure2": "Pro hydrostatický kalibrační bod změř výšku vodního sloupce nad čidlem.",
+    "tipTemperature1": "Použij teploměr s ověřenou stupnicí nebo známou bod (tání ledu = 0 °C, var vody = 100 °C).",
+    "tipTemperature2": "Nechej čidlo aspoň 30 s ustálit v médiu, než zadáš referenční hodnotu.",
+    "title": "Kalibrace senzoru",
+    "valueHelp": "Použij desetinnou tečku. Hodnota se pošle do micro:bitu, který spočítá nový kalibrační faktor.",
+    "waiting": "Čekám…",
+    "warningFactor": "Pozor: nový faktor je výrazně mimo obvyklý rozsah. Zkontroluj zadanou hodnotu a zapojení čidla."
+  },
+  "channel": {
+    "acceleration": "Zrychlení",
+    "distance": "Vzdálenost",
+    "force": "Síla",
+    "hide": "Skrýt {{name}} v grafu",
+    "humidity": "Vlhkost",
+    "pressure": "Tlak",
+    "show": "Zobrazit {{name}} v grafu",
+    "speed": "Rychlost",
+    "temperature": "Teplota",
+    "unitFor": "Jednotka – {{name}}"
+  },
+  "chart": {
+    "annotationHint": "Tip: podrž A a klikni do grafu pro anotaci",
+    "aria": "Graf v reálném čase s naměřenými hodnotami",
+    "autoscale": "Automatické měřítko",
+    "hideTable": "Skrýt tabulku",
+    "noData": "Zatím žádná data — stiskni START.",
+    "resetZoom": "Zrušit přiblížení",
+    "showTable": "Tabulka",
+    "summaryIntro": "Graf naměřených hodnot. Měření: {{runs}}. Veličiny: {{channels}}. Čas: 0 až {{duration}} s.",
+    "summarySeries": "{{run}} – {{channel}}: vzorků {{count}}, minimum {{min}} {{unit}}, maximum {{max}} {{unit}}, průměr {{avg}} {{unit}}, {{trend}}.",
+    "tableCaption": "Naměřené hodnoty — {{run}}",
+    "tableEmpty": "Zatím není co zobrazit v tabulce.",
+    "tableTruncated": "Zobrazeno {{shown}} z {{total}} vzorků (každý {{step}}. řádek). Úplná data získáš exportem do CSV.",
+    "time": "Čas (s)",
+    "trendDown": "hodnoty v čase klesají",
+    "trendFlat": "hodnoty se výrazně nemění",
+    "trendUp": "hodnoty v čase rostou"
+  },
+  "connection": {
+    "bluetooth": "Bluetooth",
+    "bluetoothHint": "Bez kabelu, i na tabletu a telefonu · jen micro:bit V2",
+    "cancelConnect": "Zrušit",
+    "disconnect": "Odpojit",
+    "downloadFirmware": "Stáhnout firmware (.hex)",
+    "firmwareHint": "Stačí jednou. Jeden soubor pro V1 i V2 — deska si z něj sama vezme svou část a Bluetooth se zapne jen na V2.",
+    "guideLink": "Nevíš, jak senzor zapojit? Otevři návod →",
+    "insecureContext": "Připojení k micro:bitu funguje jen na https:// nebo na localhost. Tahle stránka běží na nezabezpečeném spojení, takže prohlížeč přístup k zařízení zakázal. Otevři aplikaci na adrese https://fyzbit.cz/.",
+    "mock": "Demo bez hardwaru (simulovaný senzor)",
+    "mockLabel": "Demo (simulovaný teploměr)",
+    "serial": "USB kabel",
+    "serialHint": "Web Serial · funguje na Chrome / Edge na Windows, macOS i Linuxu.",
+    "stepConnect": "Připoj se k micro:bitu",
+    "stepFirmware": "Nahraj firmware do micro:bitu",
+    "title": "Připojit micro:bit",
+    "unsupportedBluetooth": "Tento prohlížeč neumí Web Bluetooth. Funguje Chrome nebo Edge na Windows, macOS, Linuxu, Androidu a ChromeOS; Firefox ani Safari (včetně všech prohlížečů na iPhonu a iPadu) toto rozhraní nemají. Na počítači použij USB kabel.",
+    "unsupportedSerial": "Tento prohlížeč neumí Web Serial, takže se přes USB kabel připojit nedá. Funguje Chrome, Edge nebo Opera na počítači; Firefox ani Safari toto rozhraní nemají. Na tabletu a telefonu zvol Bluetooth.",
+    "unsupportedUsb": "Tento prohlížeč neumí WebUSB, takže firmware odsud nahrát nejde. Stáhni si soubor .hex níže a přetáhni ho na disk MICROBIT, který se objeví po připojení desky kabelem."
+  },
+  "error": {
+    "browserUnsupported": "Tento prohlížeč neumí Web Serial ani Web Bluetooth, takže se k micro:bitu nepřipojí. Funguje Chrome, Edge nebo Opera; Firefox a Safari (a všechny prohlížeče na iPhonu a iPadu) tato rozhraní nemají. Aplikaci si můžeš projít v demo režimu se simulovaným senzorem.",
+    "calibrationTimeout": "Kalibrace neodpověděla. Zkus znovu.",
+    "connectionLost": "Spojení s micro:bitem ztraceno.",
+    "insecureContext": "Stránka neběží po zabezpečeném spojení (https), takže prohlížeč zakázal přístup k micro:bitu. Otevři aplikaci na https://fyzbit.cz/.",
+    "storageSaveFailed": "Automatické ukládání selhává (plné úložiště nebo režim soukromého prohlížení) — probíhající měření se neukládá."
+  },
+  "flash": {
+    "failed": "Nahrání firmwaru selhalo",
+    "hint": "Nahraje firmware FyzBit do micro:bitu přes USB (WebUSB)",
+    "stageConnecting": "Připojuji se…",
+    "stageFindingDevice": "Vyber micro:bit v dialogu prohlížeče…",
+    "stageFullFlashing": "Nahrávám firmware (plný zápis)…",
+    "stageInitializing": "Připravuji…",
+    "stagePartialFlashing": "Nahrávám firmware (rychlý zápis)…",
+    "success": "Firmware nahrán! Teď zvol způsob připojení — USB kabel, nebo Bluetooth (jen V2).",
+    "title": "Připravit micro:bit"
+  },
+  "footer": {
+    "accessibility": "Prohlášení o přístupnosti",
+    "guide": "Návod a přehled senzorů",
+    "licenses": "Licence a knihovny",
+    "mitLicense": "Licence MIT",
+    "privacy": "Ochrana soukromí"
+  },
+  "nav": {
+    "aria": "Sekce aplikace",
+    "chart": "Graf"
+  },
+  "panel": {
+    "collapse": "Zmenšit zpět",
+    "expand": "Zvětšit na celou plochu",
+    "exports": "Export",
+    "runs": "Měření",
+    "wiring": "Zapojení"
+  },
+  "pdf": {
+    "className": "Třída",
+    "date": "Datum",
+    "experimentTitle": "Název experimentu",
+    "generatedBy": "Vytvořeno aplikací FyzBit",
+    "notes": "Poznámky",
+    "students": "Žáci",
+    "title": "Protokol měření"
+  },
+  "pdfModal": {
+    "classPlaceholder": "např. 8.A",
+    "download": "Stáhnout PDF",
+    "experimentPlaceholder": "např. Chladnutí vody",
+    "noDataYet": "Nemáš žádné měření k exportu. Nejdřív něco změř.",
+    "notesPlaceholder": "Pozorování, závěry…",
+    "studentsHint": "Jeden žák na řádek, nebo oddělené čárkami. Jména se ukládají jen do tohoto prohlížeče.",
+    "studentsPlaceholder": "Jeden žák na řádek, nebo oddělené čárkami",
+    "title": "Export PDF protokolu"
   },
   "recovery": {
-    "title": "Obnovit poslední session?",
-    "description": "Našel jsem rozpracované měření z minulého běhu. Chceš pokračovat, kde jsi skončil/a?",
-    "date": "Naposledy uloženo",
-    "points": "Počet vzorků",
     "annotations": "Anotace",
+    "date": "Naposledy uloženo",
+    "description": "Našel jsem rozpracované měření z minulého běhu. Chceš pokračovat, kde jsi skončil/a?",
+    "discard": "Zahodit",
+    "points": "Počet vzorků",
     "restore": "Obnovit",
-    "discard": "Zahodit"
+    "title": "Obnovit poslední session?"
   },
   "resetData": {
     "confirm": "Opravdu smazat všechna lokálně uložená data (uložená měření, jména žáků, motiv a jazyk)?",
     "done": "Smazáno. Obnov stránku pro čistý start.",
     "failed": "Část dat se nepodařilo smazat (chyba úložiště prohlížeče). Zkus to znovu nebo zkontroluj režim soukromého prohlížení."
   },
-  "error": {
-    "browserUnsupported": "Tento prohlížeč nepodporuje připojení k micro:bitu. Použij Chrome nebo Edge.",
-    "connectionLost": "Spojení s micro:bitem ztraceno.",
-    "calibrationTimeout": "Kalibrace neodpověděla. Zkus znovu.",
-    "storageSaveFailed": "Automatické ukládání selhává (plné úložiště nebo režim soukromého prohlížení) — probíhající měření se neukládá."
+  "runs": {
+    "confirmDelete": "Opravdu smazat „{{name}}“?",
+    "dblclickRename": "Dvojklikem přejmenuješ",
+    "delete": "Smazat",
+    "deleteNamed": "Smazat: {{name}}",
+    "empty": "Zatím žádná uložená měření.",
+    "rename": "Přejmenovat: {{name}}",
+    "runName": "Měření {{n}}",
+    "toggleVisible": "Zobrazit v grafu: {{name}}"
   },
-  "nav": {
-    "chart": "Graf",
-    "aria": "Sekce aplikace"
+  "selection": {
+    "title": "Výběr"
+  },
+  "sensor": {
+    "dht11": "Teplota + vlhkost (DHT11)",
+    "ds18b20": "Teploměr (DS18B20)",
+    "hcsr04": "Sonar (HC-SR04)",
+    "hx710b": "Tlakoměr (HX710B)",
+    "hx711": "Siloměr (HX711)",
+    "label": "Senzor"
+  },
+  "settings": {
+    "about": "O aplikaci",
+    "language": "Jazyk",
+    "makecodeExt": "MakeCode rozšíření",
+    "privacyNote": "Všechna data (měření i jména žáků) zůstávají v tomto počítači; aplikace nic neodesílá.",
+    "resetData": "Smazat všechna data",
+    "samplingAuto": "Automaticky (podle senzoru)",
+    "samplingHint": "Sonar potřebuje co nejvíc vzorků za sekundu, teploměr si vystačí s jedním.",
+    "samplingRate": "Vzorkovací frekvence",
+    "theme": "Motiv",
+    "themeAuto": "Podle systému",
+    "themeDark": "Tmavý",
+    "themeLight": "Světlý",
+    "title": "Nastavení",
+    "version": "Verze {{version}}"
+  },
+  "shortcuts": {
+    "annotation": "Přidat anotaci",
+    "annotationKeyboard": "Přidat anotaci na aktuální pozici (bez myši)",
+    "click": "klik na graf",
+    "escape": "Reset zoomu / zavřít okno",
+    "exportCsv": "Export CSV",
+    "exportPdf": "Export PDF",
+    "help": "Tato nápověda",
+    "newRun": "Nové měření",
+    "save": "Uložit měření",
+    "start": "Spustit / zastavit měření",
+    "tare": "Vynulovat (tára)",
+    "title": "Klávesové zkratky"
+  },
+  "stats": {
+    "avg": "Průměr",
+    "deltaY": "Δ",
+    "max": "Maximum",
+    "median": "Medián",
+    "min": "Minimum"
+  },
+  "status": {
+    "calibrating": "Kalibruji",
+    "connected": "Připojeno",
+    "connecting": "Připojuji…",
+    "disconnected": "Odpojeno",
+    "handshake": "Domlouvání…",
+    "measuring": "Měřím"
+  },
+  "toast": {
+    "deviceError": "Chyba senzoru",
+    "tareErr": "Tárování selhalo.",
+    "tareOk": "Vynulováno."
+  },
+  "wiring": {
+    "boardCredit": "Kresba desky © Micro:bit Educational Foundation · CC BY-NC-SA 4.0",
+    "ground": "zem",
+    "noteDht11": "Popisky pinů se u modulů liší (S / VCC / GND). Řiď se tím, co je natištěné na desce.",
+    "noteDs18b20": "Mezi DATA a VCC patří odpor 4,7 kΩ — bez něj čidlo nic nevrátí.",
+    "noteHcsr04": "Některé kusy HC-SR04 chtějí 5 V. Když na 3V nic neměří, napájej modul z 5 V.",
+    "noteHx710b": "Hadičku nasaď až po zapojení, ať v čidle nezůstane přetlak.",
+    "noteHx711": "Tenzometr se pájí na svorky E+, E−, A+, A− na druhé straně modulu.",
+    "noteSmallPins": "P15 a P16 jsou malé pinky — potřebuješ breakout desku nebo krokosvorky.",
+    "power": "napájení",
+    "signalNamed": "signál ({{name}})"
   }
 }

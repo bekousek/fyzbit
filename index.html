@@ -3,29 +3,49 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#1B5E20" />
+    <meta name="theme-color" content="#1B5E20" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f1410" media="(prefers-color-scheme: dark)" />
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'"
     />
     <meta name="description" content="Webový datalogger pro micro:bit — měření teploty, vzdálenosti, síly, tlaku i vlhkosti přímo v prohlížeči. Bez instalace, bez programování. Zdarma pro ZŠ a SŠ." />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="FyzBit" />
+    <meta property="og:site_name" content="FyzBit" />
+    <meta property="og:locale" content="cs_CZ" />
+    <meta property="og:locale:alternate" content="en_GB" />
+    <meta property="og:title" content="FyzBit — datalogger pro fyzikální měření s micro:bitem" />
     <meta
       property="og:description"
       content="Webový datalogger pro micro:bit — měření teploty, vzdálenosti, síly, tlaku i vlhkosti přímo v prohlížeči. Bez instalace, bez programování. Zdarma pro ZŠ a SŠ."
     />
     <meta property="og:url" content="https://fyzbit.cz/" />
-    <meta property="og:image" content="https://fyzbit.cz/icon-512.png" />
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="FyzBit" />
+    <meta property="og:image" content="https://fyzbit.cz/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="FyzBit — Fyzika na micro:bitu. Datalogger v prohlížeči pro teplotu, vzdálenost, sílu, tlak a vlhkost."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="FyzBit — datalogger pro fyzikální měření s micro:bitem" />
     <meta
       name="twitter:description"
       content="Webový datalogger pro micro:bit — měření teploty, vzdálenosti, síly, tlaku i vlhkosti přímo v prohlížeči. Bez instalace, bez programování. Zdarma pro ZŠ a SŠ."
     />
-    <meta name="twitter:image" content="https://fyzbit.cz/icon-512.png" />
+    <meta name="twitter:image" content="https://fyzbit.cz/og-image.png" />
     <link rel="canonical" href="https://fyzbit.cz/" />
+    <!--
+      One URL serves both languages; ?lang= picks one explicitly so a teacher
+      can hand out an English link, and so hreflang has something real to
+      point at. x-default is the plain URL, which auto-detects.
+    -->
+    <link rel="alternate" hreflang="cs" href="https://fyzbit.cz/?lang=cs" />
+    <link rel="alternate" hreflang="en" href="https://fyzbit.cz/?lang=en" />
+    <link rel="alternate" hreflang="x-default" href="https://fyzbit.cz/" />
     <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
     <link rel="manifest" href="./manifest.json" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -34,7 +54,8 @@
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "WebApplication",
+        "@type": "SoftwareApplication",
+        "@id": "https://fyzbit.cz/#app",
         "name": "FyzBit",
         "url": "https://fyzbit.cz/",
         "description": "Webový datalogger pro micro:bit — měření teploty, vzdálenosti, síly, tlaku i vlhkosti přímo v prohlížeči. Bez instalace, bez programování. Zdarma pro ZŠ a SŠ.",
@@ -62,8 +83,45 @@
         }
       }
     </script>
+    <!--
+      Analytics: deliberately none. No Google Analytics, no tag manager, no
+      pixel — the privacy page promises exactly that, and every one of them
+      would need a cookie banner the app currently does not.
+
+      If visitor counts are ever wanted, GoatCounter is the cookie-free option
+      that keeps that promise: it stores nothing on the visitor's device and
+      does not build a cross-site profile, so it stays within "technically
+      necessary" and needs no consent banner under § 89 odst. 3 zákona
+      č. 127/2005 Sb.
+
+      To switch it on, three things have to happen together:
+        1. Register a site at https://www.goatcounter.com/ and put the code in
+           the data-goatcounter URL below.
+        2. Uncomment the <script> tag.
+        3. Widen the Content-Security-Policy above — the current
+           `script-src 'self'` and `connect-src 'self'` will block it:
+              script-src 'self' https://gc.zgo.at;
+              connect-src 'self' https://*.goatcounter.com;
+        4. Say so on soukromi.html. The page currently states that no
+           analytics runs at all, and that has to stay true.
+
+      <script
+        data-goatcounter="https://VASE-JMENO.goatcounter.com/count"
+        async
+        src="https://gc.zgo.at/count.js"
+      ></script>
+    -->
   </head>
   <body>
+    <a class="skip-link" href="#chart-container" data-i18n="a11y.skipToChart"
+      >Přeskočit na graf</a
+    >
+    <!--
+      Discrete state changes only (connected / recording / saved). The live
+      numeric value is deliberately NOT live: at 50 Hz it would talk over
+      everything else a screen reader has to say.
+    -->
+    <p id="a11y-live" class="visually-hidden" role="status" aria-live="polite"></p>
     <div id="app" data-view="chart" data-expanded="none">
       <!-- Top bar -->
       <header class="topbar">
@@ -73,9 +131,10 @@
             <span class="status-badge__text" data-i18n="status.disconnected">Odpojeno</span>
           </div>
           <button type="button" class="btn btn--primary" id="btn-connect">
-            <span data-i18n="button.connect">Připojit micro:bit</span>
+            <span class="btn__label" data-i18n="button.connect">Připojit micro:bit</span>
           </button>
-          <div class="big-value" id="big-value" aria-live="polite">
+          <div class="big-value" id="big-value">
+            <span class="visually-hidden" data-i18n="a11y.currentValue">Aktuální hodnota</span>
             <span class="big-value__number">—</span>
             <span class="big-value__unit"></span>
           </div>
@@ -132,10 +191,22 @@
         <section class="panel panel--center">
           <div class="chart-toolbar">
             <button type="button" class="btn btn--sm" id="btn-autoscale" aria-pressed="true">
-              <span data-i18n="chart.autoscale">&#8962; Autoscale</span>
+              <span class="btn__icon" aria-hidden="true">&#8962;</span>
+              <span class="btn__label" data-i18n="chart.autoscale">Automatické měřítko</span>
             </button>
             <button type="button" class="btn btn--sm" id="btn-reset-zoom">
-              <span data-i18n="chart.resetZoom">&#128269; Reset zoom</span>
+              <span class="btn__icon" aria-hidden="true">&#128269;</span>
+              <span class="btn__label" data-i18n="chart.resetZoom">Zrušit přiblížení</span>
+            </button>
+            <button
+              type="button"
+              class="btn btn--sm"
+              id="btn-toggle-table"
+              aria-pressed="false"
+              aria-controls="chart-table"
+            >
+              <span class="btn__icon" aria-hidden="true">&#9636;</span>
+              <span class="btn__label" data-i18n="chart.showTable">Tabulka</span>
             </button>
             <button
               type="button"
@@ -170,13 +241,24 @@
             </button>
           </div>
           <div class="channel-controls" id="channel-controls" hidden></div>
+          <!--
+            role="img" plus a tab stop: the canvas itself says nothing, so the
+            generated summary below is the whole accessible content of the
+            chart — without tabindex a keyboard user could never land on it.
+          -->
           <div
             class="chart-container"
             id="chart-container"
             role="img"
+            tabindex="0"
+            aria-describedby="chart-summary"
             data-i18n-aria-label="chart.aria"
             aria-label="Graf v reálném čase"
           ></div>
+          <p class="chart-summary" id="chart-summary" data-i18n="chart.noData">
+            Zatím žádná data — stiskni START.
+          </p>
+          <div class="chart-table" id="chart-table" hidden></div>
           <div class="selection-stats" id="selection-stats" hidden></div>
         </section>
 
@@ -206,19 +288,44 @@
             <li class="runs-list__empty" data-i18n="runs.empty">Zatím žádná uložená měření.</li>
           </ul>
           <button type="button" class="btn btn--sm" id="btn-new-run" disabled>
-            <span data-i18n="button.newRun">+ Nové</span>
+            <span class="btn__icon" aria-hidden="true">+</span>
+            <span class="btn__label" data-i18n="button.newRun">Nové měření</span>
           </button>
 
           <h2 class="panel__title panel__title--spaced" data-i18n="panel.exports">Export</h2>
           <div class="actions actions--column">
-            <button type="button" class="btn btn--sm" id="btn-export-csv" disabled>
-              <span data-i18n="button.exportCsv">&#128229; CSV</span>
+            <button
+              type="button"
+              class="btn btn--sm"
+              id="btn-export-csv"
+              data-i18n-aria-label="button.exportCsvLong"
+              aria-label="Exportovat naměřená data do CSV"
+              disabled
+            >
+              <span class="btn__icon" aria-hidden="true">&#128229;</span>
+              <span class="btn__label" data-i18n="button.exportCsv">CSV</span>
             </button>
-            <button type="button" class="btn btn--sm" id="btn-export-pdf" disabled>
-              <span data-i18n="button.exportPdf">&#128196; PDF</span>
+            <button
+              type="button"
+              class="btn btn--sm"
+              id="btn-export-pdf"
+              data-i18n-aria-label="button.exportPdfLong"
+              aria-label="Exportovat protokol do PDF"
+              disabled
+            >
+              <span class="btn__icon" aria-hidden="true">&#128196;</span>
+              <span class="btn__label" data-i18n="button.exportPdf">PDF</span>
             </button>
-            <button type="button" class="btn btn--sm" id="btn-export-png" disabled>
-              <span data-i18n="button.exportPng">&#128375; PNG</span>
+            <button
+              type="button"
+              class="btn btn--sm"
+              id="btn-export-png"
+              data-i18n-aria-label="button.exportPngLong"
+              aria-label="Exportovat graf do PNG"
+              disabled
+            >
+              <span class="btn__icon" aria-hidden="true">&#128375;</span>
+              <span class="btn__label" data-i18n="button.exportPng">PNG</span>
             </button>
           </div>
         </aside>
@@ -226,16 +333,20 @@
         <!-- Measurement controls: own row on desktop, sticky bottom bar on mobile -->
         <div class="actionbar">
           <button type="button" class="btn btn--primary btn--lg" id="btn-start">
-            <span data-i18n="button.start">&#9654; START</span>
+            <span class="btn__icon" aria-hidden="true">&#9654;</span>
+            <span class="btn__label" data-i18n="button.start">START</span>
           </button>
           <button type="button" class="btn btn--lg" id="btn-tare" disabled>
-            <span data-i18n="button.tare">&#8856; TÁRA</span>
+            <span class="btn__icon" aria-hidden="true">&#8856;</span>
+            <span class="btn__label" data-i18n="button.tare">TÁRA</span>
           </button>
           <button type="button" class="btn btn--lg" id="btn-save-run" disabled>
-            <span data-i18n="button.saveRun">&#128190; Uložit</span>
+            <span class="btn__icon" aria-hidden="true">&#128190;</span>
+            <span class="btn__label" data-i18n="button.saveRun">Uložit</span>
           </button>
           <button type="button" class="btn btn--lg" id="btn-calibrate" disabled>
-            <span data-i18n="button.calibrate">&#9881; Kalibrovat</span>
+            <span class="btn__icon" aria-hidden="true">&#9881;</span>
+            <span class="btn__label" data-i18n="button.calibrate">Kalibrovat</span>
           </button>
         </div>
       </main>
@@ -299,12 +410,12 @@
           </button>
         </header>
         <div class="modal__body">
-          <label class="field">
-            <span class="field__label" data-i18n="pdf.date">Datum</span>
+          <div class="field">
+            <label class="field__label" for="pdf-date" data-i18n="pdf.date">Datum</label>
             <input type="text" id="pdf-date" class="field__input" readonly />
-          </label>
-          <label class="field">
-            <span class="field__label" data-i18n="pdf.className">Třída</span>
+          </div>
+          <div class="field">
+            <label class="field__label" for="pdf-class" data-i18n="pdf.className">Třída</label>
             <input
               type="text"
               id="pdf-class"
@@ -312,20 +423,25 @@
               data-i18n-placeholder="pdfModal.classPlaceholder"
               placeholder="např. 8.A"
             />
-          </label>
-          <label class="field">
-            <span class="field__label" data-i18n="pdf.students">Žáci</span>
+          </div>
+          <div class="field">
+            <label class="field__label" for="pdf-students" data-i18n="pdf.students">Žáci</label>
             <textarea
               id="pdf-students"
               class="field__input"
               rows="3"
+              aria-describedby="pdf-students-hint"
               data-i18n-placeholder="pdfModal.studentsPlaceholder"
               placeholder="Jeden žák na řádek, nebo oddělené čárkami"
             ></textarea>
-          </label>
-          <label class="field">
-            <span class="field__label" data-i18n="pdf.experimentTitle"
-              >Název experimentu</span
+            <small class="field__hint" id="pdf-students-hint" data-i18n="pdfModal.studentsHint"
+              >Jeden žák na řádek, nebo oddělené čárkami. Jména se ukládají jen do tohoto
+              prohlížeče.</small
+            >
+          </div>
+          <div class="field">
+            <label class="field__label" for="pdf-experiment" data-i18n="pdf.experimentTitle"
+              >Název experimentu</label
             >
             <input
               type="text"
@@ -334,9 +450,9 @@
               data-i18n-placeholder="pdfModal.experimentPlaceholder"
               placeholder="např. Chladnutí vody"
             />
-          </label>
-          <label class="field">
-            <span class="field__label" data-i18n="pdf.notes">Poznámky</span>
+          </div>
+          <div class="field">
+            <label class="field__label" for="pdf-notes" data-i18n="pdf.notes">Poznámky</label>
             <textarea
               id="pdf-notes"
               class="field__input"
@@ -344,7 +460,7 @@
               data-i18n-placeholder="pdfModal.notesPlaceholder"
               placeholder="Pozorování, závěry…"
             ></textarea>
-          </label>
+          </div>
         </div>
         <footer class="modal__footer">
           <button type="button" class="btn" id="btn-pdf-cancel">
@@ -393,14 +509,23 @@
               </span>
             </button>
             <div class="flash-progress" id="flash-progress" hidden>
-              <div class="flash-progress__bar">
+              <div
+                class="flash-progress__bar"
+                id="flash-progress-bar"
+                role="progressbar"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-labelledby="flash-progress-label"
+              >
                 <div class="flash-progress__fill" id="flash-progress-fill"></div>
               </div>
-              <p class="flash-progress__label" id="flash-progress-label"></p>
+              <p class="flash-progress__label" id="flash-progress-label" role="status"></p>
             </div>
-            <p class="connection-error" id="flash-error" hidden></p>
+            <p class="connection-error" id="flash-error" role="alert" hidden></p>
+            <p class="connection-note" id="flash-unavailable" hidden></p>
             <a class="connection-secondary" id="link-download-firmware" download>
-              <span data-i18n="connection.downloadFirmware">&#8595; Stáhnout firmware (.hex)</span>
+              <span aria-hidden="true">&#8595;</span>
+              <span data-i18n="connection.downloadFirmware">Stáhnout firmware (.hex)</span>
             </a>
           </section>
 
@@ -424,6 +549,7 @@
                 >
               </span>
             </button>
+            <p class="connection-note" id="serial-unavailable" hidden></p>
             <button
               type="button"
               class="connect-option"
@@ -438,15 +564,22 @@
                 >
               </span>
             </button>
-            <p class="connection-error" id="connection-error" hidden></p>
+            <p class="connection-note" id="bluetooth-unavailable" hidden></p>
+            <p class="connection-error" id="connection-error" role="alert" hidden></p>
             <button
               type="button"
               class="connection-secondary"
               id="btn-connect-mock"
               data-transport="mock"
             >
-              <span data-i18n="connection.mock">&#129514; Demo bez hardwaru (simulovaný senzor)</span>
+              <span aria-hidden="true">&#129514;</span>
+              <span data-i18n="connection.mock">Demo bez hardwaru (simulovaný senzor)</span>
             </button>
+            <!-- Where someone stuck on wiring or on an unsupported browser
+                 actually is when they get stuck. -->
+            <a class="connection-secondary" href="./home/" data-i18n="connection.guideLink"
+              >Nevíš, jak senzor zapojit? Otevři návod →</a
+            >
           </section>
         </div>
       </div>
@@ -468,13 +601,15 @@
           </button>
         </header>
         <div class="modal__body">
-          <label class="field">
-            <span class="field__label" data-i18n="settings.language">Jazyk</span>
+          <div class="field">
+            <label class="field__label" for="setting-language" data-i18n="settings.language"
+              >Jazyk</label
+            >
             <select id="setting-language" class="field__input">
-              <option value="cs">Čeština</option>
-              <option value="en">English</option>
+              <option value="cs" lang="cs">Čeština</option>
+              <option value="en" lang="en">English</option>
             </select>
-          </label>
+          </div>
           <fieldset class="field">
             <legend class="field__label" data-i18n="settings.theme">Motiv</legend>
             <label class="radio">
@@ -490,9 +625,11 @@
               <span data-i18n="settings.themeAuto">Podle systému</span>
             </label>
           </fieldset>
-          <label class="field">
-            <span class="field__label" data-i18n="settings.samplingRate">Vzorkovací frekvence</span>
-            <select id="setting-sampling" class="field__input">
+          <div class="field">
+            <label class="field__label" for="setting-sampling" data-i18n="settings.samplingRate"
+              >Vzorkovací frekvence</label
+            >
+            <select id="setting-sampling" class="field__input" aria-describedby="sampling-hint">
               <option value="auto" selected data-i18n="settings.samplingAuto">
                 Automaticky (podle senzoru)
               </option>
@@ -502,10 +639,10 @@
               <option value="25">25 Hz</option>
               <option value="50">50 Hz</option>
             </select>
-            <small class="field__hint" data-i18n="settings.samplingHint"
+            <small class="field__hint" id="sampling-hint" data-i18n="settings.samplingHint"
               >Sonar potřebuje co nejvíc vzorků za sekundu, teploměr si vystačí s jedním.</small
             >
-          </label>
+          </div>
           <div class="field">
             <button type="button" class="btn btn--danger" id="btn-reset-data">
               <span data-i18n="settings.resetData">Smazat všechna data</span>
@@ -517,12 +654,20 @@
             </p>
             <p>
               <span data-i18n="app.title">FyzBit</span>
-              <span id="about-version">v0.1.0</span>
+              <span id="about-version"></span>
             </p>
             <p data-i18n="settings.privacyNote">
               Všechna data (měření i jména žáků) zůstávají v tomto počítači; aplikace nic
               neodesílá.
             </p>
+            <nav class="about__links" data-i18n-aria-label="a11y.aboutLinks" aria-label="Odkazy o aplikaci">
+              <a href="./home/" data-i18n="footer.guide">Návod a přehled senzorů</a>
+              <a href="./soukromi.html" data-i18n="footer.privacy">Ochrana soukromí</a>
+              <a href="./pristupnost.html" data-i18n="footer.accessibility"
+                >Prohlášení o přístupnosti</a
+              >
+              <a href="./licence.html" data-i18n="footer.licenses">Licence a knihovny</a>
+            </nav>
             <p>
               <a
                 href="https://github.com/bekousek/fyzbit"
@@ -530,7 +675,15 @@
                 rel="noopener noreferrer"
                 >GitHub</a
               >
-              · MIT ·
+              ·
+              <a
+                href="https://github.com/bekousek/fyzbit/blob/main/LICENSE"
+                target="_blank"
+                rel="noopener noreferrer"
+                data-i18n="footer.mitLicense"
+                >Licence MIT</a
+              >
+              ·
               <a
                 href="https://github.com/bekousek/fyzikalni_senzory"
                 target="_blank"

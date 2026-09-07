@@ -1,0 +1,735 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1B5E20" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f1410" media="(prefers-color-scheme: dark)" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'"
+    />
+    <title>FyzBit — návod a přehled senzorů</title>
+    <meta
+      name="description"
+      content="Jak měřit s micro:bitem teplotu, vzdálenost, rychlost, sílu, tlak a vlhkost přímo v prohlížeči. Zapojení všech pěti senzorů, tára a kalibrace, export do CSV a PDF, řešení problémů."
+    />
+    <link rel="canonical" href="https://fyzbit.cz/home/" />
+    <link rel="alternate" hreflang="cs" href="https://fyzbit.cz/home/" />
+    <link rel="alternate" hreflang="x-default" href="https://fyzbit.cz/home/" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="FyzBit" />
+    <meta property="og:locale" content="cs_CZ" />
+    <meta property="og:title" content="FyzBit — návod a přehled senzorů" />
+    <meta
+      property="og:description"
+      content="Jak měřit s micro:bitem teplotu, vzdálenost, rychlost, sílu, tlak a vlhkost přímo v prohlížeči. Zapojení, kalibrace, export dat."
+    />
+    <meta property="og:url" content="https://fyzbit.cz/home/" />
+    <meta property="og:image" content="https://fyzbit.cz/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="FyzBit — Fyzika na micro:bitu. Datalogger v prohlížeči pro teplotu, vzdálenost, sílu, tlak a vlhkost."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="FyzBit — návod a přehled senzorů" />
+    <meta
+      name="twitter:description"
+      content="Jak měřit s micro:bitem teplotu, vzdálenost, rychlost, sílu, tlak a vlhkost přímo v prohlížeči."
+    />
+    <meta name="twitter:image" content="https://fyzbit.cz/og-image.png" />
+    <link rel="icon" type="image/svg+xml" href="../icon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <!--
+      Same entity as the one declared on the app at "/" — the shared @id ties
+      the two descriptions together instead of claiming two applications.
+    -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "@id": "https://fyzbit.cz/#app",
+        "name": "FyzBit",
+        "url": "https://fyzbit.cz/",
+        "description": "Webový datalogger pro micro:bit — měření teploty, vzdálenosti, rychlosti, síly, tlaku i vlhkosti přímo v prohlížeči. Bez instalace, bez programování. Zdarma pro ZŠ a SŠ.",
+        "applicationCategory": "EducationalApplication",
+        "browserRequirements": "Vyžaduje Chrome, Edge nebo Operu (Web Serial / Web Bluetooth).",
+        "operatingSystem": "Windows, macOS, Linux, Android, ChromeOS",
+        "inLanguage": ["cs", "en"],
+        "isAccessibleForFree": true,
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "CZK"
+        },
+        "author": {
+          "@type": "Person",
+          "name": "Ondřej Bek"
+        },
+        "license": "https://opensource.org/licenses/MIT",
+        "audience": {
+          "@type": "EducationalAudience",
+          "educationalRole": "teacher"
+        }
+      }
+    </script>
+    <script type="module" src="/src/page.ts"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#obsah">Přeskočit na obsah</a>
+
+    <header class="page-header">
+      <div class="page-header__inner">
+        <a class="page-header__brand" href="../">FyzBit</a>
+        <span class="page-header__back"><a href="../">Spustit aplikaci →</a></span>
+      </div>
+    </header>
+
+    <div class="hero">
+      <div class="hero__inner">
+        <h1>Fyzikální měření s micro:bitem, rovnou v prohlížeči</h1>
+        <p class="hero__claim">
+          Připoj micro:bit se senzorem, otevři stránku a měř. Žádná instalace,
+          žádné programování, žádné přihlašování — a naměřená data zůstávají
+          v počítači, na kterém měříš.
+        </p>
+        <div class="page-actions">
+          <a class="is-primary" href="../">Spustit FyzBit</a>
+          <a href="#jak-zacit">Jak začít</a>
+          <a href="#senzory">Přehled senzorů</a>
+        </div>
+      </div>
+    </div>
+
+    <main class="page" id="obsah">
+      <nav class="toc" aria-labelledby="toc-nadpis">
+        <h2 id="toc-nadpis">Na téhle stránce</h2>
+        <ol>
+          <li><a href="#proc">Proč FyzBit</a></li>
+          <li><a href="#co-potrebujes">Co potřebuješ</a></li>
+          <li><a href="#jak-zacit">Jak začít</a></li>
+          <li><a href="#senzory">Podporované senzory</a></li>
+          <li><a href="#rychlost">Rychlost a zrychlení</a></li>
+          <li><a href="#tara">Tára a kalibrace</a></li>
+          <li><a href="#grafy">Grafy a jednotky</a></li>
+          <li><a href="#export">Export dat</a></li>
+          <li><a href="#zkratky">Klávesové zkratky</a></li>
+          <li><a href="#problemy">Řešení problémů</a></li>
+          <li><a href="#makecode">Vztah k MakeCode</a></li>
+        </ol>
+      </nav>
+
+      <h2 id="proc">Proč FyzBit</h2>
+      <p>
+        Měření ve fyzice na ZŠ a SŠ obvykle uvázne na tom, že než se stihne
+        rozběhnout, hodina skončí. FyzBit vznikl proto, aby mezi žákem a naměřenou
+        křivkou nestálo nic než kabel.
+      </p>
+
+      <div class="cards">
+        <div class="card">
+          <h3>Bez instalace</h3>
+          <p>
+            Běží jako webová stránka. Na školním počítači, kde nemáš práva
+            instalovat, i na tabletu.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Bez programování</h3>
+          <p>
+            Do micro:bitu se jednou nahraje firmware a dál se jen mačká START.
+            Žák se soustředí na pokus, ne na skládání bloků.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Data zůstávají u tebe</h3>
+          <p>
+            Nic se nikam neodesílá — FyzBit nemá server. Žádné cookies, žádná
+            analytika. Podrobně na stránce
+            <a href="../soukromi.html">Ochrana soukromí</a>.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Funguje i bez wifi</h3>
+          <p>
+            Po první návštěvě se aplikace uloží do prohlížeče. Ve fyzikálním
+            kabinetu se špatným signálem se otevře stejně.
+          </p>
+        </div>
+      </div>
+
+      <h2 id="co-potrebujes">Co potřebuješ</h2>
+      <ul>
+        <li>
+          <strong>micro:bit V1 nebo V2</strong> a USB kabel. Na V2 jde měřit i
+          bezdrátově přes Bluetooth — na tabletu nebo telefonu, kde USB není.
+        </li>
+        <li>
+          <strong>Jeden z pěti senzorů</strong> níže. Všechny jsou běžně dostupné
+          a stojí řádově desítky až nižší stovky korun.
+        </li>
+        <li>
+          <strong>Krokosvorky nebo breakout deska.</strong> Na velké pady (0, 1, 2,
+          3V, GND) stačí krokosvorky; siloměr a tlakoměr sahají i na malé pinky,
+          kde je breakout deska pohodlnější.
+        </li>
+        <li>
+          <strong>Prohlížeč Chrome, Edge nebo Opera.</strong> Firefox ani Safari
+          neumí rozhraní, kterým se prohlížeč připojuje k zařízení — viz
+          <a href="#problemy">Řešení problémů</a>.
+        </li>
+      </ul>
+
+      <h2 id="jak-zacit">Jak začít</h2>
+      <ol class="steps">
+        <li>
+          <h3>Zapoj senzor k micro:bitu</h3>
+          <p>
+            Podle tabulky u příslušného senzoru níže. Stejné schéma se ti
+            vykreslí i přímo v aplikaci v levém sloupci, jakmile se micro:bit
+            připojí — včetně barev vodičů.
+          </p>
+        </li>
+        <li>
+          <h3>Nahraj firmware — jednou za život desky</h3>
+          <p>
+            V aplikaci klikni na <em>Připojit micro:bit</em> →
+            <em>Připravit micro:bit</em>. Firmware se nahraje přímo z prohlížeče
+            přes USB. Kdyby to nešlo, je vedle odkaz
+            <em>Stáhnout firmware (.hex)</em> — soubor pak stačí přetáhnout na
+            disk <code>MICROBIT</code>, který se objeví po připojení desky.
+          </p>
+          <p>
+            Je to jeden soubor pro V1 i V2; deska si z něj sama vezme svou část
+            a Bluetooth se zapne jen na V2.
+          </p>
+        </li>
+        <li>
+          <h3>Připoj se a měř</h3>
+          <p>
+            <em>Připojit micro:bit</em> → <em>USB kabel</em> nebo
+            <em>Bluetooth</em>, vyber desku v dialogu prohlížeče a zmáčkni
+            <strong>START</strong>. Senzor si firmware pozná sám a aplikace
+            rovnou ví, co kreslí a v jakých jednotkách.
+          </p>
+        </li>
+      </ol>
+
+      <div class="callout">
+        <p>
+          <strong>Nemáš zrovna po ruce hardware?</strong> V dialogu připojení je
+          dole <em>Demo bez hardwaru</em> — simulovaný teploměr, na kterém si jde
+          projít celé ovládání, graf i export. Hodí se na přípravu hodiny i na
+          promítání.
+        </p>
+      </div>
+
+      <h2 id="senzory">Podporované senzory</h2>
+      <p>
+        Pět senzorů, stejných jako v
+        <a href="https://github.com/bekousek/fyzikalni_senzory" rel="noopener noreferrer"
+          >rozšíření Fyzikální senzory pro MakeCode</a
+        >, ze kterého FyzBit vychází. Čísla pinů odpovídají firmwaru — jsou pevná,
+        nemusíš je nikde nastavovat.
+      </p>
+
+      <section class="sensor" aria-labelledby="s-ds18b20">
+        <h3 id="s-ds18b20">1. Teploměr DS18B20</h3>
+        <ul class="sensor__meta">
+          <li>Měří: <strong>teplotu</strong></li>
+          <li>Jednotky: <strong>°C</strong>, K, °F</li>
+          <li>Vzorkování: <strong>1 Hz</strong></li>
+        </ul>
+        <p>
+          Teplota kapalin i vzduchu vodotěsnou sondou. Ze všech pěti senzorů měří
+          teplotu nejpřesněji — na chladnutí vody nebo tání ledu je to ten správný.
+        </p>
+        <div class="table-scroll">
+          <table class="wiring-table">
+            <caption>Zapojení</caption>
+            <thead>
+              <tr>
+                <th scope="col">Pin micro:bitu</th>
+                <th scope="col">Svorka čidla</th>
+                <th scope="col">Vodič</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">3V</th><td>VCC</td><td>červený</td></tr>
+              <tr><th scope="row">P0</th><td>DATA</td><td>žlutý nebo bílý</td></tr>
+              <tr><th scope="row">GND</th><td>GND</td><td>černý nebo modrý</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout callout--warn">
+          <p>
+            Mezi DATA a VCC patří <strong>pull-up rezistor 4,7 kΩ</strong>. Bez něj
+            čidlo nevrátí vůbec nic. Osvědčilo se připájet ho přímo k jedné
+            krokosvorce a propojit s druhou — schová se do „punčochy“ a nikde se
+            neutrhne.
+          </p>
+        </div>
+        <p>
+          Jedno 12bitové měření trvá zhruba 750 ms, proto 1 Hz. Rychleji se ptát
+          nemá smysl — vrátilo by se stejné číslo víckrát.
+        </p>
+      </section>
+
+      <section class="sensor" aria-labelledby="s-hx711">
+        <h3 id="s-hx711">2. Siloměr a váha (tenzometr + HX711)</h3>
+        <ul class="sensor__meta">
+          <li>Měří: <strong>sílu</strong></li>
+          <li>Jednotky: <strong>N</strong>, mN, kN</li>
+          <li>Vzorkování: <strong>10 Hz</strong></li>
+        </ul>
+        <p>
+          Síla v newtonech tenzometrickým členem (běžně do 20 kg) s převodníkem
+          HX711. Hodí se na Hookův zákon, tření, kladky i na obyčejné vážení.
+        </p>
+        <div class="table-scroll">
+          <table class="wiring-table">
+            <caption>Zapojení</caption>
+            <thead>
+              <tr>
+                <th scope="col">Pin micro:bitu</th>
+                <th scope="col">Svorka modulu</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">3V</th><td>VCC</td></tr>
+              <tr><th scope="row">P15</th><td>DT (data)</td></tr>
+              <tr><th scope="row">P16</th><td>SCK (hodiny)</td></tr>
+              <tr><th scope="row">GND</th><td>GND</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout callout--warn">
+          <p>
+            <strong>P15 a P16 jsou malé pinky</strong> — krokosvorka se na ně
+            nechytne. Potřebuješ breakout desku, nebo krokosvorky s hrotem.
+          </p>
+        </div>
+        <p>
+          Samotný tenzometr se pájí na svorky E+, E−, A+, A− na druhé straně
+          modulu. Po zapojení nezapomeň na <a href="#tara">táru</a> — bez ní
+          siloměr ukazuje vlastní hmotnost úchytu.
+        </p>
+      </section>
+
+      <section class="sensor" aria-labelledby="s-hcsr04">
+        <h3 id="s-hcsr04">3. Vzdálenost a rychlost (sonar HC-SR04)</h3>
+        <ul class="sensor__meta">
+          <li>Měří: <strong>vzdálenost</strong></li>
+          <li>Dopočítá: <strong>rychlost, zrychlení</strong></li>
+          <li>Jednotky: cm, mm, m · m/s, km/h, cm/s</li>
+          <li>Vzorkování: <strong>50 Hz</strong></li>
+        </ul>
+        <p>
+          Poloha vozíčku, míčku nebo ruky ultrazvukem. Ze všech senzorů měří
+          nejrychleji, protože pohyb je přesně to, co se z pomalých vzorků
+          zrekonstruovat nedá.
+        </p>
+        <div class="table-scroll">
+          <table class="wiring-table">
+            <caption>Zapojení (čidlo míří od tebe)</caption>
+            <thead>
+              <tr>
+                <th scope="col">Pin micro:bitu</th>
+                <th scope="col">Svorka modulu</th>
+                <th scope="col">Vodič</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">GND</th><td>GND</td><td>černý</td></tr>
+              <tr><th scope="row">P2</th><td>Echo</td><td>žlutý</td></tr>
+              <tr><th scope="row">P1</th><td>Trig</td><td>modrý</td></tr>
+              <tr><th scope="row">3V</th><td>VCC</td><td>červený</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout callout--warn">
+          <p>
+            <strong>Některé kusy HC-SR04 chtějí 5 V.</strong> Když na 3V nic
+            neměří, napájej modul z 5 V (a na Echo pin dej dělič napětí), nebo
+            si pořiď variantu <code>HC-SR04P</code>, která na 3,3 V pracuje.
+          </p>
+        </div>
+      </section>
+
+      <section class="sensor" aria-labelledby="s-hx710b">
+        <h3 id="s-hx710b">4. Tlakoměr HX710B</h3>
+        <ul class="sensor__meta">
+          <li>Měří: <strong>tlak</strong></li>
+          <li>Jednotky: <strong>Pa</strong>, hPa, kPa, bar</li>
+          <li>Vzorkování: <strong>10 Hz</strong></li>
+        </ul>
+        <p>
+          Tlak plynů i kapalin tlakovým čidlem s 24bitovým převodníkem. Na
+          hydrostatický tlak vodního sloupce, pokusy s injekční stříkačkou i na
+          sledování atmosférického tlaku.
+        </p>
+        <div class="table-scroll">
+          <table class="wiring-table">
+            <caption>Zapojení</caption>
+            <thead>
+              <tr>
+                <th scope="col">Pin micro:bitu</th>
+                <th scope="col">Svorka modulu</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">3V</th><td>VCC</td></tr>
+              <tr><th scope="row">P0</th><td>OUT (data)</td></tr>
+              <tr><th scope="row">P1</th><td>SCK (hodiny)</td></tr>
+              <tr><th scope="row">GND</th><td>GND</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout callout--warn">
+          <p>
+            <strong>Hadičku nasaď až po zapojení</strong>, ať v čidle nezůstane
+            přetlak — jinak bude tára nulovat na křivou hodnotu.
+          </p>
+        </div>
+        <p>
+          Pro meteorologii se hodí hPa (běžný atmosférický tlak je kolem
+          1013 hPa), pro školní pokusy spíš Pa. Jednotku přepneš v čipu nad
+          grafem kdykoli, i uprostřed měření.
+        </p>
+      </section>
+
+      <section class="sensor" aria-labelledby="s-dht11">
+        <h3 id="s-dht11">5. Teploměr a vlhkoměr DHT11</h3>
+        <ul class="sensor__meta">
+          <li>Měří: <strong>teplotu i vlhkost</strong> současně</li>
+          <li>Jednotky: °C · %</li>
+          <li>Vzorkování: <strong>1 Hz</strong></li>
+        </ul>
+        <p>
+          Jediné čidlo vrací obě veličiny najednou — v grafu tedy uvidíš dvě
+          křivky vedle sebe. Ideální na klima ve třídě, dýchání, sušení nebo
+          odpařování.
+        </p>
+        <div class="table-scroll">
+          <table class="wiring-table">
+            <caption>Zapojení</caption>
+            <thead>
+              <tr>
+                <th scope="col">Pin micro:bitu</th>
+                <th scope="col">Svorka modulu</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">3V</th><td>VCC nebo +</td></tr>
+              <tr><th scope="row">P0</th><td>DATA, OUT nebo S</td></tr>
+              <tr><th scope="row">GND</th><td>GND nebo −</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout callout--warn">
+          <p>
+            <strong>Popisky pinů se u modulů liší</strong> (S / VCC / GND, nebo
+            + / OUT / −). Řiď se tím, co je natištěné na desce, ne pořadím.
+          </p>
+        </div>
+        <p>
+          DHT11 měří s přesností přibližně ±2 °C a ±5 %. Když potřebuješ teplotu
+          přesněji — hlavně u kapalin — sáhni po DS18B20. Hotový modul na
+          destičce má pull-up rezistor už zabudovaný; u holého čidla se hodí
+          přidat 4,7–10 kΩ mezi DATA a 3V.
+        </p>
+      </section>
+
+      <h2 id="rychlost">Rychlost a zrychlení</h2>
+      <p>
+        U sonaru nabídne FyzBit kromě vzdálenosti i <strong>rychlost</strong> a
+        <strong>zrychlení</strong>. Nejsou to další čidla — počítá je aplikace ze
+        vzdálenosti, a to proložením polynomu klouzavým oknem (0,3 s pro rychlost,
+        0,8 s pro zrychlení).
+      </p>
+      <p>
+        Proč tak složitě: prostý rozdíl dvou sousedních vzorků je u signálu
+        kvantovaného na celé centimetry šum větší než užitečná informace.
+        Proložení ten šum zprůměruje, ale — na rozdíl od klouzavého průměru —
+        neposune křivku v čase, takže vrchol rychlosti sedí přesně tam, kde má
+        proti průběhu polohy být. To je právě to, co má na grafu být vidět.
+      </p>
+      <p>
+        Obě odvozené veličiny jsou po připojení <strong>vypnuté</strong> — to
+        podstatné je změřená veličina. Zapneš je kliknutím na jejich čip nad
+        grafem. Zrychlení je ze tří křivek nejzašuměnější; druhá derivace šum
+        zesiluje a víc, než kolik dovolí rozlišení sonaru, z ní nedostaneš.
+      </p>
+
+      <h2 id="tara">Tára a kalibrace</h2>
+      <h3>Tára (vynulování)</h3>
+      <p>
+        Tlačítko <strong>TÁRA</strong> nastaví aktuální stav jako nulu. U siloměru
+        tím odečteš hmotnost háčku a misky, u tlakoměru okolní atmosférický tlak —
+        pak měříš přetlak nebo podtlak proti okolí. Stačí zmáčknout jednou, i za
+        běhu měření.
+      </p>
+      <h3>Kalibrace</h3>
+      <p>
+        Tlačítko <strong>Kalibrovat</strong> otevře průvodce: vybereš veličinu,
+        připravíš známou referenci (závaží, tabulkovou hodnotu, změřenou
+        vzdálenost) a zadáš její skutečnou hodnotu. Micro:bit z toho spočítá nový
+        kalibrační faktor a rovnou ho ohlásí zpět.
+      </p>
+      <p>
+        Firmware je předkalibrovaný, takže kalibrace obvykle není potřeba — sáhni
+        po ní, když měření zjevně neodpovídá realitě. Kdyby nový faktor vyšel
+        výrazně mimo obvyklý rozsah, průvodce na to upozorní: skoro vždycky to
+        znamená překlep v referenční hodnotě nebo špatně zapojené čidlo.
+      </p>
+
+      <h2 id="grafy">Grafy a jednotky</h2>
+      <ul>
+        <li>
+          <strong>Víc měření v jednom grafu.</strong> Zmáčkni <em>Uložit</em> a
+          pak <em>Nové měření</em>. Uložené běhy zůstanou vykreslené, takže jde
+          porovnat pokus s pokusem. Zaškrtávátkem u každého se dá skrýt.
+        </li>
+        <li>
+          <strong>Poznat, která křivka je která,</strong> jde i bez barev: každá
+          veličina má vlastní typ čáry a každé měření vlastní tvar značky. Stejný
+          klíč je vidět v čipech nad grafem i v seznamu měření.
+        </li>
+        <li>
+          <strong>Jednotky</strong> se přepínají v čipu u názvu veličiny. Přepnutí
+          je čistě zobrazovací — v datech je pořád základní jednotka z firmwaru,
+          takže změna uprostřed měření nemůže nic pokazit.
+        </li>
+        <li>
+          <strong>Statistiky výběru:</strong> tažením myší přes graf vybereš úsek
+          a pod grafem se objeví minimum, maximum, průměr, medián a Δ.
+        </li>
+        <li>
+          <strong>Anotace:</strong> podrž <kbd>A</kbd> a klikni do grafu (nebo
+          zmáčkni <kbd>Shift</kbd>+<kbd>A</kbd>) a označíš okamžik popiskem —
+          „přidal jsem závaží“, „otevřel jsem ventil“. Anotace se exportují spolu
+          s daty.
+        </li>
+        <li>
+          <strong>Tabulka:</strong> tlačítko <em>Tabulka</em> nad grafem ukáže
+          naměřené hodnoty jako text. Hodí se na promítání i pro toho, kdo z
+          křivky čísla nepřečte.
+        </li>
+      </ul>
+
+      <h2 id="export">Export dat</h2>
+      <ul>
+        <li>
+          <strong>CSV</strong> — všechna měření a všechny vzorky, oddělovač
+          středník a desetinná čárka, takže se to v českém Excelu otevře správně
+          napoprvé. Anotace se ukládají do druhého souboru.
+        </li>
+        <li>
+          <strong>PDF</strong> — hotový protokol o měření: třída, jména žáků,
+          název pokusu, graf, tabulka statistik a poznámky. Vyplněná hlavička se
+          pamatuje, takže se při dalším exportu nemusí psát znovu.
+        </li>
+        <li><strong>PNG</strong> — samotný obrázek grafu, na prezentaci nebo do sešitu.</li>
+      </ul>
+      <p>
+        Všechno vzniká v prohlížeči a rovnou se stahuje — nic neprochází přes
+        žádný server.
+      </p>
+
+      <h2 id="zkratky">Klávesové zkratky</h2>
+      <div class="table-scroll">
+        <table>
+          <caption>Fungují všude mimo textová pole. Nápovědu vyvoláš klávesou <kbd>?</kbd>.</caption>
+          <thead>
+            <tr>
+              <th scope="col">Klávesa</th>
+              <th scope="col">Co dělá</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row"><kbd>mezerník</kbd></th><td>Spustit / zastavit měření</td></tr>
+            <tr><th scope="row"><kbd>T</kbd></th><td>Vynulovat (tára)</td></tr>
+            <tr><th scope="row"><kbd>S</kbd></th><td>Uložit měření</td></tr>
+            <tr><th scope="row"><kbd>N</kbd></th><td>Nové měření</td></tr>
+            <tr><th scope="row"><kbd>A</kbd> + klik</th><td>Přidat anotaci na místo kliknutí</td></tr>
+            <tr><th scope="row"><kbd>Shift</kbd>+<kbd>A</kbd></th><td>Přidat anotaci bez myši</td></tr>
+            <tr><th scope="row"><kbd>E</kbd></th><td>Export CSV</td></tr>
+            <tr><th scope="row"><kbd>P</kbd></th><td>Export PDF</td></tr>
+            <tr><th scope="row"><kbd>Esc</kbd></th><td>Zrušit přiblížení / zavřít okno</td></tr>
+            <tr><th scope="row"><kbd>?</kbd></th><td>Nápověda ke zkratkám</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="problemy">Řešení problémů</h2>
+
+      <details class="faq">
+        <summary>Ve Firefoxu nebo Safari se nejde připojit k micro:bitu</summary>
+        <p>
+          FyzBit se k desce připojuje rozhraními Web Serial (USB) a Web Bluetooth.
+          Ta mají jen prohlížeče postavené na Chromiu — <strong>Chrome, Edge a
+          Opera</strong>. Firefox ani Safari je nemají, a na iPhonu a iPadu je
+          nemá ani Chrome, protože tam všechny prohlížeče používají jádro Safari.
+        </p>
+        <p>
+          Aplikace se v nich otevře a projít se dá, jen připojení k senzoru
+          nefunguje. Demo režim se simulovaným senzorem funguje všude.
+        </p>
+      </details>
+
+      <details class="faq">
+        <summary>Tlačítko pro připojení nic nedělá / dialog s výběrem se neobjeví</summary>
+        <p>
+          Prohlížeč povolí přístup k zařízení jen na zabezpečeném spojení. Na
+          <code>https://fyzbit.cz/</code> to platí; když si stránku otevřeš přes
+          <code>http://</code> nebo ze souboru na disku, rozhraní zmizí a
+          aplikace to napíše nahoře jako upozornění.
+        </p>
+      </details>
+
+      <details class="faq">
+        <summary>Deska se připojí, ale nechodí žádná data</summary>
+        <p>
+          Nejčastěji chybí firmware — nahraj ho tlačítkem <em>Připravit
+          micro:bit</em>. Pak zkontroluj zapojení podle tabulky u svého senzoru,
+          hlavně 3V a GND. U DS18B20 zkontroluj pull-up rezistor 4,7 kΩ; bez něj
+          čidlo mlčí. U HC-SR04 zkus napájení 5 V.
+        </p>
+      </details>
+
+      <details class="faq">
+        <summary>Bluetooth desku nenajde</summary>
+        <p>
+          Bluetooth umí jen <strong>micro:bit V2</strong> — deska s logem a
+          zlatými zářezy vpředu, s mikrofonem a reproduktorem. Na V1 se senzorové
+          ovladače a celý Bluetooth stack prostě nevejdou do paměti, takže tam
+          FyzBit jede jen po kabelu.
+        </p>
+        <p>
+          Na V2 zkontroluj, že je Bluetooth v počítači zapnutý a že deska běží na
+          čerstvě nahraném firmwaru. Párovat ji nikde v systému netřeba, výběr
+          probíhá přímo v dialogu prohlížeče.
+        </p>
+      </details>
+
+      <details class="faq">
+        <summary>Siloměr ukazuje nesmyslné nebo poskakující hodnoty</summary>
+        <p>
+          Zmáčkni <strong>TÁRU</strong>, když je siloměr v klidu a v poloze, ve
+          které budeš měřit. Tenzometr musí být upevněný a nesmí se ohýbat o něco
+          jiného než o měřenou sílu. Pokud hodnota sedí ve tvaru, ale ne ve
+          velikosti, projdi <a href="#tara">kalibraci</a> se známým závažím
+          (100 g ≈ 1 N).
+        </p>
+      </details>
+
+      <details class="faq">
+        <summary>Zavřel jsem omylem panel uprostřed měření</summary>
+        <p>
+          FyzBit průběžně ukládá rozpracované měření do prohlížeče. Při dalším
+          otevření se zeptá, jestli chceš pokračovat, nebo data zahodit.
+        </p>
+      </details>
+
+      <details class="faq">
+        <summary>Jak data z počítače úplně smažu?</summary>
+        <p>
+          Ozubené kolo vpravo nahoře → <em>Smazat všechna data</em>. Smaže uložená
+          měření, jména žáků z hlavičky protokolu, motiv i jazyk. Na sdíleném
+          školním počítači to po hodině stojí za to — viz
+          <a href="../soukromi.html">Ochrana soukromí</a>.
+        </p>
+      </details>
+
+      <h2 id="makecode">Vztah k rozšíření pro MakeCode</h2>
+      <p>
+        FyzBit vychází z rozšíření
+        <a href="https://bekousek.github.io/fyzikalni_senzory/" rel="noopener noreferrer"
+          >Fyzikální senzory pro micro:bit</a
+        >
+        — stejný autor, stejných pět senzorů, stejné zapojení. Rozdíl je v tom,
+        kde se pracuje:
+      </p>
+      <div class="table-scroll">
+        <table>
+          <caption>Kdy sáhnout po čem</caption>
+          <thead>
+            <tr>
+              <th scope="col"></th>
+              <th scope="col">Rozšíření pro MakeCode</th>
+              <th scope="col">FyzBit</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Žák programuje</th>
+              <td>Ano — skládá bloky, to je smysl</td>
+              <td>Ne — nahraje firmware a měří</td>
+            </tr>
+            <tr>
+              <th scope="row">Hodí se na</th>
+              <td>Informatiku, algoritmizaci, projekt „naprogramuj si měřák“</td>
+              <td>Fyziku, kde je cílem naměřená veličina, ne kód</td>
+            </tr>
+            <tr>
+              <th scope="row">Graf</th>
+              <td>Zobrazit data zařízení v MakeCode</td>
+              <td>Vlastní graf s jednotkami, statistikami a anotacemi</td>
+            </tr>
+            <tr>
+              <th scope="row">Export</th>
+              <td>Text nebo CSV z editoru</td>
+              <td>CSV, PNG a hotový PDF protokol se jmény žáků</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Obojí se dá používat vedle sebe. Jen pozor: firmware FyzBitu přepíše to,
+        co je v desce nahrané teď — pro návrat k vlastnímu programu ho z MakeCode
+        prostě nahraj znovu.
+      </p>
+
+      <h2>Autor a licence</h2>
+      <p>
+        FyzBit vytvořil <strong>Ondřej Bek</strong> pro výuku fyziky na základní
+        škole. Kód je otevřený pod licencí MIT — na
+        <a href="https://github.com/bekousek/fyzbit" rel="noopener noreferrer">GitHubu</a>
+        je celý, včetně firmwaru. Podrobný seznam použitých knihoven je na
+        stránce <a href="../licence.html">Licence a knihovny</a>.
+      </p>
+      <p>
+        Nápady, chyby a připomínky ze třídy jsou vítané —
+        <a href="https://github.com/bekousek/fyzbit/issues" rel="noopener noreferrer"
+          >GitHub Issues</a
+        >
+        nebo <a href="mailto:ondrejbek8@gmail.com">ondrejbek8@gmail.com</a>.
+      </p>
+
+      <div class="page-actions">
+        <a class="is-primary" href="../">Spustit FyzBit</a>
+        <a href="../firmware/fyzbit.hex" download>Stáhnout firmware (.hex)</a>
+      </div>
+    </main>
+
+    <footer class="page-footer">
+      <nav aria-label="Stránky o aplikaci">
+        <a href="../">Aplikace</a>
+        <a href="./" aria-current="page">Návod</a>
+        <a href="../soukromi.html">Ochrana soukromí</a>
+        <a href="../pristupnost.html">Prohlášení o přístupnosti</a>
+        <a href="../licence.html">Licence a knihovny</a>
+        <a href="https://github.com/bekousek/fyzbit" rel="noopener noreferrer">GitHub</a>
+      </nav>
+      <p>
+        FyzBit © <span id="current-year">2026</span> Ondřej Bek ·
+        <a href="https://github.com/bekousek/fyzbit/blob/main/LICENSE" rel="noopener noreferrer"
+          >Licence MIT</a
+        >
+      </p>
+    </footer>
+  </body>
+</html>

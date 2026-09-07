@@ -17,24 +17,31 @@ initI18n();
 const app = new App();
 app.start();
 
-// Detect total lack of FyzBit-relevant transports (Web Serial AND Web Bluetooth).
-// If neither exists, show a non-dismissable warning banner. We allow Mock to
-// still work so demos and screenshots are possible.
+// No Web Serial *and* no Web Bluetooth means no micro:bit at all — say so up
+// front rather than letting a teacher discover it two clicks in. Mock still
+// works, so demos and screenshots remain possible.
+//
+// Two different causes produce the same missing APIs: a browser that never
+// had them, and a page served over plain http (both are gated on a secure
+// context). They need different advice, so they get different messages.
 const hasSerial = SerialTransport.isSupported();
-const hasBluetooth =
-  typeof navigator !== 'undefined' && 'bluetooth' in navigator;
+const hasBluetooth = typeof navigator !== 'undefined' && 'bluetooth' in navigator;
+const insecure = typeof window !== 'undefined' && window.isSecureContext === false;
 if (!hasSerial && !hasBluetooth) {
-  showBrowserBanner();
+  showBrowserBanner(insecure ? 'error.insecureContext' : 'error.browserUnsupported');
 }
 
-function showBrowserBanner(): void {
+function showBrowserBanner(messageKey: string): void {
   const banner = document.createElement('div');
   banner.className = 'browser-warning';
   banner.setAttribute('role', 'alert');
-  banner.innerHTML = `
-    <strong>⚠</strong>
-    <span data-i18n="error.browserUnsupported">${t('error.browserUnsupported')}</span>
-  `;
+  const icon = document.createElement('strong');
+  icon.setAttribute('aria-hidden', 'true');
+  icon.textContent = '⚠';
+  const text = document.createElement('span');
+  text.dataset.i18n = messageKey;
+  text.textContent = t(messageKey);
+  banner.append(icon, text);
   document.body.prepend(banner);
 }
 

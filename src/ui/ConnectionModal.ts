@@ -14,6 +14,25 @@ import { toast } from './Toast';
 const FLASH_SUPPORTED = typeof navigator !== 'undefined' && 'usb' in navigator;
 const BLUETOOTH_SUPPORTED = typeof navigator !== 'undefined' && 'bluetooth' in navigator;
 
+/**
+ * Web Serial, Web Bluetooth and WebUSB are all gated on a secure context, and
+ * a browser that has them still hides them over plain http. The two causes —
+ * "your browser cannot" and "this page is not https" — need different advice,
+ * and the second one is invisible in feature detection: the API is simply
+ * absent either way. So check the context separately and say which it is.
+ */
+function isInsecureContext(): boolean {
+  return typeof window !== 'undefined' && window.isSecureContext === false;
+}
+
+/** Why a transport is unavailable, phrased for a teacher rather than a log. */
+function unavailableReason(kind: 'serial' | 'bluetooth' | 'usb'): string {
+  if (isInsecureContext()) return t('connection.insecureContext');
+  if (kind === 'serial') return t('connection.unsupportedSerial');
+  if (kind === 'bluetooth') return t('connection.unsupportedBluetooth');
+  return t('connection.unsupportedUsb');
+}
+
 const STAGE_I18N_KEY: Partial<Record<string, string>> = {
   Initializing: 'flash.stageInitializing',
   FindingDevice: 'flash.stageFindingDevice',
@@ -51,9 +70,13 @@ export class ConnectionModal {
   private flashBtn: HTMLButtonElement;
   private downloadLink: HTMLAnchorElement;
   private flashProgressEl: HTMLElement;
+  private flashProgressBarEl: HTMLElement;
   private flashProgressFillEl: HTMLElement;
   private flashProgressLabelEl: HTMLElement;
   private flashErrorEl: HTMLElement;
+  private flashUnavailableEl: HTMLElement;
+  private serialNoteEl: HTMLElement;
+  private bluetoothNoteEl: HTMLElement;
   private flashing = false;
   private pendingResolve: ((req: ConnectRequest | null) => void) | null = null;
 
@@ -67,20 +90,24 @@ export class ConnectionModal {
     this.flashBtn = required<HTMLButtonElement>('#btn-flash-firmware', this.dialog);
     this.downloadLink = required<HTMLAnchorElement>('#link-download-firmware', this.dialog);
     this.flashProgressEl = required<HTMLElement>('#flash-progress', this.dialog);
+    this.flashProgressBarEl = required<HTMLElement>('#flash-progress-bar', this.dialog);
     this.flashProgressFillEl = required<HTMLElement>('#flash-progress-fill', this.dialog);
     this.flashProgressLabelEl = required<HTMLElement>('#flash-progress-label', this.dialog);
     this.flashErrorEl = required<HTMLElement>('#flash-error', this.dialog);
+    this.flashUnavailableEl = required<HTMLElement>('#flash-unavailable', this.dialog);
+    this.serialNoteEl = required<HTMLElement>('#serial-unavailable', this.dialog);
+    this.bluetoothNoteEl = required<HTMLElement>('#bluetooth-unavailable', this.dialog);
     this.downloadLink.href = FIRMWARE_HEX_URL;
 
-    if (!SerialTransport.isSupported()) {
-      this.serialBtn.disabled = true;
-      this.serialBtn.title = t('connection.unsupportedBrowser');
-    }
-    if (!BLUETOOTH_SUPPORTED) {
-      this.bluetoothBtn.disabled = true;
-      this.bluetoothBtn.title = t('connection.unsupportedBrowser');
-    }
+    this.syncAvailability();
+    // The flash step has a working fallback (download the .hex, drag it onto
+    // the MICROBIT drive), so instead of hiding the button without a word,
+    // the reason is spelled out above that fallback link.
     this.flashBtn.hidden = !FLASH_SUPPORTED;
+    if (!FLASH_SUPPORTED) {
+      this.flashUnavailableEl.textContent = unavailableReason('usb');
+      this.flashUnavailableEl.hidden = false;
+    }
 
     this.serialBtn.addEventListener('click', () => {
       void this.pick('serial');
@@ -101,13 +128,43 @@ export class ConnectionModal {
     });
 
     onLanguageChange(() => {
-      if (this.serialBtn.disabled) {
-        this.serialBtn.title = t('connection.unsupportedBrowser');
-      }
-      if (this.bluetoothBtn.disabled) {
-        this.bluetoothBtn.title = t('connection.unsupportedBrowser');
-      }
+      this.syncAvailability();
+      if (!FLASH_SUPPORTED) this.flashUnavailableEl.textContent = unavailableReason('usb');
     });
+  }
+
+  /**
+   * Marks the transports this browser cannot offer and says why, both as a
+   * tooltip and — since a tooltip is unreachable by keyboard and touch — as
+   * a line of text under the button, wired to it via aria-describedby.
+   */
+  private syncAvailability(): void {
+    const serialOk = SerialTransport.isSupported() && !isInsecureContext();
+    const bluetoothOk = BLUETOOTH_SUPPORTED && !isInsecureContext();
+
+    this.serialBtn.disabled = !serialOk;
+    this.bluetoothBtn.disabled = !bluetoothOk;
+
+    const explain = (
+      btn: HTMLButtonElement,
+      note: HTMLElement,
+      kind: 'serial' | 'bluetooth',
+    ) => {
+      if (btn.disabled) {
+        const reason = unavailableReason(kind);
+        btn.title = reason;
+        note.textContent = reason;
+        note.hidden = false;
+        btn.setAttribute('aria-describedby', note.id);
+      } else {
+        btn.removeAttribute('title');
+        btn.removeAttribute('aria-describedby');
+        note.textContent = '';
+        note.hidden = true;
+      }
+    };
+    explain(this.serialBtn, this.serialNoteEl, 'serial');
+    explain(this.bluetoothBtn, this.bluetoothNoteEl, 'bluetooth');
   }
 
   private async startFlash(): Promise<void> {
@@ -132,8 +189,12 @@ export class ConnectionModal {
   }
 
   private setTransportButtonsEnabled(enabled: boolean): void {
-    this.serialBtn.disabled = !enabled || !SerialTransport.isSupported();
-    this.bluetoothBtn.disabled = !enabled || !BLUETOOTH_SUPPORTED;
+    if (enabled) {
+      this.syncAvailability();
+    } else {
+      this.serialBtn.disabled = true;
+      this.bluetoothBtn.disabled = true;
+    }
     this.mockBtn.disabled = !enabled;
   }
 
@@ -142,6 +203,14 @@ export class ConnectionModal {
     this.flashProgressLabelEl.textContent = key ? t(key) : p.stage;
     const pct = p.progress !== undefined ? Math.round(p.progress * 100) : null;
     this.flashProgressFillEl.style.width = pct !== null ? `${pct}%` : '30%';
+    // Stages without a percentage (connecting, finding the device) are
+    // genuinely indeterminate — dropping aria-valuenow says so, rather than
+    // claiming the 30% the bar happens to be painting.
+    if (pct !== null) {
+      this.flashProgressBarEl.setAttribute('aria-valuenow', String(pct));
+    } else {
+      this.flashProgressBarEl.removeAttribute('aria-valuenow');
+    }
   }
 
   /** Open the modal and resolve with the chosen transport, or null if cancelled. */
@@ -162,13 +231,13 @@ export class ConnectionModal {
         this.resolveAndClose({
           kind,
           transport: new MockTransport(),
-          label: 'Mock (Teploměr)',
+          label: t('connection.mockLabel'),
         });
         return;
       }
       if (kind === 'serial') {
-        if (!SerialTransport.isSupported()) {
-          this.showError(t('connection.unsupportedBrowser'));
+        if (!SerialTransport.isSupported() || isInsecureContext()) {
+          this.showError(unavailableReason('serial'));
           return;
         }
         const transport = new SerialTransport();
@@ -180,8 +249,8 @@ export class ConnectionModal {
         return;
       }
       if (kind === 'bluetooth') {
-        if (!BLUETOOTH_SUPPORTED) {
-          this.showError(t('connection.unsupportedBrowser'));
+        if (!BLUETOOTH_SUPPORTED || isInsecureContext()) {
+          this.showError(unavailableReason('bluetooth'));
           return;
         }
         const { BluetoothTransport } = await import('../transport/BluetoothTransport');

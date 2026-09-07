@@ -15,9 +15,31 @@ const LANG_CHANGE_EVENT = 'fyzbit:language-changed';
 
 let currentLanguage: Language = 'cs';
 
+function isLanguage(value: string | null): value is Language {
+  return value === 'cs' || value === 'en';
+}
+
+/**
+ * Precedence: an explicit ?lang= in the URL, then the stored choice, then the
+ * browser's own preference.
+ *
+ * The query parameter exists so one URL can be handed out in a chosen
+ * language — that is also what the hreflang alternates in index.html point
+ * at. It is written to storage like any other explicit choice, because a
+ * teacher who opens the English link means it.
+ */
 function detectLanguage(): Language {
+  const fromUrl = new URLSearchParams(window.location.search).get('lang');
+  if (isLanguage(fromUrl)) {
+    try {
+      localStorage.setItem(STORAGE_KEY, fromUrl);
+    } catch {
+      /* private mode — the URL still wins for this visit */
+    }
+    return fromUrl;
+  }
   const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored === 'cs' || stored === 'en') return stored;
+  if (isLanguage(stored)) return stored;
   const nav = navigator.language.toLowerCase();
   return nav.startsWith('cs') || nav.startsWith('sk') ? 'cs' : 'en';
 }
