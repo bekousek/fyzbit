@@ -3,29 +3,49 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#1B5E20" />
+    <meta name="theme-color" content="#1B5E20" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f1410" media="(prefers-color-scheme: dark)" />
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'"
     />
     <meta name="description" content="Webový datalogger pro micro:bit — měření teploty, vzdálenosti, síly, tlaku i vlhkosti přímo v prohlížeči. Bez instalace, bez programování. Zdarma pro ZŠ a SŠ." />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="FyzBit" />
+    <meta property="og:site_name" content="FyzBit" />
+    <meta property="og:locale" content="cs_CZ" />
+    <meta property="og:locale:alternate" content="en_GB" />
+    <meta property="og:title" content="FyzBit — datalogger pro fyzikální měření s micro:bitem" />
     <meta
       property="og:description"
       content="Webový datalogger pro micro:bit — měření teploty, vzdálenosti, síly, tlaku i vlhkosti přímo v prohlížeči. Bez instalace, bez programování. Zdarma pro ZŠ a SŠ."
     />
     <meta property="og:url" content="https://fyzbit.cz/" />
-    <meta property="og:image" content="https://fyzbit.cz/icon-512.png" />
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="FyzBit" />
+    <meta property="og:image" content="https://fyzbit.cz/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="FyzBit — Fyzika na micro:bitu. Datalogger v prohlížeči pro teplotu, vzdálenost, sílu, tlak a vlhkost."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="FyzBit — datalogger pro fyzikální měření s micro:bitem" />
     <meta
       name="twitter:description"
       content="Webový datalogger pro micro:bit — měření teploty, vzdálenosti, síly, tlaku i vlhkosti přímo v prohlížeči. Bez instalace, bez programování. Zdarma pro ZŠ a SŠ."
     />
-    <meta name="twitter:image" content="https://fyzbit.cz/icon-512.png" />
+    <meta name="twitter:image" content="https://fyzbit.cz/og-image.png" />
     <link rel="canonical" href="https://fyzbit.cz/" />
+    <!--
+      One URL serves both languages; ?lang= picks one explicitly so a teacher
+      can hand out an English link, and so hreflang has something real to
+      point at. x-default is the plain URL, which auto-detects.
+    -->
+    <link rel="alternate" hreflang="cs" href="https://fyzbit.cz/?lang=cs" />
+    <link rel="alternate" hreflang="en" href="https://fyzbit.cz/?lang=en" />
+    <link rel="alternate" hreflang="x-default" href="https://fyzbit.cz/" />
     <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
     <link rel="manifest" href="./manifest.json" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />

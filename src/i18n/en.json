@@ -65,7 +65,6 @@
     "tipTemperature2": "Let the sensor equilibrate in the medium for at least 30 s before entering the reference value.",
     "title": "Sensor calibration",
     "valueHelp": "Use a decimal point. The value is sent to the micro:bit which computes a new calibration factor.",
-    "valueLabel": "Actual value",
     "waiting": "Waiting…",
     "warningFactor": "Warning: the new factor is far outside the usual range. Double-check the entered value and sensor wiring."
   },
@@ -75,7 +74,6 @@
     "force": "Force",
     "hide": "Hide {{name}} on the chart",
     "humidity": "Humidity",
-    "lineStyle": "Line style in the chart",
     "pressure": "Pressure",
     "show": "Show {{name}} on the chart",
     "speed": "Speed",
@@ -109,6 +107,7 @@
     "firmwareHint": "Once is enough. One file for V1 and V2 — the board picks its own half, and Bluetooth only switches on for V2.",
     "insecureContext": "Connecting to a micro:bit only works over https:// or on localhost. This page is served over an insecure connection, so the browser blocked device access. Open the app at https://fyzbit.cz/.",
     "mock": "Demo without hardware (simulated sensor)",
+    "mockLabel": "Demo (simulated thermometer)",
     "serial": "USB cable",
     "serialHint": "Web Serial · works in Chrome / Edge on Windows, macOS and Linux.",
     "stepConnect": "Connect to the micro:bit",

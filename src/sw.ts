@@ -26,10 +26,13 @@ sw.addEventListener('install', (event) => {
       await cache.addAll([
         SHELL_URL,
         './',
+        './pristupnost.html',
         './manifest.json',
         './icon.svg',
         './icon-192.png',
         './icon-512.png',
+        './favicon-32.png',
+        './apple-touch-icon.png',
         './fonts/Roboto-Regular.ttf',
         './img/microbit-board.svg',
         // So "Prepare micro:bit" (WebUSB flash) works offline in a classroom
@@ -70,14 +73,22 @@ sw.addEventListener('fetch', (event) => {
   event.respondWith(cacheFirst(req));
 });
 
+/**
+ * Network-first for HTML, cached under the requested URL rather than under a
+ * single shell key: there are several documents now (the app, the
+ * accessibility statement, 404), and storing every one of them as
+ * `index.html` would hand back the wrong page the moment the network drops.
+ * The shell stays the last-resort fallback for a navigation we have never
+ * seen — better the app than a browser error page.
+ */
 async function networkFirstShell(req: Request): Promise<Response> {
   const cache = await caches.open(CACHE_NAME);
   try {
     const fresh = await fetch(req);
-    if (fresh.ok) cache.put(SHELL_URL, fresh.clone());
+    if (fresh.ok) cache.put(req, fresh.clone());
     return fresh;
   } catch {
-    const cached = (await cache.match(SHELL_URL)) ?? (await cache.match(req));
+    const cached = (await cache.match(req)) ?? (await cache.match(SHELL_URL));
     if (cached) return cached;
     return new Response('Offline and shell not cached', { status: 503 });
   }

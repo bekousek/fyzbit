@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1B5E20" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f1410" media="(prefers-color-scheme: dark)" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'"
+    />
+    <title>Stránka nenalezena (404) — FyzBit</title>
+    <meta
+      name="description"
+      content="Tahle adresa na fyzbit.cz neexistuje. Odkazy zpět do aplikace FyzBit a na její další stránky."
+    />
+    <!-- A 404 has nothing to rank for, and indexing it would only dilute the app. -->
+    <meta name="robots" content="noindex, follow" />
+    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+    <script type="module" src="/src/page.ts"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#obsah">Přeskočit na obsah</a>
+
+    <header class="page-header">
+      <div class="page-header__inner">
+        <a class="page-header__brand" href="./">FyzBit</a>
+        <span class="page-header__back"><a href="./">← Zpět do aplikace</a></span>
+      </div>
+    </header>
+
+    <main class="page" id="obsah">
+      <h1>Tady nic není</h1>
+      <p class="page__lead">
+        Adresa, na kterou jsi klikl/a, na fyzbit.cz neexistuje — nejspíš je překlepnutá
+        nebo vede na starší verzi webu.
+      </p>
+
+      <div class="page-actions">
+        <a class="is-primary" href="./">Otevřít FyzBit</a>
+        <a href="./pristupnost.html">Prohlášení o přístupnosti</a>
+      </div>
+
+      <h2>Hledáš jednu z těchhle věcí?</h2>
+      <ul>
+        <li>
+          <a href="./">Samotnou aplikaci</a> — připojení micro:bitu, měření a export
+          dat. Vše je na jedné stránce.
+        </li>
+        <li>
+          <a href="./firmware/fyzbit.hex" download>Firmware ke stažení</a> — jeden
+          soubor <code>.hex</code> pro micro:bit V1 i V2. V aplikaci ho jde nahrát
+          rovnou přes USB tlačítkem <em>Připravit micro:bit</em>.
+        </li>
+        <li>
+          <a href="https://github.com/bekousek/fyzbit" rel="noopener noreferrer"
+            >Zdrojový kód na GitHubu</a
+          >
+          — včetně firmwaru a možnosti nahlásit chybu.
+        </li>
+      </ul>
+
+      <p lang="en">
+        <strong>Page not found.</strong> This address does not exist on fyzbit.cz —
+        <a href="./?lang=en">open the app</a> instead.
+      </p>
+    </main>
+
+    <footer class="page-footer">
+      <nav aria-label="Stránky o aplikaci">
+        <a href="./">Aplikace</a>
+        <a href="./pristupnost.html">Prohlášení o přístupnosti</a>
+        <a href="https://github.com/bekousek/fyzbit" rel="noopener noreferrer">GitHub</a>
+      </nav>
+      <p>
+        FyzBit © <span id="current-year">2026</span> Ondřej Bek ·
+        <a href="https://github.com/bekousek/fyzbit/blob/main/LICENSE" rel="noopener noreferrer"
+          >Licence MIT</a
+        >
+      </p>
+    </footer>
+  </body>
+</html>

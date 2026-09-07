@@ -65,7 +65,6 @@
     "tipTemperature2": "Nechej čidlo aspoň 30 s ustálit v médiu, než zadáš referenční hodnotu.",
     "title": "Kalibrace senzoru",
     "valueHelp": "Použij desetinnou tečku. Hodnota se pošle do micro:bitu, který spočítá nový kalibrační faktor.",
-    "valueLabel": "Skutečná hodnota",
     "waiting": "Čekám…",
     "warningFactor": "Pozor: nový faktor je výrazně mimo obvyklý rozsah. Zkontroluj zadanou hodnotu a zapojení čidla."
   },
@@ -75,7 +74,6 @@
     "force": "Síla",
     "hide": "Skrýt {{name}} v grafu",
     "humidity": "Vlhkost",
-    "lineStyle": "Styl čáry v grafu",
     "pressure": "Tlak",
     "show": "Zobrazit {{name}} v grafu",
     "speed": "Rychlost",
@@ -109,6 +107,7 @@
     "firmwareHint": "Stačí jednou. Jeden soubor pro V1 i V2 — deska si z něj sama vezme svou část a Bluetooth se zapne jen na V2.",
     "insecureContext": "Připojení k micro:bitu funguje jen na https:// nebo na localhost. Tahle stránka běží na nezabezpečeném spojení, takže prohlížeč přístup k zařízení zakázal. Otevři aplikaci na adrese https://fyzbit.cz/.",
     "mock": "Demo bez hardwaru (simulovaný senzor)",
+    "mockLabel": "Demo (simulovaný teploměr)",
     "serial": "USB kabel",
     "serialHint": "Web Serial · funguje na Chrome / Edge na Windows, macOS i Linuxu.",
     "stepConnect": "Připoj se k micro:bitu",

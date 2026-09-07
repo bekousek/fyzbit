@@ -569,13 +569,16 @@ export class App {
     if (!this.transport || !this.transport.isConnected()) return;
     const transport = this.transport;
     transport.send(cmd).catch((err) => {
-      console.error('[App] send failed:', err);
       if (!transport.isConnected() && this.transport === transport) {
+        // The cable was pulled or the board reset. Expected, already told to
+        // the user as a toast — logging an error on top is just noise.
         const wasMeasuring = appState.recording;
         appState.stopRecording();
         appState.setStatus('disconnected');
         if (wasMeasuring) toast.error(t('error.connectionLost'));
+        return;
       }
+      console.error('[App] send failed:', err);
     });
   }
 
@@ -643,7 +646,11 @@ export class App {
       }
       case 'unknown':
       default:
-        if (msg.type === 'unknown' && msg.raw.trim() !== '') {
+        // A board that has just been reset spits boot noise and half-lines
+        // down the wire before its first #HELLO; the app resynchronises on
+        // the next newline by itself. It is useful while working on the
+        // firmware and pure confusion in a classroom, so: dev only.
+        if (import.meta.env.DEV && msg.type === 'unknown' && msg.raw.trim() !== '') {
           console.warn('[App] unknown protocol line:', msg.raw);
         }
         break;

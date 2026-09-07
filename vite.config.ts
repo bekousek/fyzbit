@@ -13,19 +13,38 @@ export default defineConfig({
   build: {
     outDir: 'docs',
     emptyOutDir: true,
-    sourcemap: true,
+    // Off in production: source maps ship the whole readable source next to a
+    // static site nobody debugs in the field, and they were the largest thing
+    // in docs/. `npm run dev` still has them.
+    sourcemap: false,
     target: 'es2022',
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
         pristupnost: resolve(__dirname, 'pristupnost.html'),
+        notfound: resolve(__dirname, '404.html'),
         sw: resolve(__dirname, 'src/sw.ts'),
       },
+      /*
+       * jsPDF lists canvg, html2canvas, dompurify and core-js as optional
+       * dependencies and imports them dynamically for doc.html() — a code path
+       * FyzBit never touches, since the chart goes in as a PNG. Installed, they
+       * get bundled anyway: ~380 kB raw across three lazy chunks that can only
+       * ever be downloaded and thrown away. Marking them external leaves the
+       * import as a bare specifier the browser never reaches.
+       */
+      external: ['canvg', 'html2canvas', 'dompurify', 'core-js'],
       output: {
         // Service worker must keep a stable, predictable filename so the
         // registration in main.ts can find it.
         entryFileNames: (chunk) =>
           chunk.name === 'sw' ? 'sw.js' : 'assets/[name]-[hash].js',
+      },
+      onwarn(warning, defaultHandler) {
+        // The externals above are unresolved on purpose; everything else
+        // still gets reported.
+        if (warning.code === 'UNRESOLVED_IMPORT') return;
+        defaultHandler(warning);
       },
     },
   },

@@ -172,7 +172,7 @@ export class ConnectionModal {
         this.resolveAndClose({
           kind,
           transport: new MockTransport(),
-          label: 'Mock (Teploměr)',
+          label: t('connection.mockLabel'),
         });
         return;
       }

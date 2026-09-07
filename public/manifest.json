@@ -1,6 +1,7 @@
 {
-  "name": "FyzBit",
+  "name": "FyzBit — datalogger pro fyzikální měření s micro:bitem",
   "short_name": "FyzBit",
+  "id": "/",
   "description": "Fyzika na micro:bitu — webový datalogger pro fyzikální měření na ZŠ a SŠ.",
   "start_url": "/",
   "scope": "/",
@@ -9,7 +10,11 @@
   "background_color": "#0f1410",
   "theme_color": "#1B5E20",
   "lang": "cs",
-  "categories": ["education", "science", "utilities"],
+  "categories": [
+    "education",
+    "science",
+    "utilities"
+  ],
   "icons": [
     {
       "src": "icon-192.png",
