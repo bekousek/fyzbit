@@ -95,9 +95,17 @@
     "tableEmpty": "Nothing to show in the table yet.",
     "tableTruncated": "Showing {{shown}} of {{total}} samples (every {{step}}. row). Export to CSV for the full data.",
     "time": "Time (s)",
+    "timeWindow": "Visible time range",
     "trendDown": "values fall over time",
     "trendFlat": "values stay roughly constant",
-    "trendUp": "values rise over time"
+    "trendUp": "values rise over time",
+    "window10s": "Last 10 s",
+    "window1m": "Last minute",
+    "window30s": "Last 30 s",
+    "window5m": "Last 5 minutes",
+    "windowAll": "Whole run",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out"
   },
   "connection": {
     "bluetooth": "Bluetooth",
@@ -234,10 +242,12 @@
     "exportPdf": "Export PDF",
     "help": "This help",
     "newRun": "New run",
+    "pan": "Move the chart along time",
     "save": "Save run",
     "start": "Start / stop recording",
     "tare": "Tare (zero)",
-    "title": "Keyboard shortcuts"
+    "title": "Keyboard shortcuts",
+    "zoom": "Zoom the chart in / out"
   },
   "stats": {
     "avg": "Average",

@@ -95,9 +95,17 @@
     "tableEmpty": "Zatím není co zobrazit v tabulce.",
     "tableTruncated": "Zobrazeno {{shown}} z {{total}} vzorků (každý {{step}}. řádek). Úplná data získáš exportem do CSV.",
     "time": "Čas (s)",
+    "timeWindow": "Zobrazený časový úsek",
     "trendDown": "hodnoty v čase klesají",
     "trendFlat": "hodnoty se výrazně nemění",
-    "trendUp": "hodnoty v čase rostou"
+    "trendUp": "hodnoty v čase rostou",
+    "window10s": "Posledních 10 s",
+    "window1m": "Poslední minuta",
+    "window30s": "Posledních 30 s",
+    "window5m": "Posledních 5 minut",
+    "windowAll": "Celé měření",
+    "zoomIn": "Přiblížit",
+    "zoomOut": "Oddálit"
   },
   "connection": {
     "bluetooth": "Bluetooth",
@@ -234,10 +242,12 @@
     "exportPdf": "Export PDF",
     "help": "Tato nápověda",
     "newRun": "Nové měření",
+    "pan": "Posun grafu v čase",
     "save": "Uložit měření",
     "start": "Spustit / zastavit měření",
     "tare": "Vynulovat (tára)",
-    "title": "Klávesové zkratky"
+    "title": "Klávesové zkratky",
+    "zoom": "Přiblížit / oddálit graf"
   },
   "stats": {
     "avg": "Průměr",

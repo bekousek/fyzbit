@@ -579,7 +579,10 @@ body {
 
 .chart-toolbar {
   display: flex;
-  gap: 8px;
+  /* Seven controls fit on one row on a laptop and wrap to two on a narrow
+     phone; wrapping only costs height when the row genuinely runs out. */
+  flex-wrap: wrap;
+  gap: 8px 6px;
   align-items: center;
   padding: 4px 4px 8px;
   border-bottom: 1px solid var(--border);
@@ -587,10 +590,10 @@ body {
 }
 
 /*
- * Below this width the four labels ("Automatické měřítko", "Zrušit
- * přiblížení", "Tabulka", "?") no longer fit side by side and start colliding.
- * Drop to icons only; each button carries the same wording in aria-label, so
- * nothing is lost for a screen reader or for a tooltip.
+ * Below this width the labels ("Automatické měřítko", "Zrušit přiblížení",
+ * "Tabulka", "?") no longer fit side by side and start colliding. Drop to
+ * icons only; each button carries the same wording in aria-label, so nothing
+ * is lost for a screen reader or for a tooltip.
  */
 @media (max-width: 720px) {
   .chart-toolbar .btn__label {
@@ -600,6 +603,19 @@ body {
   .chart-toolbar .btn--sm {
     padding: 6px 12px;
   }
+}
+
+/* The time-window picker. Styled like the unit picker on the channel chips —
+   it is a toolbar control sitting among buttons, not a form field. */
+.chart-toolbar__select {
+  min-height: 36px;
+  padding: 4px 6px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--fg);
+  background: var(--surface-1);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
 }
 
 .chart-toolbar__hint {
@@ -1782,7 +1798,8 @@ textarea.field__input {
     padding: 2px 2px 4px;
   }
 
-  #app[data-expanded='chart'] .chart-toolbar .btn--sm {
+  #app[data-expanded='chart'] .chart-toolbar .btn--sm,
+  #app[data-expanded='chart'] .chart-toolbar__select {
     min-height: 30px;
   }
 

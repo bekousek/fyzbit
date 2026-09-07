@@ -219,13 +219,59 @@
             <button
               type="button"
               class="btn btn--sm"
+              id="btn-zoom-out"
+              data-i18n-aria-label="chart.zoomOut"
+              data-i18n-title="chart.zoomOut"
+              aria-label="Oddálit"
+              title="Oddálit"
+            >
+              <span class="btn__icon" aria-hidden="true">&#8722;</span>
+              <span class="btn__label" data-i18n="chart.zoomOut">Oddálit</span>
+            </button>
+            <button
+              type="button"
+              class="btn btn--sm"
+              id="btn-zoom-in"
+              data-i18n-aria-label="chart.zoomIn"
+              data-i18n-title="chart.zoomIn"
+              aria-label="Přiblížit"
+              title="Přiblížit"
+            >
+              <span class="btn__icon" aria-hidden="true">&#43;</span>
+              <span class="btn__label" data-i18n="chart.zoomIn">Přiblížit</span>
+            </button>
+            <button
+              type="button"
+              class="btn btn--sm"
               id="btn-reset-zoom"
+              disabled
               data-i18n-aria-label="chart.resetZoom"
+              data-i18n-title="chart.resetZoom"
               aria-label="Zrušit přiblížení"
+              title="Zrušit přiblížení"
             >
               <span class="btn__icon" aria-hidden="true">&#128269;</span>
               <span class="btn__label" data-i18n="chart.resetZoom">Zrušit přiblížení</span>
             </button>
+            <!--
+              The option text says what the control does, so it needs no visible
+              label of its own — which is what keeps the toolbar on one row on a
+              phone. The accessible name spells it out.
+            -->
+            <select
+              class="chart-toolbar__select"
+              id="select-time-window"
+              data-i18n-aria-label="chart.timeWindow"
+              data-i18n-title="chart.timeWindow"
+              aria-label="Zobrazený časový úsek"
+              title="Zobrazený časový úsek"
+            >
+              <option value="auto" data-i18n="chart.windowAll">Celé měření</option>
+              <option value="10" data-i18n="chart.window10s">Posledních 10 s</option>
+              <option value="30" data-i18n="chart.window30s">Posledních 30 s</option>
+              <option value="60" data-i18n="chart.window1m">Poslední minuta</option>
+              <option value="300" data-i18n="chart.window5m">Posledních 5 minut</option>
+            </select>
             <button
               type="button"
               class="btn btn--sm"

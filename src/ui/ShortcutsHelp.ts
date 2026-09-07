@@ -75,6 +75,8 @@ export class ShortcutsHelp {
       ['Shift+A', t('shortcuts.annotationKeyboard')],
       ['E', t('shortcuts.exportCsv')],
       ['P', t('shortcuts.exportPdf')],
+      ['+ / −', t('shortcuts.zoom')],
+      ['← / →', t('shortcuts.pan')],
       ['Esc', t('shortcuts.escape')],
       ['?', t('shortcuts.help')],
     ];

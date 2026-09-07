@@ -22,7 +22,26 @@ const LEGEND_MIN_WIDTH = 560;
 const MARKER_SPACING_PX = 72;
 const MARKER_SIZE_PX = 9;
 
+/** The x axis grows in whole steps, so a live run doesn't re-scale every sample. */
+const X_STEP_SECONDS = 10;
+/** One press of zoom in / zoom out halves or doubles the visible time span. */
+const ZOOM_FACTOR = 2;
+/** Gentler than the buttons — a wheel notch is a much cheaper gesture. */
+const WHEEL_ZOOM_FACTOR = 1.25;
+/** Zooming in stops here; below a fifth of a second there is nothing left to resolve. */
+const MIN_SPAN_SECONDS = 0.2;
+/** One press of the arrow keys moves the view by this fraction of its own width. */
+const PAN_FRACTION = 0.25;
+
 export type SelectionRange = { tMin: number; tMax: number } | null;
+
+/** What the chart is currently showing of the time axis. */
+export type ChartView = {
+  /** Length of the rolling window in seconds, or null for the whole run. */
+  windowSeconds: number | null;
+  /** True while a zoom or a pan is holding the view still. */
+  zoomed: boolean;
+};
 
 export type ChartCallbacks = {
   onSelection?: (range: SelectionRange) => void;
@@ -32,6 +51,12 @@ export type ChartCallbacks = {
   isAnnotationModifierHeld?: () => boolean;
   /** Called when user clicks chart while annotation modifier is held. */
   onAnnotationClick?: (tSec: number, label: string) => void;
+  /**
+   * The view changed — including when the chart gave up its rolling window on
+   * its own, because a zoom or a pan took over the x range. The toolbar shows
+   * this state, so it has to hear about every change, not just its own.
+   */
+  onViewChange?: (view: ChartView) => void;
 };
 
 /**
@@ -51,6 +76,12 @@ export type ChartCallbacks = {
  * answer without seeing any hue at all. The axis labels carry the quantity's
  * colour in the first case and stay neutral in the second, so they never lie.
  *
+ * What part of the time axis is on screen has exactly one owner, `xRange()`:
+ * uPlot funnels every re-range through the x scale's `range` callback — the
+ * autoscale that follows each streamed batch just as much as our own
+ * `setScale` — so a rolling window or a manual zoom survives incoming data
+ * instead of being flattened by the next sample.
+ *
  * Values are converted to the user's chosen display unit on the way in; runs
  * keep storing whatever base unit the firmware reported.
  *
@@ -66,6 +97,10 @@ export class Chart {
   private runs: Run[] = [];
   private activeRun: Run | null = null;
   private autoscale = true;
+  /** Rolling view: draw only the last N seconds. null = the whole recording. */
+  private windowSeconds: number | null = null;
+  /** An explicit zoom/pan range; it overrides the rolling window while set. */
+  private manualRange: { min: number; max: number } | null = null;
   private pendingRedraw = false;
   private lastRedrawTs = 0;
   private pendingUpdate = false;
@@ -85,11 +120,13 @@ export class Chart {
 
     document.addEventListener('keydown', this.handleKey);
     this.container.addEventListener('click', this.handleClick, true);
+    this.container.addEventListener('wheel', this.handleWheel, { passive: false });
   }
 
   destroy(): void {
     document.removeEventListener('keydown', this.handleKey);
     this.container.removeEventListener('click', this.handleClick, true);
+    this.container.removeEventListener('wheel', this.handleWheel);
     this.disposers.forEach((d) => d());
     this.disposers = [];
     this.resizeObs?.disconnect();
@@ -134,8 +171,54 @@ export class Chart {
     if (on) this.scheduleRedraw(true);
   }
 
+  /**
+   * Draw only the last `seconds` of the recording, or all of it when null.
+   * The window is anchored to the newest sample, so during a recording the
+   * trace scrolls the way a scope's does and old data leaves on the left.
+   * Nothing is thrown away — the run keeps every sample, and picking "whole
+   * run" again brings them all back on screen.
+   */
+  setTimeWindow(seconds: number | null): void {
+    if (seconds === this.windowSeconds && this.manualRange === null) return;
+    this.windowSeconds = seconds;
+    this.manualRange = null;
+    this.applyXView();
+    this.notifyView();
+  }
+
+  /** What the toolbar has to render: the window in force, and whether a
+   *  zoom is holding the view still. */
+  view(): ChartView {
+    return { windowSeconds: this.windowSeconds, zoomed: this.manualRange !== null };
+  }
+
+  /** Halve the visible time span, keeping its middle in place. */
+  zoomIn(): void {
+    this.zoomBy(1 / ZOOM_FACTOR);
+  }
+
+  /** Double the visible time span; wide enough, and the auto view takes over. */
+  zoomOut(): void {
+    this.zoomBy(ZOOM_FACTOR);
+  }
+
+  /** Move a zoomed view back along the time axis by a quarter of its width. */
+  panLeft(): void {
+    this.panBy(-PAN_FRACTION);
+  }
+
+  /** Move a zoomed view forward along the time axis by a quarter of its width. */
+  panRight(): void {
+    this.panBy(PAN_FRACTION);
+  }
+
+  /** Drop the manual zoom and hand the x range back to the automatic view. */
   resetZoom(): void {
-    this.scheduleRedraw(true);
+    this.manualRange = null;
+    // The drag rectangle would otherwise stay painted over the restored view.
+    this.plot?.setSelect({ left: 0, top: 0, width: 0, height: 0 }, false);
+    this.applyXView();
+    this.notifyView();
     this.callbacks.onSelection?.(null);
   }
 
@@ -159,8 +242,145 @@ export class Chart {
     ];
   }
 
+  /**
+   * The x range to draw, whoever asked and for whatever reason. Everything
+   * that can change the view goes through here, which is why a rolling window
+   * keeps rolling and a zoom keeps holding while samples stream in.
+   */
+  private xRange(): [number, number] {
+    const manual = this.manualRange;
+    if (manual) return [manual.min, manual.max];
+    const win = this.windowSeconds;
+    if (win !== null) {
+      // Anchored to the newest sample, but never narrower than the window
+      // itself: two seconds into a recording the axis still spans the window
+      // instead of stretching a sliver of data across the whole plot.
+      const end = Math.max(win, this.dataTimeSpan().max);
+      return [end - win, end];
+    }
+    return this.autoXRange();
+  }
+
+  /** The whole recording, its end snapped up to the next X_STEP_SECONDS mark. */
+  private autoXRange(): [number, number] {
+    const { min, max } = this.dataTimeSpan();
+    const stepped = Math.max(
+      X_STEP_SECONDS,
+      Math.ceil(max / X_STEP_SECONDS) * X_STEP_SECONDS,
+    );
+    return [Math.min(0, min), stepped];
+  }
+
+  /** Extent of the plotted data itself — not of what is currently on screen. */
+  private dataTimeSpan(): { min: number; max: number } {
+    let min = Infinity;
+    let max = -Infinity;
+    for (const r of this.visibleRuns) {
+      const first = r.times[0];
+      const last = r.times[r.times.length - 1];
+      if (first !== undefined && first < min) min = first;
+      if (last !== undefined && last > max) max = last;
+    }
+    if (!Number.isFinite(min) || !Number.isFinite(max)) return { min: 0, max: 0 };
+    return { min, max };
+  }
+
+  /** What the plot shows right now — its live scale, before our own state. */
+  private currentXRange(): [number, number] {
+    const sc = this.plot?.scales['x'];
+    if (sc && typeof sc.min === 'number' && typeof sc.max === 'number' && sc.max > sc.min) {
+      return [sc.min, sc.max];
+    }
+    return this.xRange();
+  }
+
+  private applyXView(): void {
+    const plot = this.plot;
+    if (!plot) {
+      this.scheduleRedraw(true);
+      return;
+    }
+    const [min, max] = this.xRange();
+    plot.setScale('x', { min, max });
+  }
+
+  /**
+   * Scale the visible span by `factor` (below 1 zooms in) around `anchorSec`,
+   * or around the middle of the view when no anchor is given. Zooming out far
+   * enough hands the range back to the automatic view rather than stopping at
+   * a manual one that happens to be the same width.
+   */
+  private zoomBy(factor: number, anchorSec?: number): void {
+    const [curMin, curMax] = this.currentXRange();
+    const [boundMin, boundMax] = this.autoXRange();
+    const curSpan = curMax - curMin;
+    const boundSpan = boundMax - boundMin;
+    const span = Math.max(curSpan * factor, MIN_SPAN_SECONDS);
+    if (span >= boundSpan) {
+      // Zoomed all the way back out: give the range back to the auto view.
+      this.setManualRange(null);
+      return;
+    }
+    const anchor =
+      anchorSec !== undefined && Number.isFinite(anchorSec)
+        ? Math.min(Math.max(anchorSec, curMin), curMax)
+        : (curMin + curMax) / 2;
+    // Keep whatever is under the anchor where it is, so zooming at the pointer
+    // magnifies that spot rather than the middle of the plot.
+    const at = curSpan > 0 ? (anchor - curMin) / curSpan : 0.5;
+    this.setManualRange(this.clampToBounds(anchor - at * span, span));
+  }
+
+  /** Slide the view by a fraction of its own width, data permitting. */
+  private panBy(fraction: number): void {
+    const [curMin, curMax] = this.currentXRange();
+    const [boundMin, boundMax] = this.autoXRange();
+    const span = curMax - curMin;
+    if (span >= boundMax - boundMin) return; // everything is on screen already
+    this.setManualRange(this.clampToBounds(curMin + span * fraction, span));
+  }
+
+  /** Place a window of `span` at `min`, pushed back inside the recording. */
+  private clampToBounds(min: number, span: number): { min: number; max: number } {
+    const [boundMin, boundMax] = this.autoXRange();
+    let lo = min;
+    if (lo + span > boundMax) lo = boundMax - span;
+    if (lo < boundMin) lo = boundMin;
+    return { min: lo, max: lo + span };
+  }
+
+  private setManualRange(range: { min: number; max: number } | null): void {
+    this.manualRange = range;
+    // Zooming ends the rolling window: both want to own the x range, and the
+    // toolbar can only honestly show one of the two.
+    if (range && this.windowSeconds !== null) this.windowSeconds = null;
+    this.applyXView();
+    this.notifyView();
+  }
+
+  private notifyView(): void {
+    this.callbacks.onViewChange?.(this.view());
+  }
+
   private handleKey = (e: KeyboardEvent) => {
     if (e.key === 'Escape') this.resetZoom();
+  };
+
+  /**
+   * Wheel over the plot zooms around the pointer — the quickest way into one
+   * particular stretch of a run. Confined to the plot area, and ctrl+wheel is
+   * left alone because that is the browser's own page zoom.
+   */
+  private handleWheel = (e: WheelEvent) => {
+    const plot = this.plot;
+    if (!plot || e.ctrlKey || e.deltaY === 0) return;
+    const rect = plot.over.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    if (x < 0 || x > rect.width || y < 0 || y > rect.height) return;
+    e.preventDefault();
+    const anchor = plot.posToVal(x, 'x');
+    this.zoomBy(e.deltaY > 0 ? WHEEL_ZOOM_FACTOR : 1 / WHEEL_ZOOM_FACTOR, anchor);
   };
 
   private handleClick = (e: MouseEvent) => {
@@ -350,23 +570,13 @@ export class Chart {
 
     const { data, series } = this.buildAlignedData();
 
-    // X axis grows in fixed steps (default 10 s) so a live recording doesn't
-    // re-scale on every sample. The max snaps to the next multiple of
-    // X_STEP_SECONDS; the min is anchored at 0 (run-relative time).
-    const X_STEP_SECONDS = 10;
+    // Every re-range uPlot performs — the autoscale after each streamed batch
+    // included — asks this callback, so xRange() alone decides what is on
+    // screen. Its arguments are deliberately ignored: on an explicit setScale
+    // they carry the *requested* range rather than the data's, which would
+    // make the answer depend on how the question was asked.
     const scales: Options['scales'] = {
-      x: {
-        time: false,
-        range: (_u, dataMin, dataMax) => {
-          if (!Number.isFinite(dataMax)) return [0, X_STEP_SECONDS];
-          const stepped = Math.max(
-            X_STEP_SECONDS,
-            Math.ceil(dataMax / X_STEP_SECONDS) * X_STEP_SECONDS,
-          );
-          const min = Number.isFinite(dataMin) ? Math.min(0, dataMin) : 0;
-          return [min, stepped];
-        },
-      },
+      x: { time: false, range: () => this.xRange() },
     };
     for (const ch of channels) {
       scales[ch.id] = { auto: this.autoscale };
@@ -427,7 +637,10 @@ export class Chart {
       scales,
       axes,
       legend: { show: width >= LEGEND_MIN_WIDTH, live: true },
-      cursor: { drag: { x: true, y: false, uni: 50 } },
+      // Dragging marks a range for the statistics panel and nothing else.
+      // uPlot would zoom to it as well by default, which is why the x range
+      // function used to have to fight it back to full width on every drag.
+      cursor: { drag: { x: true, y: false, uni: 50, setScale: false } },
       hooks: {
         setSelect: [
           (u) => {

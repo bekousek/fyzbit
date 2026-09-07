@@ -10,7 +10,7 @@ import {
 import { Deriver, planDerivedChannels, type DerivedSpec } from '../state/derive';
 import { settings, type SamplingHz } from '../state/Settings';
 import { t, onLanguageChange, applyTranslations } from '../i18n/i18n';
-import { Chart, type SelectionRange } from './Chart';
+import { Chart, type ChartView, type SelectionRange } from './Chart';
 import { TopBar } from './TopBar';
 import { SensorSelect } from './SensorSelect';
 import { WiringDiagram } from './WiringDiagram';
@@ -103,6 +103,7 @@ export class App {
       onAnnotationClick: (tSec, label) => {
         appState.addAnnotation({ t: tSec, label });
       },
+      onViewChange: (view) => this.renderChartView(view),
     });
 
     // Switching sections or expanding a panel hides/shows the chart container;
@@ -131,6 +132,10 @@ export class App {
         if (newBtn && !newBtn.disabled) newBtn.click();
       },
       annotation: () => void this.addAnnotationAtCursor(),
+      zoomIn: () => this.chart.zoomIn(),
+      zoomOut: () => this.chart.zoomOut(),
+      panLeft: () => this.chart.panLeft(),
+      panRight: () => this.chart.panRight(),
       exportCsv: () => this.exportCsv(),
       exportPdf: () => this.exportPdf(),
       help: () => this.shortcutsHelp.toggle(),
@@ -275,6 +280,36 @@ export class App {
     document.getElementById('btn-reset-zoom')?.addEventListener('click', () =>
       this.chart.resetZoom(),
     );
+    document.getElementById('btn-zoom-in')?.addEventListener('click', () =>
+      this.chart.zoomIn(),
+    );
+    document.getElementById('btn-zoom-out')?.addEventListener('click', () =>
+      this.chart.zoomOut(),
+    );
+
+    const windowSelect = document.getElementById('select-time-window');
+    if (windowSelect instanceof HTMLSelectElement) {
+      windowSelect.addEventListener('change', () => {
+        const raw = windowSelect.value;
+        this.chart.setTimeWindow(raw === 'auto' ? null : Number(raw));
+      });
+    }
+    this.renderChartView(this.chart.view());
+  }
+
+  /**
+   * Mirror the chart's time view into the toolbar. A zoom drops the rolling
+   * window, and during a recording it also stops the view from following the
+   * newest sample — so both controls have to say what is actually going on,
+   * or the chart just looks frozen.
+   */
+  private renderChartView(view: ChartView): void {
+    const sel = document.getElementById('select-time-window');
+    if (sel instanceof HTMLSelectElement) {
+      sel.value = view.windowSeconds === null ? 'auto' : String(view.windowSeconds);
+    }
+    const resetBtn = document.getElementById('btn-reset-zoom');
+    if (resetBtn instanceof HTMLButtonElement) resetBtn.disabled = !view.zoomed;
   }
 
   /** Export buttons (CSV/PNG immediate; PDF opens metadata modal first). */

@@ -9,6 +9,8 @@
  *   Shift+A → Add annotation at the current position without a mouse
  *   E       → Export CSV
  *   P       → Export PDF
+ *   + / -   → Zoom the chart in / out
+ *   ← / →   → Pan a zoomed chart along the time axis
  *   Esc     → Reset zoom / close modal (modals already handle Esc natively)
  *   ?       → Help overlay
  *
@@ -24,6 +26,10 @@ export type ShortcutHandlers = {
   annotation: () => void;
   exportCsv: () => void;
   exportPdf: () => void;
+  zoomIn: () => void;
+  zoomOut: () => void;
+  panLeft: () => void;
+  panRight: () => void;
   help: () => void;
 };
 
@@ -90,6 +96,26 @@ export class KeyboardShortcuts {
       case 'P':
         e.preventDefault();
         this.handlers.exportPdf();
+        break;
+      // '+' is unshifted on a Czech layout and shifted on an English one, so
+      // both halves of the key are accepted; same for '-' and '_'.
+      case '+':
+      case '=':
+        e.preventDefault();
+        this.handlers.zoomIn();
+        break;
+      case '-':
+      case '_':
+        e.preventDefault();
+        this.handlers.zoomOut();
+        break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        this.handlers.panLeft();
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        this.handlers.panRight();
         break;
       case '?':
         e.preventDefault();
