@@ -26,6 +26,7 @@ sw.addEventListener('install', (event) => {
       await cache.addAll([
         SHELL_URL,
         './',
+        './home/',
         './pristupnost.html',
         './soukromi.html',
         './licence.html',

@@ -105,6 +105,7 @@
     "disconnect": "Disconnect",
     "downloadFirmware": "Download firmware (.hex)",
     "firmwareHint": "Once is enough. One file for V1 and V2 — the board picks its own half, and Bluetooth only switches on for V2.",
+    "guideLink": "Not sure how to wire the sensor? Open the guide →",
     "insecureContext": "Connecting to a micro:bit only works over https:// or on localhost. This page is served over an insecure connection, so the browser blocked device access. Open the app at https://fyzbit.cz/.",
     "mock": "Demo without hardware (simulated sensor)",
     "mockLabel": "Demo (simulated thermometer)",
@@ -137,6 +138,7 @@
   },
   "footer": {
     "accessibility": "Accessibility statement",
+    "guide": "Guide and sensor reference",
     "licenses": "Licences and libraries",
     "mitLicense": "MIT licence",
     "privacy": "Privacy"

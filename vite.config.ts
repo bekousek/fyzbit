@@ -21,6 +21,9 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
+        // Landing page + documentation. Its own directory so the URL is
+        // /home/ — GitHub Pages resolves /home to it.
+        home: resolve(__dirname, 'home/index.html'),
         pristupnost: resolve(__dirname, 'pristupnost.html'),
         soukromi: resolve(__dirname, 'soukromi.html'),
         licence: resolve(__dirname, 'licence.html'),

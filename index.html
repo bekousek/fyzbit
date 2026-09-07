@@ -55,6 +55,7 @@
       {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
+        "@id": "https://fyzbit.cz/#app",
         "name": "FyzBit",
         "url": "https://fyzbit.cz/",
         "description": "Webový datalogger pro micro:bit — měření teploty, vzdálenosti, síly, tlaku i vlhkosti přímo v prohlížeči. Bez instalace, bez programování. Zdarma pro ZŠ a SŠ.",
@@ -574,6 +575,11 @@
               <span aria-hidden="true">&#129514;</span>
               <span data-i18n="connection.mock">Demo bez hardwaru (simulovaný senzor)</span>
             </button>
+            <!-- Where someone stuck on wiring or on an unsupported browser
+                 actually is when they get stuck. -->
+            <a class="connection-secondary" href="./home/" data-i18n="connection.guideLink"
+              >Nevíš, jak senzor zapojit? Otevři návod →</a
+            >
           </section>
         </div>
       </div>
@@ -655,6 +661,7 @@
               neodesílá.
             </p>
             <nav class="about__links" data-i18n-aria-label="a11y.aboutLinks" aria-label="Odkazy o aplikaci">
+              <a href="./home/" data-i18n="footer.guide">Návod a přehled senzorů</a>
               <a href="./soukromi.html" data-i18n="footer.privacy">Ochrana soukromí</a>
               <a href="./pristupnost.html" data-i18n="footer.accessibility"
                 >Prohlášení o přístupnosti</a

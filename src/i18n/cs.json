@@ -105,6 +105,7 @@
     "disconnect": "Odpojit",
     "downloadFirmware": "Stáhnout firmware (.hex)",
     "firmwareHint": "Stačí jednou. Jeden soubor pro V1 i V2 — deska si z něj sama vezme svou část a Bluetooth se zapne jen na V2.",
+    "guideLink": "Nevíš, jak senzor zapojit? Otevři návod →",
     "insecureContext": "Připojení k micro:bitu funguje jen na https:// nebo na localhost. Tahle stránka běží na nezabezpečeném spojení, takže prohlížeč přístup k zařízení zakázal. Otevři aplikaci na adrese https://fyzbit.cz/.",
     "mock": "Demo bez hardwaru (simulovaný senzor)",
     "mockLabel": "Demo (simulovaný teploměr)",
@@ -137,6 +138,7 @@
   },
   "footer": {
     "accessibility": "Prohlášení o přístupnosti",
+    "guide": "Návod a přehled senzorů",
     "licenses": "Licence a knihovny",
     "mitLicense": "Licence MIT",
     "privacy": "Ochrana soukromí"
