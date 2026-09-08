@@ -275,6 +275,10 @@
     "noteHcsr04": "Některé kusy HC-SR04 chtějí 5 V. Když na 3V nic neměří, napájej modul z 5 V.",
     "noteHx710b": "Hadičku nasaď až po zapojení, ať v čidle nezůstane přetlak.",
     "noteHx711": "Tenzometr se pájí na svorky E+, E−, A+, A− na druhé straně modulu.",
+    "photoDs18b20": "Sonda DS18B20 — nerezový váleček na dlouhém kabelu se třemi krokosvorkami.",
+    "photoHcsr04": "Modul HC-SR04 — modrá destička se dvěma stříbrnými ultrazvukovými měniči.",
+    "photoHx710b": "Destička s tlakovým čidlem zakončeným trubičkou na hadičku a s převodníkem.",
+    "photoHx711": "Hliníkový tenzometrický paprsek s okem na zavěšení, v krabičce s převodníkem.",
     "power": "napájení",
     "signalNamed": "signál ({{name}})"
   }

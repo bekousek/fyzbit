@@ -452,6 +452,73 @@ body {
   margin-top: 4px;
 }
 
+/*
+ * Photo of the module the schematic is wiring up. Light plate for the same
+ * reason as on the landing page: every render was shot on a light ground, so
+ * a dark card would only frame a bright rectangle.
+ *
+ * The width cap does the real work. The panel is 220–260 px, but expanding it
+ * (data-expanded) hands it the whole window, and a photo at width:100% would
+ * then be the size of a poster.
+ */
+.wiring-photo {
+  margin: 10px 0 0;
+}
+
+.wiring-photo img {
+  display: block;
+  width: 100%;
+  max-width: 240px;
+  margin-inline: auto;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+  padding: 4px;
+  background: var(--figure-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+/*
+ * On a phone the panel is the whole screen: full width, but no more height
+ * than before. Stacked, the photo pushed the panel 245 px past the fold, so
+ * below 860 px it moves out of the flow and sits beside the legend and notes,
+ * where the width the phone has costs nothing. Every child is placed
+ * explicitly — the set is fixed and known (see WiringDiagram.render).
+ */
+@media (max-width: 860px) {
+  #wiring-diagram {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 12px;
+  }
+
+  #wiring-diagram > svg {
+    grid-area: 1 / 1 / 2 / -1;
+  }
+
+  .wiring-legend {
+    grid-area: 2 / 1;
+  }
+
+  .wiring-notes {
+    grid-area: 3 / 1;
+  }
+
+  .wiring-photo {
+    grid-area: 2 / 2 / 4 / 3;
+    align-self: start;
+  }
+
+  .wiring-photo img {
+    max-width: 128px;
+  }
+
+  .wiring-credit {
+    grid-area: 4 / 1 / 5 / -1;
+  }
+}
+
 /* Required by the board drawing's licence — see WiringDiagram.ts. */
 .wiring-credit {
   margin: 8px 0 0;
@@ -1851,4 +1918,5 @@ textarea.field__input {
     gap: 6px;
     min-height: 42px;
   }
+
 }

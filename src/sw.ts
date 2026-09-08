@@ -39,6 +39,12 @@ sw.addEventListener('install', (event) => {
         './logo.png',
         './fonts/Roboto-Regular.ttf',
         './img/microbit-board.svg',
+        // Sensor photos under the wiring schematic — same reason as the board
+        // drawing: the panel must not show broken images in a room with no wifi.
+        './img/sensor-ds18b20.webp',
+        './img/sensor-hx711.webp',
+        './img/sensor-hcsr04.webp',
+        './img/sensor-hx710b.webp',
         // So "Prepare micro:bit" (WebUSB flash) works offline in a classroom
         // without wifi — the one universal .hex is ~1.5 MB.
         './firmware/fyzbit.hex',
