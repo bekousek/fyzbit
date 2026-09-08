@@ -289,11 +289,11 @@ export class WiringDiagram {
       </svg>
       <ul class="wiring-legend">${legend}</ul>
       <ul class="wiring-notes">${notes}</ul>
+      <p class="wiring-credit">${escapeHtml(t('wiring.boardCredit'))}</p>
       <figure class="wiring-photo">
         <img src="${import.meta.env.BASE_URL}img/${wiring.photo}"
              alt="${escapeHtml(t(wiring.photoAltKey))}" loading="lazy" decoding="async" />
       </figure>
-      <p class="wiring-credit">${escapeHtml(t('wiring.boardCredit'))}</p>
     `;
   }
 }
