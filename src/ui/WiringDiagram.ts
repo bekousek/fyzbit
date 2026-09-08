@@ -75,6 +75,13 @@ type SensorWiring = {
   wires: Wire[];
   /** i18n keys for caveats worth printing under the drawing. */
   noteKeys: string[];
+  /**
+   * Photo of the module itself, under public/img/. The schematic says where
+   * the wires go; this says what the thing in the drawer looks like, which is
+   * the question a pupil handed a bag of modules actually has.
+   */
+  photo: string;
+  photoAltKey: string;
 };
 
 /**
@@ -91,6 +98,8 @@ const SENSOR_WIRING: Record<SensorName, SensorWiring> = {
       { pad: 'GND', terminal: 'GND', role: 'ground' },
     ],
     noteKeys: ['wiring.noteDs18b20'],
+    photo: 'sensor-ds18b20.webp',
+    photoAltKey: 'wiring.photoDs18b20',
   },
   HX711: {
     nameKey: 'sensor.hx711',
@@ -104,6 +113,8 @@ const SENSOR_WIRING: Record<SensorName, SensorWiring> = {
       { pad: '3V', terminal: 'VCC', role: 'power' },
     ],
     noteKeys: ['wiring.noteHx711'],
+    photo: 'sensor-hx711.webp',
+    photoAltKey: 'wiring.photoHx711',
   },
   HCSR04: {
     nameKey: 'sensor.hcsr04',
@@ -117,6 +128,8 @@ const SENSOR_WIRING: Record<SensorName, SensorWiring> = {
       { pad: '3V', terminal: 'VCC', role: 'power' },
     ],
     noteKeys: ['wiring.noteHcsr04'],
+    photo: 'sensor-hcsr04.webp',
+    photoAltKey: 'wiring.photoHcsr04',
   },
   HX710B: {
     nameKey: 'sensor.hx710b',
@@ -130,6 +143,8 @@ const SENSOR_WIRING: Record<SensorName, SensorWiring> = {
       { pad: '3V', terminal: 'VCC', role: 'power' },
     ],
     noteKeys: ['wiring.noteHx710b'],
+    photo: 'sensor-hx710b.webp',
+    photoAltKey: 'wiring.photoHx710b',
   },
 };
 
@@ -274,6 +289,10 @@ export class WiringDiagram {
       </svg>
       <ul class="wiring-legend">${legend}</ul>
       <ul class="wiring-notes">${notes}</ul>
+      <figure class="wiring-photo">
+        <img src="${import.meta.env.BASE_URL}img/${wiring.photo}"
+             alt="${escapeHtml(t(wiring.photoAltKey))}" loading="lazy" decoding="async" />
+      </figure>
       <p class="wiring-credit">${escapeHtml(t('wiring.boardCredit'))}</p>
     `;
   }

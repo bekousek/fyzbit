@@ -275,6 +275,10 @@
     "noteHcsr04": "Some HC-SR04 units want 5 V. If nothing reads on 3V, power the module from 5 V.",
     "noteHx710b": "Attach the tubing after wiring, so no pressure is left trapped in the sensor.",
     "noteHx711": "The load cell solders to E+, E−, A+, A− on the other side of the module.",
+    "photoDs18b20": "DS18B20 probe — a stainless steel tip on a long cable ending in three crocodile clips.",
+    "photoHcsr04": "HC-SR04 module — a blue board with two silver ultrasonic transducers.",
+    "photoHx710b": "Board carrying the pressure sensor with its hose nipple, and the converter.",
+    "photoHx711": "Aluminium load cell beam with a hanging eyelet, in an enclosure with the converter.",
     "power": "power",
     "signalNamed": "signal ({{name}})"
   }
