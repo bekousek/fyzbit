@@ -13,6 +13,9 @@ coverage/
 .scratch/
 # Avoid committing the local plan / session metadata
 .claude/plans/
+# Per-machine tool permissions — paths from one person's disk, no use to anyone
+# else. The shared .claude/settings.json is still tracked.
+.claude/settings.local.json
 
 # Firmware build artifacts (rebuilt via `npm run firmware`; only the copied
 # public/firmware/*.hex is committed as the distributed artifact)

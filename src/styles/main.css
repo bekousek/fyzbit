@@ -480,6 +480,20 @@ body {
 }
 
 /*
+ * A laptop at 900 px leaves the panel 571 px, and the schematic alone wants
+ * half of that — a four-wire sensor draws 13 px taller than a three-wire one,
+ * so the honest room for a photo there is 78 px. Shrinking it that far would
+ * make it useless as "what does the thing look like", so below 1000 px it
+ * merely gives up a third of its size: enough that the panel fits outright on
+ * a 960 px screen, and scrolls 42 px rather than 98 px on a 900 px one.
+ */
+@media (min-width: 861px) and (max-height: 1000px) {
+  .wiring-photo img {
+    max-width: 160px;
+  }
+}
+
+/*
  * On a phone the panel is the whole screen: full width, but no more height
  * than before. Stacked, the photo pushed the panel 245 px past the fold, so
  * below 860 px it moves out of the flow and sits beside the legend and notes,
