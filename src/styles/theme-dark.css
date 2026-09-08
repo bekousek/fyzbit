@@ -25,6 +25,10 @@
   --status-err: #f28b82;
   --status-idle: #8d938d;
 
+  /* Light, like the illustrations themselves — just taken down a step so a
+     full-width photo is not a floodlight at night. */
+  --figure-bg: #dfe1e5;
+
   /* Borders & lines */
   --border: #3a4a3d;
   --border-strong: #728573;
