@@ -31,6 +31,11 @@
   --status-err: #c62828;
   --status-idle: #6f766f;
 
+  /* Backdrop behind photos and diagrams. Every illustration on the landing
+     page was shot or drawn on a light ground, so the plate is light in both
+     themes — a dark card would only frame a bright rectangle. */
+  --figure-bg: #eceef1;
+
   /* Borders & lines */
   --border: #bcc7bc;
   --border-strong: #6b7a6d;

@@ -138,6 +138,11 @@ body {
   margin: 20px 0 6px;
 }
 
+.page h4 {
+  font-size: 15px;
+  margin: 18px 0 4px;
+}
+
 .page p,
 .page li {
   font-size: 16px;
@@ -433,9 +438,67 @@ body {
   color: var(--fg);
 }
 
+/* Heading, chips and intro text on the left, the module's photo as a tile on
+   the right. The four renders don't share an aspect ratio, so the tile fixes
+   one and letterboxes into it — that way the sensor blocks line up. */
+.sensor__head {
+  display: grid;
+  gap: 0 20px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 620px) {
+  .sensor__head {
+    grid-template-columns: 1fr 200px;
+  }
+
+  /* Last in the DOM (so it follows the intro text when the columns collapse),
+     pulled up beside the three blocks that precede it. */
+  .sensor__photo {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    align-self: start;
+  }
+}
+
+.sensor__photo {
+  margin: 4px 0 14px;
+}
+
+.sensor__photo img {
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+  padding: 6px;
+}
+
 .wiring-table td:first-child,
 .wiring-table th:first-child {
   white-space: nowrap;
+}
+
+/* Photos and diagrams. Light plate in both themes — see --figure-bg. */
+.figure {
+  margin: 16px 0;
+}
+
+.figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--figure-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.figure figcaption {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--fg-muted);
+}
+
+/* Diagrams are near-square; at the full measure they'd tower over the text. */
+.figure--narrow {
+  max-width: 24rem;
 }
 
 .faq {

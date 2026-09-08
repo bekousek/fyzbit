@@ -111,9 +111,11 @@
         <h2 id="toc-nadpis">Na téhle stránce</h2>
         <ol>
           <li><a href="#proc">Proč FyzBit</a></li>
+          <li><a href="#cena">Kolik to stojí</a></li>
           <li><a href="#co-potrebujes">Co potřebuješ</a></li>
           <li><a href="#jak-zacit">Jak začít</a></li>
           <li><a href="#senzory">Podporované senzory</a></li>
+          <li><a href="#vodice">Propojovací vodiče</a></li>
           <li><a href="#rychlost">Rychlost a zrychlení</a></li>
           <li><a href="#tara">Tára a kalibrace</a></li>
           <li><a href="#grafy">Grafy a jednotky</a></li>
@@ -185,6 +187,85 @@
         </div>
       </div>
 
+      <h2 id="cena">Kolik to stojí</h2>
+      <p>
+        Konkrétně, ať to není jen řeč. V tabulce je za každou veličinu jedno
+        čidlo, které FyzBit umí, a vedle něj odpovídající čidlo z komerční
+        školní sady — vzal jsem Vernier Go Direct, protože je na českých
+        školách nejběžnější.
+      </p>
+      <div class="table-scroll">
+        <table>
+          <caption>
+            Orientační ceny z jara 2026. Čidla se prodávají v mnoha variantách
+            a kurz se hýbe, ale řád zůstává.
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Veličina</th>
+              <th scope="col">Čidlo</th>
+              <th scope="col">Aliexpress</th>
+              <th scope="col">Český e-shop</th>
+              <th scope="col">Komerční čidlo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Teplota</th>
+              <td>DS18B20</td>
+              <td>40&nbsp;Kč</td>
+              <td>40&nbsp;Kč</td>
+              <td>4&nbsp;776&nbsp;Kč</td>
+            </tr>
+            <tr>
+              <th scope="row">Síla</th>
+              <td>tenzometr + HX711</td>
+              <td>70&nbsp;Kč</td>
+              <td>120&nbsp;Kč</td>
+              <td>7&nbsp;193&nbsp;Kč</td>
+            </tr>
+            <tr>
+              <th scope="row">Vzdálenost</th>
+              <td>HC-SR04</td>
+              <td>19&nbsp;Kč</td>
+              <td>35&nbsp;Kč</td>
+              <td>7&nbsp;798&nbsp;Kč</td>
+            </tr>
+            <tr>
+              <th scope="row">Tlak</th>
+              <td>HX710B</td>
+              <td>42&nbsp;Kč</td>
+              <td>79&nbsp;Kč</td>
+              <td>7&nbsp;286&nbsp;Kč</td>
+            </tr>
+            <tr>
+              <th scope="row">Všechna čtyři</th>
+              <td></td>
+              <td><strong>171&nbsp;Kč</strong></td>
+              <td><strong>274&nbsp;Kč</strong></td>
+              <td><strong>27&nbsp;053&nbsp;Kč</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Celá čtveřice z českého e-shopu vyjde na <strong>274&nbsp;Kč</strong> —
+        <strong>zhruba stokrát méně</strong> než tytéž čtyři veličiny v komerční
+        sadě, a pořád méně než jedno jediné její čidlo. K tomu jeden micro:bit,
+        který škola nejspíš už má z informatiky, a je to.
+      </p>
+      <p>
+        Důležitější než ta úspora je ale to, co z ní plyne: <strong>čidlo, které
+        se smí rozbít, si žák vezme do ruky.</strong> Za jedno komerční čidlo
+        pořídíš sadu pro celou třídu, takže nemusí být jedno na katedře a zbytek
+        třídy koukat. A když se něco upálí nebo přetrhne, je to výdaj za pár
+        desetikorun, ne položka do příštího rozpočtu.
+      </p>
+      <p class="page__updated">
+        Ceny a poznámky k jednotlivým čidlům pocházejí z workshopu pro učitele,
+        který jsem vedl na Konferenci Elixíru do škol 2026.
+      </p>
+
       <h2 id="co-potrebujes">Co potřebuješ</h2>
       <ul>
         <li>
@@ -198,7 +279,8 @@
         <li>
           <strong>Krokosvorky.</strong> Všechny čtyři senzory se připojují jen na
           velké pady 0, 1, 2, 3V a GND, na které krokosvorka dosáhne. Breakout
-          deska není potřeba.
+          deska není potřeba. Vodič s dutinkou na jedné a krokosvorkou na druhé
+          straně se dá koupit i <a href="#vodice">vyrobit</a>.
         </li>
         <li>
           <strong>Počítač nebo tablet s Androidem a prohlížečem Chrome, Edge
@@ -276,15 +358,35 @@
       </p>
 
       <section class="sensor" aria-labelledby="s-ds18b20">
-        <h3 id="s-ds18b20">1. Teploměr DS18B20</h3>
-        <ul class="sensor__meta">
-          <li>Měří: <strong>teplotu</strong></li>
-          <li>Jednotky: <strong>°C</strong>, K, °F</li>
-          <li>Vzorkování: <strong>1 Hz</strong></li>
-        </ul>
+        <div class="sensor__head">
+          <h3 id="s-ds18b20">1. Teploměr DS18B20</h3>
+          <ul class="sensor__meta">
+            <li>Měří: <strong>teplotu</strong></li>
+            <li>Jednotky: <strong>°C</strong>, K, °F</li>
+            <li>Rozsah: <strong>−55 až +125 °C</strong></li>
+            <li>Přesnost: <strong>±0,5 °C</strong></li>
+            <li>Vzorkování: <strong>1 Hz</strong></li>
+          </ul>
+          <p>
+            Teplota kapalin i vzduchu vodotěsnou sondou. Měří na desetiny stupně a
+            sonda snese ponoření — na chladnutí vody nebo tání ledu je to ten správný.
+          </p>
+          <figure class="figure sensor__photo">
+            <img
+              src="../img/sensor-ds18b20.webp"
+              width="900"
+              height="624"
+              loading="lazy"
+              decoding="async"
+              alt="Sonda DS18B20: nerezový váleček na dlouhém černém kabelu, který se na druhém konci dělí na tři krokosvorky — žlutou, červenou a černou."
+            />
+          </figure>
+        </div>
         <p>
-          Teplota kapalin i vzduchu vodotěsnou sondou. Měří na desetiny stupně a
-          sonda snese ponoření — na chladnutí vody nebo tání ledu je to ten správný.
+          Uvnitř té nerezové jehly je digitální čidlo Dallas/Maxim, které si
+          teplotu přepočítá samo a po sběrnici 1-Wire pošle rovnou stupně —
+          jediným datovým vodičem, žádné analogové napětí se nikde nepřevádí.
+          Proto se dá kabel natáhnout přes celou lavici, aniž by hodnota ujela.
         </p>
         <div class="table-scroll">
           <table class="wiring-table">
@@ -303,13 +405,43 @@
             </tbody>
           </table>
         </div>
+        <figure class="figure figure--narrow">
+          <img
+            src="../img/wiring-ds18b20.webp"
+            width="800"
+            height="767"
+            loading="lazy"
+            decoding="async"
+            alt="Schéma zapojení: ze sondy vedou tři vodiče — černý, červený a žlutý — do tří krokosvorek. Od krokosvorky pokračuje modrý vodič na GND, červený na 3V a oranžový na datový pin. Mezi datovým a napájecím vodičem je zapojený rezistor."
+          />
+          <figcaption>
+            Zapojení i s rezistorem. Tři vodiče sondy jdou do krokosvorek a z nich
+            na micro:bit: černý na GND, červený na 3V, žlutý na P0. Rezistor
+            propojuje datový vodič s napájecím.
+          </figcaption>
+        </figure>
         <div class="callout callout--warn">
           <p>
             Mezi DATA a VCC patří <strong>pull-up rezistor 4,7 kΩ</strong>. Bez něj
             čidlo nevrátí vůbec nic. Osvědčilo se připájet ho přímo k jedné
             krokosvorce a propojit s druhou — schová se do „punčochy“ a nikde se
-            neutrhne.
+            neutrhne; jak na to, ukazuje
+            <a href="#rezistor">Rezistor schovaný v krokosvorce</a> níže.
           </p>
+          <ul>
+            <li>
+              Že rezistor chybí, poznáš podle hodnoty: čidlo hlásí
+              <code>−127 °C</code> nebo <code>+85 °C</code> a ani se nehne.
+            </li>
+            <li>
+              <strong>Vodotěsná je jen sonda, ne konektor.</strong> Do vody patří
+              nerezový váleček a kus kabelu, ne konce s krokosvorkami.
+            </li>
+            <li>
+              Izolace kabelu snese zhruba 100 °C. Ve vroucí vodě měř krátce a
+              hlídej, ať se kabel neopírá o dno hrnce.
+            </li>
+          </ul>
         </div>
         <p>
           Jedno 12bitové měření trvá zhruba 750 ms, proto 1 Hz. Rychleji se ptát
@@ -318,15 +450,37 @@
       </section>
 
       <section class="sensor" aria-labelledby="s-hx711">
-        <h3 id="s-hx711">2. Siloměr a váha (tenzometr + HX711)</h3>
-        <ul class="sensor__meta">
-          <li>Měří: <strong>sílu</strong></li>
-          <li>Jednotky: <strong>N</strong>, mN, kN</li>
-          <li>Vzorkování: <strong>10 Hz</strong></li>
-        </ul>
+        <div class="sensor__head">
+          <h3 id="s-hx711">2. Siloměr a váha (tenzometr + HX711)</h3>
+          <ul class="sensor__meta">
+            <li>Měří: <strong>sílu</strong></li>
+            <li>Jednotky: <strong>N</strong>, mN, kN</li>
+            <li>Rozsah: <strong>do 20 kg ≈ 200 N</strong></li>
+            <li>Rozlišení: <strong>24 bit</strong></li>
+            <li>Vzorkování: <strong>10 Hz</strong></li>
+          </ul>
+          <p>
+            Síla v newtonech tenzometrickým členem (běžně do 20 kg) s převodníkem
+            HX711. Hodí se na Hookův zákon, tření, kladky i na obyčejné vážení.
+          </p>
+          <figure class="figure sensor__photo">
+            <img
+              src="../img/sensor-hx711.webp"
+              width="900"
+              height="913"
+              loading="lazy"
+              decoding="async"
+              alt="Hliníkový tenzometrický paprsek s okem na zavěšení, zasazený do tištěné krabičky s převodníkem. Zespodu vyčnívá čtyřkolíková lišta pro připojení k micro:bitu."
+            />
+            <figcaption>Tenzometrický paprsek s převodníkem v tištěné krabičce.</figcaption>
+          </figure>
+        </div>
         <p>
-          Síla v newtonech tenzometrickým členem (běžně do 20 kg) s převodníkem
-          HX711. Hodí se na Hookův zákon, tření, kladky i na obyčejné vážení.
+          Uvnitř hliníkového paprsku jsou nalepené tenzometry zapojené do můstku:
+          když se paprsek pod zátěží nepatrně prohne, jedna dvojice se natáhne a
+          druhá stlačí, a můstek se rozváží. Rozdíl napětí je tak malý, že se na
+          něj nedá jen tak sáhnout — proto ten HX711 vedle. Zesílí ho a převede na
+          24bitové číslo, tedy přes milion dílků na celý rozsah.
         </p>
         <div class="table-scroll">
           <table class="wiring-table">
@@ -351,6 +505,21 @@
             modulů P0 a P1, protože uvnitř je stejný převodník. Připoj vždy jen
             jeden modul; dva na jedné sběrnici si navzájem přebijí data.
           </p>
+          <ul>
+            <li>
+              <strong>Přetížení paprsek trvale ohne.</strong> Dvacetikilový snese
+              zhruba 200 N; co se pověsí navíc, už se z ohybu nevrátí a čidlo měří
+              natrvalo křivě. Žáky na to upozorni dřív, než se na siloměr někdo pověsí.
+            </li>
+            <li>
+              Tenzometr má teplotní drift. Když se čidlo nese z chodby do vyhřáté
+              třídy, chvíli počkej, než se srovná, a <a href="#tara">táruj</a> znovu.
+            </li>
+            <li>
+              Vadí mu silné elektromagnetické rušení — nepokládej modul na
+              transformátor, motor ani na spuštěnou indukční plotýnku.
+            </li>
+          </ul>
         </div>
         <p>
           Samotný tenzometr se pájí na svorky E+, E−, A+, A− na druhé straně
@@ -360,17 +529,39 @@
       </section>
 
       <section class="sensor" aria-labelledby="s-hcsr04">
-        <h3 id="s-hcsr04">3. Vzdálenost a rychlost (sonar HC-SR04)</h3>
-        <ul class="sensor__meta">
-          <li>Měří: <strong>vzdálenost</strong></li>
-          <li>Dopočítá: <strong>rychlost, zrychlení</strong></li>
-          <li>Jednotky: cm, mm, m · m/s, km/h, cm/s</li>
-          <li>Vzorkování: <strong>50 Hz</strong></li>
-        </ul>
+        <div class="sensor__head">
+          <h3 id="s-hcsr04">3. Vzdálenost a rychlost (sonar HC-SR04)</h3>
+          <ul class="sensor__meta">
+            <li>Měří: <strong>vzdálenost</strong></li>
+            <li>Dopočítá: <strong>rychlost, zrychlení</strong></li>
+            <li>Jednotky: cm, mm, m · m/s, km/h, cm/s</li>
+            <li>Rozsah: <strong>2–400 cm</strong></li>
+            <li>Přesnost: <strong>±3 mm</strong></li>
+            <li>Vzorkování: <strong>50 Hz</strong></li>
+          </ul>
+          <p>
+            Poloha vozíčku, míčku nebo ruky ultrazvukem. Ze všech senzorů měří
+            nejrychleji, protože pohyb je přesně to, co se z pomalých vzorků
+            zrekonstruovat nedá.
+          </p>
+          <figure class="figure sensor__photo">
+            <img
+              src="../img/sensor-hcsr04.webp"
+              width="900"
+              height="761"
+              loading="lazy"
+              decoding="async"
+              alt="Modul HC-SR04: modrá destička se dvěma stříbrnými válci ultrazvukových měničů označenými T a R a se čtyřkolíkovou lištou VCC, Trig, Echo, GND."
+            />
+            <figcaption>Dva měniče: T vysílá, R poslouchá ozvěnu.</figcaption>
+          </figure>
+        </div>
         <p>
-          Poloha vozíčku, míčku nebo ruky ultrazvukem. Ze všech senzorů měří
-          nejrychleji, protože pohyb je přesně to, co se z pomalých vzorků
-          zrekonstruovat nedá.
+          Levý váleček vyšle krátký pulz o frekvenci 40 kHz, pravý čeká na ozvěnu
+          a modul změří, jak dlouho to trvalo. Zvuk letí tam a zpátky, takže
+          vzdálenost je <strong>čas × rychlost zvuku ÷ 2</strong>. Je to tedy
+          měření času, ne délky — a je to přesně ten princip, kterým se
+          orientuje netopýr.
         </p>
         <div class="table-scroll">
           <table class="wiring-table">
@@ -394,22 +585,58 @@
           <p>
             <strong>Některé kusy HC-SR04 chtějí 5 V.</strong> Když na 3V nic
             neměří, napájej modul z 5 V (a na Echo pin dej dělič napětí), nebo
-            si pořiď variantu <code>HC-SR04P</code>, která na 3,3 V pracuje.
+            si pořiď variantu <code>HC-SR04P</code>, která na 3,3 V pracuje. Do
+            školní sady rovnou kupuj <code>HC-SR04P</code>.
           </p>
+          <ul>
+            <li>
+              <strong>Měkký cíl ozvěnu spolkne.</strong> Látka, molitan nebo svetr
+              se neodrazí — na vozíček přilep kus kartonu nebo staré CD.
+            </li>
+            <li>
+              Čidlo vidí do kužele užšího než 15° a cíl mu musí stát kolmo v cestě;
+              šikmá plocha odrazí pulz stranou a hodnota vyskočí.
+            </li>
+            <li>
+              Blíž než 2 cm sonar neměří. Nechej vozíčku na konci dráhy rezervu.
+            </li>
+          </ul>
         </div>
       </section>
 
       <section class="sensor" aria-labelledby="s-hx710b">
-        <h3 id="s-hx710b">4. Tlakoměr HX710B</h3>
-        <ul class="sensor__meta">
-          <li>Měří: <strong>tlak</strong></li>
-          <li>Jednotky: <strong>Pa</strong>, hPa, kPa, bar</li>
-          <li>Vzorkování: <strong>10 Hz</strong></li>
-        </ul>
+        <div class="sensor__head">
+          <h3 id="s-hx710b">4. Tlakoměr HX710B</h3>
+          <ul class="sensor__meta">
+            <li>Měří: <strong>tlak</strong></li>
+            <li>Jednotky: <strong>Pa</strong>, hPa, kPa, bar</li>
+            <li>Rozlišení: <strong>24 bit</strong></li>
+            <li>Vzorkování: <strong>10 Hz</strong></li>
+          </ul>
+          <p>
+            Tlak plynů i kapalin tlakovým čidlem s 24bitovým převodníkem. Na
+            hydrostatický tlak vodního sloupce, na stlačování vzduchu ve
+            stříkačce i na přetlak v nafouknutém balonku.
+          </p>
+          <figure class="figure sensor__photo">
+            <img
+              src="../img/sensor-hx710b.webp"
+              width="900"
+              height="759"
+              loading="lazy"
+              decoding="async"
+              alt="Malá destička plošného spoje s černým tlakovým čidlem zakončeným trubičkou na hadičku, s převodníkem a kolíkovou lištou."
+            />
+            <figcaption>
+              Tlakové čidlo s převodníkem na destičce (ilustrační snímek).
+            </figcaption>
+          </figure>
+        </div>
         <p>
-          Tlak plynů i kapalin tlakovým čidlem s 24bitovým převodníkem. Na
-          hydrostatický tlak vodního sloupce, pokusy s injekční stříkačkou i na
-          sledování atmosférického tlaku.
+          Uvnitř černé krabičky s trubičkou je tenká membrána a na ní zase
+          tenzometry — funguje to tedy stejně jako siloměr, jen sílu na membránu
+          dělá tlak vzduchu nebo vody. Proto má tlakoměr i stejný převodník a
+          stejné dva piny; z pohledu micro:bitu je to skoro totéž čidlo.
         </p>
         <div class="table-scroll">
           <table class="wiring-table">
@@ -433,13 +660,125 @@
             <strong>Hadičku nasaď až po zapojení</strong>, ať v čidle nezůstane
             přetlak — jinak bude tára nulovat na křivou hodnotu.
           </p>
+          <ul>
+            <li>
+              <strong>Použitelný rozsah je zhruba ±14 kPa kolem okolního tlaku</strong>,
+              tedy asi ±1,4 m vodního sloupce. Neomezuje ho membrána, ale
+              převodník — širší rozsah se mu do 24 bitů nevejde a hodnota se
+              nahoře zastaví.
+            </li>
+            <li>
+              Při prudké změně tlaku čidlo zaostává. U stlačené stříkačky odečítej
+              až ustálenou hodnotu, ne špičku během stlačování.
+            </li>
+            <li>
+              Hadičku od vodního sloupce veď tak, aby voda nemohla natéct do
+              modulu — destička ani konektory vodotěsné nejsou.
+            </li>
+          </ul>
         </div>
         <p>
-          Pro meteorologii se hodí hPa (běžný atmosférický tlak je kolem
-          1013 hPa), pro školní pokusy spíš Pa. Jednotku přepneš v čipu nad
-          grafem kdykoli, i uprostřed měření.
+          Jednotku přepneš v čipu nad grafem kdykoli, i uprostřed měření: pro
+          vodní sloupec se hodí kPa, pro jemné pokusy Pa. Absolutní číslo ale
+          neber doslova — čidlo je manometrické, měří <em>rozdíl</em> proti
+          okolí, a to, co ukazuje jako atmosférický tlak, je jen výchozí posun
+          nastavený ve firmwaru. Zajímavý je průběh a rozdíl proti táře, ne
+          hodnota sama. Na meteorologii to tedy není.
         </p>
       </section>
+
+      <h2 id="vodice">Propojovací vodiče</h2>
+      <p>
+        Senzory mají kolíkovou lištu, micro:bit velké pady s dírou. Mezi ně patří
+        vodič, který má na jednom konci dutinku (Dupont F) a na druhém
+        krokosvorku. Koupit se dá hotový, ale je to i vděčná práce do dílen —
+        čtyři vodiče, hodina a pájka. Na workshopu si ho účastníci vyrobili sami.
+      </p>
+      <figure class="figure">
+        <img
+          src="../img/croc-cable.webp"
+          width="1400"
+          height="788"
+          loading="lazy"
+          decoding="async"
+          alt="Čtyřžilový propojovací vodič. Vlevo černá čtyřpinová dutinka Dupont F, vpravo se vodiče rozbíhají do čtyř krokosvorek — černé, žluté, modré a červené. Popisky: černá je GND, červená VCC, žlutá a modrá libovolné."
+        />
+        <figcaption>
+          Dutinka nasedne na lištu senzoru, krokosvorky na pady micro:bitu.
+          Barvy nejsou libovolné jen tak: <strong>černá je vždycky GND</strong> a
+          <strong>červená vždycky VCC</strong>, zbylé dvě jsou signálové a co je
+          co, určuje až senzor. Když se toho drží celá sada, nemá žák jak zaměnit
+          napájení.
+        </figcaption>
+      </figure>
+      <p>Postup, který se osvědčil:</p>
+      <ol class="steps">
+        <li>
+          <h3>Připrav čtyři vodiče Dupont</h3>
+          <p>
+            Vezmi čtyři propojovací vodiče s dutinkou (samice) na obou koncích a
+            u každého jeden konec odstřihni. Půlit je nemá cenu — půlka je na
+            propojení lavice krátká.
+          </p>
+        </li>
+        <li>
+          <h3>Odizoluj a pocínuj</h3>
+          <p>
+            Konec vodiče i čelist krokosvorky. Pocínovaný spoj drží líp a nemusí
+            se u něj dlouho hřát plast.
+          </p>
+        </li>
+        <li>
+          <h3>Navlékni punčochu — až teď</h3>
+          <p>
+            Plastový obal krokosvorky se přes zapájený spoj už nepřetáhne. Tohle
+            je krok, na který se zapomíná nejčastěji.
+          </p>
+        </li>
+        <li>
+          <h3>Připájej a punčochu natáhni přes spoj</h3>
+          <p>Ta pak drží spoj mechanicky a zabrání zkratu se sousedním vodičem.</p>
+        </li>
+        <li>
+          <h3>Slož dutinky do jednoho čtyřřadého obalu</h3>
+          <p>
+            Jednotlivé dutinky se dají z plastu vycvaknout a přendat. Lišta se pak
+            nasazuje jedním pohybem a nejde nasadit posunutá.
+          </p>
+        </li>
+        <li>
+          <h3>Prozvoň to</h3>
+          <p>
+            Než sada půjde mezi žáky. Studený spoj se pozná až ve chvíli, kdy
+            měření nejde a hodina běží.
+          </p>
+        </li>
+      </ol>
+
+      <h3 id="rezistor">Rezistor schovaný v krokosvorce</h3>
+      <p>
+        Teploměr DS18B20 potřebuje mezi datovým a napájecím vodičem pull-up
+        4,7 kΩ. Skládat ho pokaždé na nepájivém poli je zdržení a v žákovských
+        rukou to dlouho nevydrží. Jednodušší je připájet rezistor natrvalo do
+        jedné z krokosvorek a schovat pod punčochu: navenek pak vypadá zapojení
+        teploměru úplně stejně jako u ostatních senzorů a není co zapomenout.
+      </p>
+      <figure class="figure">
+        <img
+          src="../img/pullup-resistor.webp"
+          width="900"
+          height="507"
+          loading="lazy"
+          decoding="async"
+          alt="Detail rozebrané červené krokosvorky: mezi její kovovou čelist a přívodní vodič je zapájený malý rezistor. Vedle leží žlutá krokosvorka s odsunutým plastovým obalem."
+        />
+        <figcaption>
+          Rezistor zapájený uvnitř krokosvorky, těsně před natažením punčochy.
+          Elektricky je to přesně ten spoj, který je ve
+          <a href="#s-ds18b20">schématu u teploměru</a> nakreslený mezi datovým
+          a napájecím vodičem.
+        </figcaption>
+      </figure>
 
       <h2 id="rychlost">Rychlost a zrychlení</h2>
       <p>
