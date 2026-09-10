@@ -69,7 +69,23 @@ const HX_SCK = DigitalPin.P1
 let sampleHz = 10
 let streaming = true            // start streaming as soon as we hand off to the app
 
+// DS18B20 — celsius() only ever says -Infinity; the reason for a failed read
+// arrives separately, through the driver's error callback.
+let tempErrorMsg = ""
+let tempErrorCode = 0
+let tempErrorReported = false
+let tempErrorMs = 0
+
+/**
+ * How long to give the converter to pull DOUT low before giving up on it.
+ * An HX711 strapped for 10 SPS answers every 100 ms, so this is one full
+ * period plus margin; only a missing module ever waits the whole time.
+ */
+const HX_READY_TIMEOUT_MS = 150
+
 // HX711 (force)
+let hxErrorReported = false
+let hxErrorMs = 0
 let forceOffset = 0
 let forceScale = -10578
 let tareForceRequested = false
@@ -113,9 +129,49 @@ function sendChannelDefinitions(): void {
 
 // === Sensor reads =========================================================
 
+/**
+ * One temperature sample — or a #ERR saying why there is none.
+ *
+ * dstemp.celsius() answers -Infinity for every kind of failure. Passing that on
+ * is worse than useless: MakeCode renders it as the literal string "-Infinity",
+ * the app cannot read a number out of the row and drops it, so a probe that
+ * never reads looks exactly like a working one with nothing to say.
+ *
+ * The retries are for Bluetooth. The driver bit-bangs 1-Wire with cycle-counted
+ * busy waits and never masks interrupts, and a read slot has to be sampled
+ * within 15 us of pulling the line low. Once a BLE connection exists the
+ * SoftDevice takes the radio every connection interval at the highest priority
+ * and walks straight through that window; merely advertising, which is the
+ * board's state on the USB cable, leaves long quiet gaps. Pausing between
+ * attempts lets a radio event land between two reads rather than inside one.
+ */
 function readDS18B20(): void {
-    const value = dstemp.celsius(DigitalPin.P0)
-    send("t:" + roundTo(value, 2))
+    for (let attempt = 0; attempt < 3; attempt++) {
+        tempErrorMsg = ""
+        const value = dstemp.celsius(DigitalPin.P0)
+        // Anything above -300 is a real reading: the sentinel is -Infinity, and
+        // -300 C is below absolute zero anyway. (The driver's own advice.)
+        if (value > -300) {
+            tempErrorReported = false
+            send("t:" + roundTo(value, 2))
+            return
+        }
+        basic.pause(15)
+    }
+    reportTempError()
+}
+
+/**
+ * Say the probe cannot be read — but not once per sample. The app turns #ERR
+ * into a toast, and a toast every second is noise rather than information.
+ */
+function reportTempError(): void {
+    const now = control.millis()
+    if (tempErrorReported && now - tempErrorMs < 5000) return
+    tempErrorReported = true
+    tempErrorMs = now
+    const why = tempErrorMsg == "" ? "read failed" : tempErrorMsg
+    send("#ERR;DS18B20: " + why + " (" + tempErrorCode + ")")
 }
 
 function pingSonarCm(trig: DigitalPin, echo: DigitalPin): number {
@@ -153,10 +209,35 @@ function readHCSR04(): void {
  * globals, so no read may assume the previous caller left them the way it
  * needs them.
  */
-function hxBegin(): void {
+function hxBegin(): boolean {
     HX711.SetPIN_DOUT(HX_DOUT)
     HX711.SetPIN_SCK(HX_SCK)
+    // Nothing below this line may run without a converter answering: both
+    // HX711.begin() (set_gain ends in a read) and HX711.read() open with
+    // wait_ready(0), which is an unbounded `while (!is_ready())`. The
+    // extension says so itself — "will halt the sketch until a load cell is
+    // connected" — and is_ready() means nothing more than "DOUT is low".
+    if (!HX711.wait_ready_timeout(HX_READY_TIMEOUT_MS, 1)) return false
     HX711.begin()
+    return true
+}
+
+/**
+ * Say the converter is not answering — throttled, like the probe's own error.
+ *
+ * This is what a board switched to force or pressure mode with no HX711 on the
+ * pads does now. Before the load cell moved onto P0 it would hang on a floating
+ * pin, which at least sometimes read low by accident; P0 is shared with the
+ * DS18B20's data line, and a 4.7k pull-up holds that hard high, so the sampling
+ * loop stopped for good — no data on any transport, and only the RESET button
+ * got it back, because the stuck fiber never looks at currentSensor again.
+ */
+function reportHxMissing(id: string): void {
+    const now = control.millis()
+    if (hxErrorReported && now - hxErrorMs < 5000) return
+    hxErrorReported = true
+    hxErrorMs = now
+    send("#ERR;" + id + ": no HX711 on P0/P1")
 }
 
 /**
@@ -196,18 +277,22 @@ function hxMedian5(): number {
 function applyPendingTare(): void {
     if (tareForceRequested) {
         tareForceRequested = false
-        hxBegin()
-        forceOffset = hxMedian5()
+        if (hxBegin()) forceOffset = hxMedian5()
+        else reportHxMissing("F")
     }
     if (tarePressRequested) {
         tarePressRequested = false
-        hxBegin()
-        pressOffset = hxMedian5()
+        if (hxBegin()) pressOffset = hxMedian5()
+        else reportHxMissing("p")
     }
 }
 
 function readHX711Force(): void {
-    hxBegin()
+    if (!hxBegin()) {
+        reportHxMissing("F")
+        return
+    }
+    hxErrorReported = false
     // Median of 3 for stable measurement.
     const a = hxRead()
     const b = hxRead()
@@ -221,7 +306,11 @@ function readHX711Force(): void {
 }
 
 function readHX710BPressure(): void {
-    hxBegin()
+    if (!hxBegin()) {
+        reportHxMissing("p")
+        return
+    }
+    hxErrorReported = false
     const a = hxRead()
     const b = hxRead()
     const c = hxRead()
@@ -248,7 +337,6 @@ function readAndStream(): void {
 // === Helpers ==============================================================
 
 function roundTo(value: number, decimals: number): number {
-    if (value < -998) return value  // driver error sentinel — pass through unrounded
     const factor = Math.pow(10, decimals)
     return Math.round(value * factor) / factor
 }
@@ -267,6 +355,19 @@ function sensorName(s: Sensor): string {
     if (s == Sensor.HX711) return "HX711"
     if (s == Sensor.HCSR04) return "HCSR04"
     return "HX710B"
+}
+
+/**
+ * One letter for the LED matrix. Deliberately not the first letter of the
+ * sensor's name: three of the four are called H-something, so the display said
+ * nothing about which of them had been picked. These are the quantities —
+ * temperature, force, distance, pressure.
+ */
+function sensorLetter(s: Sensor): string {
+    if (s == Sensor.DS18B20) return "T"
+    if (s == Sensor.HX711) return "F"
+    if (s == Sensor.HCSR04) return "D"
+    return "P"
 }
 
 function sensorFromName(name: string): Sensor {
@@ -326,12 +427,23 @@ function handleCommand(rawLine: string): void {
             const target = parseFloat(parts[2])
             // For HX711 / HX710B we can compute a new scale factor from current
             // raw reading. For other sensors there's no app-side calibration yet.
+            // hxBegin() first, and not only for the pins: this runs in the
+            // command handler's fiber, so an unguarded read would wedge the
+            // one thing still able to talk to a hung board.
             if (currentSensor == Sensor.HX711 && id == "F" && target != 0) {
+                if (!hxBegin()) {
+                    send("#CAL;F;err")
+                    return
+                }
                 const raw = hxRead()
                 const newScale = (raw - forceOffset) / target
                 if (newScale != 0) forceScale = newScale
                 send("#CAL;F;ok;" + roundTo(forceScale, 3))
             } else if (currentSensor == Sensor.HX710B && id == "p" && target != 0) {
+                if (!hxBegin()) {
+                    send("#CAL;p;err")
+                    return
+                }
                 const raw = hxRead()
                 const newScale = (raw - pressOffset) / target
                 if (newScale != 0) pressScale = newScale
@@ -354,6 +466,14 @@ serial.setRxBufferSize(64)
 basic.pause(200)
 sendHandshake()
 
+// celsius() cannot say more than "-Infinity"; this is where the reason comes
+// from. Codes: 1 not connected, 2 start error, 3 read timeout, 4 conversion
+// failure.
+dstemp.sensorError(function (errorMessage: string, errorCode: number, port: number) {
+    tempErrorMsg = errorMessage
+    tempErrorCode = errorCode
+})
+
 serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function () {
     // readUntil (not readString) so a command that straddles two buffer
     // fills can't get sliced in half at the receive boundary.
@@ -373,9 +493,9 @@ input.onButtonPressed(Button.A, function () {
 input.onButtonPressed(Button.B, function () {
     const nextS = ((currentSensor + 1) % 4) as Sensor
     currentSensor = nextS
-    // Flash the new sensor name on the LED matrix briefly so the user knows
-    // which mode the board is in without looking at the laptop.
-    basic.showString(sensorName(currentSensor).charAt(0))
+    // Flash the new sensor on the LED matrix briefly so the user knows which
+    // mode the board is in without looking at the laptop.
+    basic.showString(sensorLetter(currentSensor))
     sendHandshake()
 })
 

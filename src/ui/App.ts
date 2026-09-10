@@ -40,6 +40,16 @@ import {
 } from '../export/csv';
 import { exportChartPng, findChartCanvas } from '../export/png';
 
+/** How long to wait for a board to answer #HELLO? before asking again. */
+const HANDSHAKE_RETRY_MS = 700;
+/** How many times to ask, before telling the user to press A+B themselves. */
+const HANDSHAKE_ATTEMPTS = 8;
+/**
+ * Minimum gap between two "sensor unreadable" toasts. The board reports the
+ * failure once per sample, and a toast a second is noise, not information.
+ */
+const SENSOR_ERROR_TOAST_MS = 15000;
+
 /**
  * App — top-level orchestrator. Wires transport → parser → AppState → UI.
  */
@@ -62,6 +72,8 @@ export class App {
   >();
 
   private transport: Transport | null = null;
+  private handshakeTimer: number | null = null;
+  private lastSensorErrorMs = Number.NEGATIVE_INFINITY;
   private streamStartMs = 0;
   private currentSensor: SensorName | null = null;
   /** Channels announced by the firmware, before derived ones are added. */
@@ -526,6 +538,7 @@ export class App {
     this.transport = transport;
     this.reportedChannels = [];
     this.deriver = null;
+    this.lastSensorErrorMs = Number.NEGATIVE_INFINITY;
     appState.setSensorName(label);
     appState.setStatus('connecting');
 
@@ -553,6 +566,8 @@ export class App {
         // Cancelled while the picker was open, yet the user still chose a
         // device — close it again rather than leaving the port held open.
         void transport.disconnect();
+      } else {
+        this.requestHandshake(transport);
       }
     } catch (err) {
       if (this.transport !== transport) return;
@@ -572,6 +587,7 @@ export class App {
   }
 
   disconnect(): void {
+    this.clearHandshakeTimer();
     if (this.transport) {
       void this.transport.disconnect();
       this.transport = null;
@@ -593,6 +609,48 @@ export class App {
       : undefined;
     this.deriver = source ? new Deriver(plan.specs as DerivedSpec[], source) : null;
     appState.setChannels(plan.channels, plan.hiddenIds);
+  }
+
+  /**
+   * Ask the board to introduce itself, and keep asking until it does.
+   *
+   * The firmware volunteers its handshake twice: once ~200 ms after boot, and
+   * once per Bluetooth connect. Both can be missed, and nothing else ever
+   * triggers one. Over USB the interface chip happens to hold the boot-time
+   * #HELLO until a host opens the port, which is why the cable looked reliable;
+   * over Bluetooth the board announces itself the instant the GATT link is up,
+   * well before the browser has subscribed to UART notifications, so the whole
+   * handshake lands in the void. The app then sits on "connecting" forever with
+   * a stream of data it has no channel definitions to label — which looks, to
+   * the user, exactly like a board that sends nothing at all.
+   *
+   * The first #HELLO? can be lost the same way, so this keeps asking rather
+   * than asking once.
+   */
+  private requestHandshake(transport: Transport): void {
+    let attemptsLeft = HANDSHAKE_ATTEMPTS;
+    const ask = (): void => {
+      this.handshakeTimer = null;
+      if (this.transport !== transport) return; // superseded or disconnected
+      // 'handshake' means #HELLO arrived but #READY has not — worth one more
+      // ask, since a truncated handshake leaves the app just as stuck.
+      const status = appState.status;
+      if (status !== 'connecting' && status !== 'handshake') return;
+      if (attemptsLeft-- <= 0) {
+        toast.error(t('error.noHandshake'));
+        return;
+      }
+      this.sendCommand(Commands.rehello());
+      this.handshakeTimer = window.setTimeout(ask, HANDSHAKE_RETRY_MS);
+    };
+    ask();
+  }
+
+  private clearHandshakeTimer(): void {
+    if (this.handshakeTimer !== null) {
+      window.clearTimeout(this.handshakeTimer);
+      this.handshakeTimer = null;
+    }
   }
 
   /**
@@ -653,6 +711,7 @@ export class App {
         this.reportedChannels = [...this.reportedChannels, msg.channel];
         break;
       case 'ready':
+        this.clearHandshakeTimer();
         this.publishChannels();
         appState.setStatus(this.reportedChannels.length > 0 ? 'measuring' : 'connected');
         this.sendCommand(Commands.rate(this.effectiveRate()));
@@ -687,6 +746,17 @@ export class App {
           t: tSec,
           values: derived ? { ...msg.values, ...derived } : msg.values,
         });
+        break;
+      }
+      case 'sensor-error': {
+        // A board flashed with firmware that forwards the driver's -Infinity
+        // instead of reporting #ERR. Say so: silence used to be the only
+        // symptom of a probe that never reads.
+        const now = performance.now();
+        if (now - this.lastSensorErrorMs > SENSOR_ERROR_TOAST_MS) {
+          this.lastSensorErrorMs = now;
+          toast.error(t('error.sensorReadFailed'));
+        }
         break;
       }
       case 'unknown':
