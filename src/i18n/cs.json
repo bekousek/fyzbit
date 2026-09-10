@@ -133,7 +133,8 @@
     "connectionLost": "Spojení s micro:bitem ztraceno.",
     "insecureContext": "Stránka neběží po zabezpečeném spojení (https), takže prohlížeč zakázal přístup k micro:bitu. Otevři aplikaci na https://fyzbit.cz/.",
     "noHandshake": "Deska se neohlásila. Zmáčkni na micro:bitu obě tlačítka A+B najednou, nebo ho odpoj a připoj znovu.",
-    "sensorReadFailed": "Čidlo se nepodařilo přečíst — zkontroluj zapojení. Teploměru DS18B20 se přes Bluetooth do měření plete rádio; po kabelu čte spolehlivě.",
+    "sensorReadFailed": "Čidlo se nepodařilo přečíst — zkontroluj zapojení a rezistor 4,7 kΩ mezi datovým vodičem a 3V.",
+    "sensorReadFailedBluetooth": "Čidlo se nepodařilo přečíst. Teploměru DS18B20 se přes Bluetooth plete do měření rádio — zkus ho připojit kabelem. Když nečte ani po něm, bude to zapojením.",
     "storageSaveFailed": "Automatické ukládání selhává (plné úložiště nebo režim soukromého prohlížení) — probíhající měření se neukládá."
   },
   "flash": {

@@ -1,4 +1,4 @@
-import type { Transport } from '../transport/Transport';
+import type { Transport, TransportKind } from '../transport/Transport';
 import { appState, type Channel } from '../state/AppState';
 import { LineBuffer, parseLine } from '../protocol/Parser';
 import {
@@ -72,6 +72,7 @@ export class App {
   >();
 
   private transport: Transport | null = null;
+  private transportKind: TransportKind | null = null;
   private handshakeTimer: number | null = null;
   private lastSensorErrorMs = Number.NEGATIVE_INFINITY;
   private streamStartMs = 0;
@@ -414,7 +415,7 @@ export class App {
     }
     const req = await this.connectionModal.open();
     if (!req) return;
-    await this.connect(req.transport, req.label);
+    await this.connect(req.transport, req.label, req.kind);
   }
 
   /**
@@ -533,9 +534,10 @@ export class App {
   // Transport / protocol plumbing
   // ──────────────────────────────────────────────────────────
 
-  async connect(transport: Transport, label: string): Promise<void> {
+  async connect(transport: Transport, label: string, kind: TransportKind): Promise<void> {
     this.disconnect();
     this.transport = transport;
+    this.transportKind = kind;
     this.reportedChannels = [];
     this.deriver = null;
     this.lastSensorErrorMs = Number.NEGATIVE_INFINITY;
@@ -592,6 +594,7 @@ export class App {
       void this.transport.disconnect();
       this.transport = null;
     }
+    this.transportKind = null;
     this.streamStartMs = 0;
     this.reportedChannels = [];
     this.deriver = null;
@@ -755,7 +758,13 @@ export class App {
         const now = performance.now();
         if (now - this.lastSensorErrorMs > SENSOR_ERROR_TOAST_MS) {
           this.lastSensorErrorMs = now;
-          toast.error(t('error.sensorReadFailed'));
+          toast.error(
+            t(
+              this.transportKind === 'bluetooth'
+                ? 'error.sensorReadFailedBluetooth'
+                : 'error.sensorReadFailed',
+            ),
+          );
         }
         break;
       }

@@ -146,6 +146,15 @@ function sendChannelDefinitions(): void {
  * attempts lets a radio event land between two reads rather than inside one.
  */
 function readDS18B20(): void {
+    // Hand the bus back in a known state first. The driver configures P0 by
+    // writing PIN_CNF directly, and its setToInput() masks with 0xfffffffc —
+    // that clears DIR and the input buffer bit and leaves the PULL field
+    // exactly as it found it. P0 is shared with the HX711's DOUT, so a board
+    // that has been in force or pressure mode since the last reset carries
+    // whatever pull MakeCode left there into every temperature read, and an
+    // internal pull fighting the external 4.7k one is enough to lose the
+    // presence pulse ("Not Connected") on a bus that is otherwise wired fine.
+    pins.setPull(DigitalPin.P0, PinPullMode.PullNone)
     for (let attempt = 0; attempt < 3; attempt++) {
         tempErrorMsg = ""
         const value = dstemp.celsius(DigitalPin.P0)
@@ -494,8 +503,11 @@ input.onButtonPressed(Button.B, function () {
     const nextS = ((currentSensor + 1) % 4) as Sensor
     currentSensor = nextS
     // Flash the new sensor on the LED matrix briefly so the user knows which
-    // mode the board is in without looking at the laptop.
+    // mode the board is in without looking at the laptop — then clear it, for
+    // the same reason the Bluetooth tick gets cleared: a lit matrix keeps its
+    // refresh interrupt running, and that is fatal to bit-banged 1-Wire.
     basic.showString(sensorLetter(currentSensor))
+    basic.clearScreen()
     sendHandshake()
 })
 
