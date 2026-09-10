@@ -132,6 +132,8 @@
     "calibrationTimeout": "Calibration did not respond. Try again.",
     "connectionLost": "Connection to micro:bit lost.",
     "insecureContext": "This page is not served over a secure connection (https), so the browser blocked access to the micro:bit. Open the app at https://fyzbit.cz/.",
+    "noHandshake": "The board did not introduce itself. Press both buttons A+B on the micro:bit, or unplug it and connect again.",
+    "sensorReadFailed": "The sensor could not be read — check the wiring. Over Bluetooth the radio interferes with the DS18B20 thermometer; over the cable it reads reliably.",
     "storageSaveFailed": "Auto-save is failing (full storage or private browsing mode) — the current recording is not being saved."
   },
   "flash": {

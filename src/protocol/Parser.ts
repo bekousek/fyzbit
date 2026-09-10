@@ -41,6 +41,23 @@ export type CalibrationMessage = {
 
 export type ErrorMessage = { type: 'error'; message: string };
 
+/**
+ * A data row the firmware answered with but could not actually read.
+ *
+ * The DS18B20 driver returns -Infinity on any failure and older firmware passes
+ * it through untouched, so `t:-Infinity` is a sensor fault reported in the only
+ * way a data row can report one. Treating it as a malformed line made a probe
+ * that never reads look exactly like a working one with nothing to say.
+ *
+ * Only an infinite value counts. A value that is merely unparseable is a
+ * protocol fault, not a sensor one, and stays `unknown`.
+ */
+export type SensorErrorMessage = {
+  type: 'sensor-error';
+  /** Channel ids the firmware answered for but could not read. */
+  channelIds: string[];
+};
+
 export type DataMessage = {
   type: 'data';
   values: Record<string, number>;
@@ -56,6 +73,7 @@ export type ParsedMessage =
   | CalibrationMessage
   | ErrorMessage
   | DataMessage
+  | SensorErrorMessage
   | UnknownMessage;
 
 /** Channel ID → i18n nameKey. Falls back to lowercased English from the wire. */
@@ -134,6 +152,7 @@ function parseControl(line: string): ParsedMessage {
 
 function parseData(line: string): ParsedMessage {
   const values: Record<string, number> = {};
+  const unreadable: string[] = [];
   let hasAny = false;
   for (const pair of line.split(';')) {
     const trimmed = pair.trim();
@@ -141,14 +160,26 @@ function parseData(line: string): ParsedMessage {
     const colon = trimmed.indexOf(':');
     if (colon < 0) continue;
     const key = trimmed.slice(0, colon).trim();
+    if (!key) continue;
     const raw = trimmed.slice(colon + 1).trim();
     const value = Number(raw);
-    if (!key || !Number.isFinite(value)) continue;
-    values[key] = value;
-    hasAny = true;
+    if (Number.isFinite(value)) {
+      values[key] = value;
+      hasAny = true;
+      continue;
+    }
+    // Infinity specifically, and not merely "not a number": that is the
+    // driver's -Infinity sentinel arriving as MakeCode renders it. NaN means a
+    // malformed number — a decimal comma, say — which is a protocol fault and
+    // says nothing about the probe.
+    if (value === Infinity || value === -Infinity) unreadable.push(key);
   }
-  if (!hasAny) return { type: 'unknown', raw: line };
-  return { type: 'data', values };
+  // One real reading is enough to call the row data: no sensor reports a
+  // readable and an unreadable channel in the same row, and if one ever did,
+  // the number is worth more than the complaint.
+  if (hasAny) return { type: 'data', values };
+  if (unreadable.length > 0) return { type: 'sensor-error', channelIds: unreadable };
+  return { type: 'unknown', raw: line };
 }
 
 function parseOptionalFloat(raw: string | undefined): number | undefined {

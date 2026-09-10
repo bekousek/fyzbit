@@ -144,6 +144,24 @@ describe('parseLine — data rows', () => {
     // "24,5" parses as NaN via Number('24,5') → no values → unknown
     expect(parseLine('t:24,5').type).toBe('unknown');
   });
+
+  it('reports an infinite reading as a sensor error, not as garbage', () => {
+    // dstemp.celsius() answers -Infinity on a failed read and MakeCode prints
+    // it verbatim, so this is how firmware older than the #ERR change says the
+    // probe cannot be read. Dropping the row silently made a dead probe look
+    // exactly like a working one with nothing to say.
+    expect(parseLine('t:-Infinity')).toEqual({
+      type: 'sensor-error',
+      channelIds: ['t'],
+    });
+  });
+
+  it('keeps a real reading even when another channel is unreadable', () => {
+    expect(parseLine('t:-Infinity;p:101325')).toEqual({
+      type: 'data',
+      values: { p: 101325 },
+    });
+  });
 });
 
 describe('LineBuffer', () => {

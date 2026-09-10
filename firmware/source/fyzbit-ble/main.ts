@@ -74,6 +74,13 @@ const HX_SCK = DigitalPin.P1
 let sampleHz = 10
 let streaming = true            // start streaming as soon as we hand off to the app
 
+// DS18B20 — celsius() only ever says -Infinity; the reason for a failed read
+// arrives separately, through the driver's error callback.
+let tempErrorMsg = ""
+let tempErrorCode = 0
+let tempErrorReported = false
+let tempErrorMs = 0
+
 // HX711 (force)
 let forceOffset = 0
 let forceScale = -10578
@@ -119,9 +126,49 @@ function sendChannelDefinitions(): void {
 
 // === Sensor reads =========================================================
 
+/**
+ * One temperature sample — or a #ERR saying why there is none.
+ *
+ * dstemp.celsius() answers -Infinity for every kind of failure. Passing that on
+ * is worse than useless: MakeCode renders it as the literal string "-Infinity",
+ * the app cannot read a number out of the row and drops it, so a probe that
+ * never reads looks exactly like a working one with nothing to say.
+ *
+ * The retries are for Bluetooth. The driver bit-bangs 1-Wire with cycle-counted
+ * busy waits and never masks interrupts, and a read slot has to be sampled
+ * within 15 us of pulling the line low. Once a BLE connection exists the
+ * SoftDevice takes the radio every connection interval at the highest priority
+ * and walks straight through that window; merely advertising, which is the
+ * board's state on the USB cable, leaves long quiet gaps. Pausing between
+ * attempts lets a radio event land between two reads rather than inside one.
+ */
 function readDS18B20(): void {
-    const value = dstemp.celsius(DigitalPin.P0)
-    send("t:" + roundTo(value, 2))
+    for (let attempt = 0; attempt < 3; attempt++) {
+        tempErrorMsg = ""
+        const value = dstemp.celsius(DigitalPin.P0)
+        // Anything above -300 is a real reading: the sentinel is -Infinity, and
+        // -300 C is below absolute zero anyway. (The driver's own advice.)
+        if (value > -300) {
+            tempErrorReported = false
+            send("t:" + roundTo(value, 2))
+            return
+        }
+        basic.pause(15)
+    }
+    reportTempError()
+}
+
+/**
+ * Say the probe cannot be read — but not once per sample. The app turns #ERR
+ * into a toast, and a toast every second is noise rather than information.
+ */
+function reportTempError(): void {
+    const now = control.millis()
+    if (tempErrorReported && now - tempErrorMs < 5000) return
+    tempErrorReported = true
+    tempErrorMs = now
+    const why = tempErrorMsg == "" ? "read failed" : tempErrorMsg
+    send("#ERR;DS18B20: " + why + " (" + tempErrorCode + ")")
 }
 
 function pingSonarCm(trig: DigitalPin, echo: DigitalPin): number {
@@ -254,7 +301,6 @@ function readAndStream(): void {
 // === Helpers ==============================================================
 
 function roundTo(value: number, decimals: number): number {
-    if (value < -998) return value  // driver error sentinel — pass through unrounded
     const factor = Math.pow(10, decimals)
     return Math.round(value * factor) / factor
 }
@@ -273,6 +319,19 @@ function sensorName(s: Sensor): string {
     if (s == Sensor.HX711) return "HX711"
     if (s == Sensor.HCSR04) return "HCSR04"
     return "HX710B"
+}
+
+/**
+ * One letter for the LED matrix. Deliberately not the first letter of the
+ * sensor's name: three of the four are called H-something, so the display said
+ * nothing about which of them had been picked. These are the quantities —
+ * temperature, force, distance, pressure.
+ */
+function sensorLetter(s: Sensor): string {
+    if (s == Sensor.DS18B20) return "T"
+    if (s == Sensor.HX711) return "F"
+    if (s == Sensor.HCSR04) return "D"
+    return "P"
 }
 
 function sensorFromName(name: string): Sensor {
@@ -361,6 +420,14 @@ bluetooth.startUartService()
 basic.pause(200)
 sendHandshake()
 
+// celsius() cannot say more than "-Infinity"; this is where the reason comes
+// from. Codes: 1 not connected, 2 start error, 3 read timeout, 4 conversion
+// failure.
+dstemp.sensorError(function (errorMessage: string, errorCode: number, port: number) {
+    tempErrorMsg = errorMessage
+    tempErrorCode = errorCode
+})
+
 serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function () {
     // readUntil (not readString) so a command that straddles two buffer
     // fills can't get sliced in half at the receive boundary.
@@ -398,9 +465,9 @@ input.onButtonPressed(Button.A, function () {
 input.onButtonPressed(Button.B, function () {
     const nextS = ((currentSensor + 1) % 4) as Sensor
     currentSensor = nextS
-    // Flash the new sensor name on the LED matrix briefly so the user knows
-    // which mode the board is in without looking at the laptop.
-    basic.showString(sensorName(currentSensor).charAt(0))
+    // Flash the new sensor on the LED matrix briefly so the user knows which
+    // mode the board is in without looking at the laptop.
+    basic.showString(sensorLetter(currentSensor))
     sendHandshake()
 })
 

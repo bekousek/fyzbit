@@ -120,6 +120,7 @@
           <li><a href="#tara">Tára a kalibrace</a></li>
           <li><a href="#grafy">Grafy a jednotky</a></li>
           <li><a href="#export">Export dat</a></li>
+          <li><a href="#tlacitka">Tlačítka na micro:bitu</a></li>
           <li><a href="#zkratky">Klávesové zkratky</a></li>
           <li><a href="#problemy">Řešení problémů</a></li>
           <li><a href="#makecode">Vztah k MakeCode</a></li>
@@ -875,6 +876,68 @@
       <p>
         Všechno vzniká v prohlížeči a rovnou se stahuje — nic neprochází přes
         žádný server.
+      </p>
+
+      <h2 id="tlacitka">Tlačítka na micro:bitu</h2>
+      <p>
+        Deska se dá ovládat i sama o sobě, bez ruky na klávesnici — což se hodí,
+        když stojíš u pokusu na druhém konci stolu. Firmware je pro obě verze
+        desky stejný, takže tlačítka fungují na V1 i V2 úplně stejně.
+      </p>
+      <div class="table-scroll">
+        <table>
+          <caption>Tlačítka A a B jsou vepředu vedle displeje, RESET vzadu.</caption>
+          <thead>
+            <tr>
+              <th scope="col">Tlačítko</th>
+              <th scope="col">Co dělá</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row"><kbd>A</kbd></th>
+              <td>
+                Vynuluje čidlo — totéž co tlačítko <em>TÁRA</em> v aplikaci. Smysl
+                to dává u siloměru a tlakoměru; u teploměru a sonaru není co
+                nulovat, takže se nic nezmění.
+              </td>
+            </tr>
+            <tr>
+              <th scope="row"><kbd>B</kbd></th>
+              <td>
+                Přepne na další čidlo dokola: teploměr → siloměr → sonar →
+                tlakoměr → zase teploměr. Aplikaci to rovnou ohlásí, takže se
+                přepne i graf a schéma zapojení. Totéž se dá udělat výběrem čidla
+                přímo v aplikaci.
+              </td>
+            </tr>
+            <tr>
+              <th scope="row"><kbd>A</kbd>+<kbd>B</kbd></th>
+              <td>
+                Znovu se aplikaci představí — pošle jméno čidla, měřenou veličinu
+                a jednotku. Použij, když aplikace visí na „Připojuji…“ nebo nezná
+                veličinu; typicky se to stane po připojení přes Bluetooth.
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">RESET (vzadu)</th>
+              <td>
+                Restartuje desku. Firmware v ní zůstane nahraný, jen se rozběhne
+                od začátku. Po kabelu se deska sama znovu ohlásí a měření pojede
+                dál; přes Bluetooth se spojení přeruší a je potřeba se připojit
+                znovu.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        <strong>Co ukazuje displej.</strong> Po přepnutí čidla se krátce ukáže
+        písmeno měřené veličiny — <kbd>T</kbd> teplota, <kbd>F</kbd> síla,
+        <kbd>D</kbd> vzdálenost, <kbd>P</kbd> tlak.
+        Deska V2 navíc ukáže fajfku <span aria-hidden="true">✓</span> ve chvíli,
+        kdy se připojí přes Bluetooth, a křížek <span aria-hidden="true">✗</span>,
+        když se spojení přeruší.
       </p>
 
       <h2 id="zkratky">Klávesové zkratky</h2>
