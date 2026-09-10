@@ -81,7 +81,16 @@ let tempErrorCode = 0
 let tempErrorReported = false
 let tempErrorMs = 0
 
+/**
+ * How long to give the converter to pull DOUT low before giving up on it.
+ * An HX711 strapped for 10 SPS answers every 100 ms, so this is one full
+ * period plus margin; only a missing module ever waits the whole time.
+ */
+const HX_READY_TIMEOUT_MS = 150
+
 // HX711 (force)
+let hxErrorReported = false
+let hxErrorMs = 0
 let forceOffset = 0
 let forceScale = -10578
 let tareForceRequested = false
@@ -206,10 +215,35 @@ function readHCSR04(): void {
  * globals, so no read may assume the previous caller left them the way it
  * needs them.
  */
-function hxBegin(): void {
+function hxBegin(): boolean {
     HX711.SetPIN_DOUT(HX_DOUT)
     HX711.SetPIN_SCK(HX_SCK)
+    // Nothing below this line may run without a converter answering: both
+    // HX711.begin() (set_gain ends in a read) and HX711.read() open with
+    // wait_ready(0), which is an unbounded `while (!is_ready())`. The
+    // extension says so itself — "will halt the sketch until a load cell is
+    // connected" — and is_ready() means nothing more than "DOUT is low".
+    if (!HX711.wait_ready_timeout(HX_READY_TIMEOUT_MS, 1)) return false
     HX711.begin()
+    return true
+}
+
+/**
+ * Say the converter is not answering — throttled, like the probe's own error.
+ *
+ * This is what a board switched to force or pressure mode with no HX711 on the
+ * pads does now. Before the load cell moved onto P0 it would hang on a floating
+ * pin, which at least sometimes read low by accident; P0 is shared with the
+ * DS18B20's data line, and a 4.7k pull-up holds that hard high, so the sampling
+ * loop stopped for good — no data on any transport, and only the RESET button
+ * got it back, because the stuck fiber never looks at currentSensor again.
+ */
+function reportHxMissing(id: string): void {
+    const now = control.millis()
+    if (hxErrorReported && now - hxErrorMs < 5000) return
+    hxErrorReported = true
+    hxErrorMs = now
+    send("#ERR;" + id + ": no HX711 on P0/P1")
 }
 
 /**
@@ -249,18 +283,22 @@ function hxMedian5(): number {
 function applyPendingTare(): void {
     if (tareForceRequested) {
         tareForceRequested = false
-        hxBegin()
-        forceOffset = hxMedian5()
+        if (hxBegin()) forceOffset = hxMedian5()
+        else reportHxMissing("F")
     }
     if (tarePressRequested) {
         tarePressRequested = false
-        hxBegin()
-        pressOffset = hxMedian5()
+        if (hxBegin()) pressOffset = hxMedian5()
+        else reportHxMissing("p")
     }
 }
 
 function readHX711Force(): void {
-    hxBegin()
+    if (!hxBegin()) {
+        reportHxMissing("F")
+        return
+    }
+    hxErrorReported = false
     // Median of 3 for stable measurement.
     const a = hxRead()
     const b = hxRead()
@@ -274,7 +312,11 @@ function readHX711Force(): void {
 }
 
 function readHX710BPressure(): void {
-    hxBegin()
+    if (!hxBegin()) {
+        reportHxMissing("p")
+        return
+    }
+    hxErrorReported = false
     const a = hxRead()
     const b = hxRead()
     const c = hxRead()
@@ -391,12 +433,23 @@ function handleCommand(rawLine: string): void {
             const target = parseFloat(parts[2])
             // For HX711 / HX710B we can compute a new scale factor from current
             // raw reading. For other sensors there's no app-side calibration yet.
+            // hxBegin() first, and not only for the pins: this runs in the
+            // command handler's fiber, so an unguarded read would wedge the
+            // one thing still able to talk to a hung board.
             if (currentSensor == Sensor.HX711 && id == "F" && target != 0) {
+                if (!hxBegin()) {
+                    send("#CAL;F;err")
+                    return
+                }
                 const raw = hxRead()
                 const newScale = (raw - forceOffset) / target
                 if (newScale != 0) forceScale = newScale
                 send("#CAL;F;ok;" + roundTo(forceScale, 3))
             } else if (currentSensor == Sensor.HX710B && id == "p" && target != 0) {
+                if (!hxBegin()) {
+                    send("#CAL;p;err")
+                    return
+                }
                 const raw = hxRead()
                 const newScale = (raw - pressOffset) / target
                 if (newScale != 0) pressScale = newScale
