@@ -106,10 +106,12 @@ const SENSOR_WIRING: Record<SensorName, SensorWiring> = {
     // Terminals in the order the module prints them along its digital side.
     // The pads are the pressure module's: same converter, same two wires, so
     // one set of clips serves both — only ever one of them at a time.
+    // Signal colours match the cables the classroom set is made up with, and
+    // the pressure module below uses the same pair on the same two pads.
     wires: [
       { pad: 'GND', terminal: 'GND', role: 'ground' },
-      { pad: 'P0', terminal: 'DT', role: 'signal' },
-      { pad: 'P1', terminal: 'SCK', role: 'signal' },
+      { pad: 'P0', terminal: 'DT', role: 'signal', color: 'yellow' },
+      { pad: 'P1', terminal: 'SCK', role: 'signal', color: 'blue' },
       { pad: '3V', terminal: 'VCC', role: 'power' },
     ],
     noteKeys: ['wiring.noteHx711'],
@@ -136,10 +138,12 @@ const SENSOR_WIRING: Record<SensorName, SensorWiring> = {
     // Terminals in the order they are printed on the module, read with the
     // hose nipple pointing away: GND, SCK, OUT, VCC. The wires cross on their
     // way to the edge connector, which is what the real cables do too.
+    // Same converter and same two pads as the load cell, so the same two
+    // cables: clock blue, data yellow, whatever the silkscreen calls them.
     wires: [
       { pad: 'GND', terminal: 'GND', role: 'ground' },
-      { pad: 'P1', terminal: 'SCK', role: 'signal' },
-      { pad: 'P0', terminal: 'OUT', role: 'signal' },
+      { pad: 'P1', terminal: 'SCK', role: 'signal', color: 'blue' },
+      { pad: 'P0', terminal: 'OUT', role: 'signal', color: 'yellow' },
       { pad: '3V', terminal: 'VCC', role: 'power' },
     ],
     noteKeys: ['wiring.noteHx710b'],
