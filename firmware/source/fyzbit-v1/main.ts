@@ -92,6 +92,20 @@ const HX_READY_TIMEOUT_MS = 600
 /** What the driver calls gain: on an HX711 it is one, and 128 means 25 pulses. */
 const HX_GAIN_DEFAULT = 128
 
+/**
+ * 27 pulses instead of 25 — and on the HX710B that is not a gain at all.
+ *
+ * The driver is an HX711 driver, so it thinks the pulses trailing the 24 data
+ * bits select the PGA channel and gain. On an HX710B they select the output
+ * mode instead: 25 pulses ask for the differential input at 10 Hz, 27 for the
+ * same input at 40 Hz. Its gain is fixed either way, so pressScale is not
+ * affected — four times the conversion rate and a quarter of the settling time
+ * for nothing. That last part is the point: a 10 Hz chip needs some 400 ms to
+ * settle after any upset, which no sensible timeout covers comfortably, and at
+ * 40 Hz it needs about 100 ms.
+ */
+const HX_GAIN_HX710B = 64
+
 // HX711 family (force + pressure)
 // Which gain the driver has been told, so that set_gain stops running on every
 // single sample: it ends in a read(), so it used to cost an extra conversion —
@@ -327,7 +341,7 @@ function applyPendingTare(): void {
     }
     if (tarePressRequested) {
         tarePressRequested = false
-        if (hxBegin(HX_GAIN_DEFAULT)) pressOffset = hxMedian5()
+        if (hxBegin(HX_GAIN_HX710B)) pressOffset = hxMedian5()
         else reportHxMissing("p")
     }
 }
@@ -352,7 +366,7 @@ function readHX711Force(): void {
 }
 
 function readHX710BPressure(): void {
-    if (!hxBegin(HX_GAIN_DEFAULT)) {
+    if (!hxBegin(HX_GAIN_HX710B)) {
         reportHxMissing("p")
         return
     }
@@ -487,7 +501,7 @@ function handleCommand(rawLine: string): void {
                 if (newScale != 0) forceScale = newScale
                 send("#CAL;F;ok;" + roundTo(forceScale, 3))
             } else if (currentSensor == Sensor.HX710B && id == "p" && target != 0) {
-                if (!hxBegin(HX_GAIN_DEFAULT)) {
+                if (!hxBegin(HX_GAIN_HX710B)) {
                     send("#CAL;p;err")
                     return
                 }
