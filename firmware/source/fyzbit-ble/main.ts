@@ -84,32 +84,17 @@ let tempErrorMs = 0
 /**
  * How long to give the converter to pull DOUT low before giving up on it.
  *
- * 150 ms was too tight, and it cost a whole workshop its pressure sensor. The
- * HX710B answers every 100 ms in the mode the driver puts it in, which looks
- * like room to spare — but a chip that has just reset, or been woken from the
- * power-down its 60 us clock limit drops it into, has to let its filter settle
- * first, and at 10 Hz that is some 400 ms. Every momentary upset was therefore
- * reported as "the module is not there", and cost half a second of data. Only
- * a genuinely absent module ever waits this out.
+ * One conversion period plus margin: the HX710B answers every 100 ms, an HX711
+ * at least as often. This was briefly 600 ms, to cover the settling a chip
+ * needs after a reset — but the failure that argued for it turned out to be a
+ * wiring diagram with the two signal colours swapped, and a longer timeout buys
+ * nothing except taking four times as long to report a module that really is
+ * not answering. A fast, honest error is worth more than a suppressed one.
  */
-const HX_READY_TIMEOUT_MS = 600
+const HX_READY_TIMEOUT_MS = 150
 
 /** What the driver calls gain: on an HX711 it is one, and 128 means 25 pulses. */
 const HX_GAIN_DEFAULT = 128
-
-/**
- * 27 pulses instead of 25 — and on the HX710B that is not a gain at all.
- *
- * The driver is an HX711 driver, so it thinks the pulses trailing the 24 data
- * bits select the PGA channel and gain. On an HX710B they select the output
- * mode instead: 25 pulses ask for the differential input at 10 Hz, 27 for the
- * same input at 40 Hz. Its gain is fixed either way, so pressScale is not
- * affected — four times the conversion rate and a quarter of the settling time
- * for nothing. That last part is the point: a 10 Hz chip needs some 400 ms to
- * settle after any upset, which no sensible timeout covers comfortably, and at
- * 40 Hz it needs about 100 ms.
- */
-const HX_GAIN_HX710B = 64
 
 // HX711 family (force + pressure)
 // Which gain the driver has been told, so that set_gain stops running on every
@@ -347,7 +332,7 @@ function applyPendingTare(): void {
     }
     if (tarePressRequested) {
         tarePressRequested = false
-        if (hxBegin(HX_GAIN_HX710B)) pressOffset = hxMedian5()
+        if (hxBegin(HX_GAIN_DEFAULT)) pressOffset = hxMedian5()
         else reportHxMissing("p")
     }
 }
@@ -372,7 +357,7 @@ function readHX711Force(): void {
 }
 
 function readHX710BPressure(): void {
-    if (!hxBegin(HX_GAIN_HX710B)) {
+    if (!hxBegin(HX_GAIN_DEFAULT)) {
         reportHxMissing("p")
         return
     }
@@ -512,7 +497,7 @@ function handleCommand(rawLine: string): void {
                 // by how far it moved, never by how close to 1 it landed.
                 send("#CAL;F;ok;" + roundTo(forceScale, 3) + ";" + roundTo(wasScale, 3))
             } else if (currentSensor == Sensor.HX710B && id == "p" && target != 0) {
-                if (!hxBegin(HX_GAIN_HX710B)) {
+                if (!hxBegin(HX_GAIN_DEFAULT)) {
                     send("#CAL;p;err")
                     return
                 }

@@ -679,6 +679,9 @@ export class App {
     this.dataGapTimer = window.setInterval(() => {
       if (this.transport !== transport) return;
       if (!this.isConnectedStatus(appState.status)) return;
+      // The sonar sends nothing at all while its target is out of range, which
+      // is a measurement, not a fault. It is the one sensor this cannot judge.
+      if (this.currentSensor === 'HCSR04') return;
       // Nothing has arrived yet at all — that is the handshake's problem to
       // report, not this one's.
       if (this.lastDataMs === 0 || this.dataGapReported) return;
