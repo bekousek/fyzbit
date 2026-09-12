@@ -65,6 +65,11 @@ type Wire = {
    * set this on a signal when the colour matters — a set of cables prepared
    * for a particular experiment, say, where a diagram in different colours
    * would be worse than no diagram.
+   *
+   * With the classroom cable it always matters, and it belongs to the pin's
+   * position on the header, not to the signal's name: the four sockets sit in
+   * one Dupont housing, black–yellow–blue–red, so the yellow clip gets
+   * whatever the module prints second from GND.
    */
   color?: WireColorName;
 };
@@ -92,9 +97,11 @@ type SensorWiring = {
 const SENSOR_WIRING: Record<SensorName, SensorWiring> = {
   DS18B20: {
     nameKey: 'sensor.ds18b20',
+    // The probe brings its own cable, already split into three clips; the
+    // data core is the yellow one.
     wires: [
       { pad: '3V', terminal: 'VCC', role: 'power' },
-      { pad: 'P0', terminal: 'DATA', role: 'signal' },
+      { pad: 'P0', terminal: 'DATA', role: 'signal', color: 'yellow' },
       { pad: 'GND', terminal: 'GND', role: 'ground' },
     ],
     noteKeys: ['wiring.noteDs18b20'],
@@ -105,9 +112,9 @@ const SENSOR_WIRING: Record<SensorName, SensorWiring> = {
     nameKey: 'sensor.hx711',
     // Terminals in the order the module prints them along its digital side.
     // The pads are the pressure module's: same converter, same two wires, so
-    // one set of clips serves both — only ever one of them at a time.
-    // Signal colours match the cables the classroom set is made up with, and
-    // the pressure module below uses the same pair on the same two pads.
+    // one set of clips serves both — only ever one of them at a time. Not the
+    // same colours, though: DT is second from GND here, so data gets the
+    // yellow clip; the pressure module prints SCK in that spot.
     wires: [
       { pad: 'GND', terminal: 'GND', role: 'ground' },
       { pad: 'P0', terminal: 'DT', role: 'signal', color: 'yellow' },
@@ -138,12 +145,14 @@ const SENSOR_WIRING: Record<SensorName, SensorWiring> = {
     // Terminals in the order they are printed on the module, read with the
     // hose nipple pointing away: GND, SCK, OUT, VCC. The wires cross on their
     // way to the edge connector, which is what the real cables do too.
-    // Same converter and same two pads as the load cell, so the same two
-    // cables: clock blue, data yellow, whatever the silkscreen calls them.
+    // Same converter and same two pads as the load cell, but SCK is second
+    // from GND here, so the clock gets the yellow clip and data the blue one —
+    // the reverse of the load cell. Drawing them the load cell's way is what
+    // swapped this module's data and clock at the first workshop.
     wires: [
       { pad: 'GND', terminal: 'GND', role: 'ground' },
-      { pad: 'P1', terminal: 'SCK', role: 'signal', color: 'blue' },
-      { pad: 'P0', terminal: 'OUT', role: 'signal', color: 'yellow' },
+      { pad: 'P1', terminal: 'SCK', role: 'signal', color: 'yellow' },
+      { pad: 'P0', terminal: 'OUT', role: 'signal', color: 'blue' },
       { pad: '3V', terminal: 'VCC', role: 'power' },
     ],
     noteKeys: ['wiring.noteHx710b'],
