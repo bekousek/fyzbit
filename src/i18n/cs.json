@@ -131,6 +131,7 @@
     "browserUnsupported": "Tento prohlížeč neumí Web Serial ani Web Bluetooth, takže se k micro:bitu nepřipojí. Funguje Chrome, Edge nebo Opera; Firefox a Safari (a všechny prohlížeče na iPhonu a iPadu) tato rozhraní nemají. Aplikaci si můžeš projít v demo režimu se simulovaným senzorem.",
     "calibrationTimeout": "Kalibrace neodpověděla. Zkus znovu.",
     "connectionLost": "Spojení s micro:bitem ztraceno.",
+    "dataGap": "Z micro:bitu už pět sekund nepřišla žádná data. U sonaru to může být jen cíl mimo rozsah; u ostatních čidel zkontroluj zapojení a zkus RESET na desce.",
     "insecureContext": "Stránka neběží po zabezpečeném spojení (https), takže prohlížeč zakázal přístup k micro:bitu. Otevři aplikaci na https://fyzbit.cz/.",
     "noHandshake": "Deska se neohlásila. Zmáčkni na micro:bitu obě tlačítka A+B najednou, nebo ho odpoj a připoj znovu.",
     "sensorReadFailed": "Čidlo se nepodařilo přečíst — zkontroluj zapojení a rezistor 4,7 kΩ mezi datovým vodičem a 3V.",

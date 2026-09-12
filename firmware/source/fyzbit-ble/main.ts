@@ -83,14 +83,43 @@ let tempErrorMs = 0
 
 /**
  * How long to give the converter to pull DOUT low before giving up on it.
- * An HX711 strapped for 10 SPS answers every 100 ms, so this is one full
- * period plus margin; only a missing module ever waits the whole time.
+ *
+ * 150 ms was too tight, and it cost a whole workshop its pressure sensor. The
+ * HX710B answers every 100 ms in the mode the driver puts it in, which looks
+ * like room to spare — but a chip that has just reset, or been woken from the
+ * power-down its 60 us clock limit drops it into, has to let its filter settle
+ * first, and at 10 Hz that is some 400 ms. Every momentary upset was therefore
+ * reported as "the module is not there", and cost half a second of data. Only
+ * a genuinely absent module ever waits this out.
  */
-const HX_READY_TIMEOUT_MS = 150
+const HX_READY_TIMEOUT_MS = 600
 
-// HX711 (force)
+/** What the driver calls gain: on an HX711 it is one, and 128 means 25 pulses. */
+const HX_GAIN_DEFAULT = 128
+
+/**
+ * 27 pulses instead of 25 — and on the HX710B that is not a gain at all.
+ *
+ * The driver is an HX711 driver, so it thinks the pulses trailing the 24 data
+ * bits select the PGA channel and gain. On an HX710B they select the output
+ * mode instead: 25 pulses ask for the differential input at 10 Hz, 27 for the
+ * same input at 40 Hz. Its gain is fixed either way, so pressScale is not
+ * affected — four times the conversion rate and a quarter of the settling time
+ * for nothing. That last part is the point: a 10 Hz chip needs some 400 ms to
+ * settle after any upset, which no sensible timeout covers comfortably, and at
+ * 40 Hz it needs about 100 ms.
+ */
+const HX_GAIN_HX710B = 64
+
+// HX711 family (force + pressure)
+// Which gain the driver has been told, so that set_gain stops running on every
+// single sample: it ends in a read(), so it used to cost an extra conversion —
+// 100 ms, and 25 more clock pulses to be unlucky in — for every reading taken.
+// 0 means not configured, or the chip went away and has to be told again.
+let hxStartedGain = 0
 let hxErrorReported = false
 let hxErrorMs = 0
+let hxFailStreak = 0
 let forceOffset = 0
 let forceScale = -10578
 let tareForceRequested = false
@@ -224,16 +253,33 @@ function readHCSR04(): void {
  * globals, so no read may assume the previous caller left them the way it
  * needs them.
  */
-function hxBegin(): boolean {
+/** Bounded wait for a conversion — never the extension's unbounded one. */
+function hxWaitReady(): boolean {
+    return HX711.wait_ready_timeout(HX_READY_TIMEOUT_MS, 1)
+}
+
+function hxBegin(gain: number): boolean {
+    // Two assignments to driver globals, no bus traffic — free to repeat.
     HX711.SetPIN_DOUT(HX_DOUT)
     HX711.SetPIN_SCK(HX_SCK)
     // Nothing below this line may run without a converter answering: both
-    // HX711.begin() (set_gain ends in a read) and HX711.read() open with
-    // wait_ready(0), which is an unbounded `while (!is_ready())`. The
-    // extension says so itself — "will halt the sketch until a load cell is
-    // connected" — and is_ready() means nothing more than "DOUT is low".
-    if (!HX711.wait_ready_timeout(HX_READY_TIMEOUT_MS, 1)) return false
-    HX711.begin()
+    // set_gain() and HX711.read() open with wait_ready(0), which is an
+    // unbounded `while (!is_ready())`. The extension says so itself — "will
+    // halt the sketch until a load cell is connected" — and is_ready() means
+    // nothing more than "DOUT is low".
+    if (!hxWaitReady()) {
+        // The chip may have reset or powered down on us, and a chip that reset
+        // has forgotten the gain it was told. Ask again on the way back in.
+        hxStartedGain = 0
+        return false
+    }
+    if (hxStartedGain != gain) {
+        HX711.set_gain(gain)
+        hxStartedGain = gain
+        // set_gain() ends in a read(), which just spent the conversion we
+        // waited for. The caller wants one of its own.
+        return hxWaitReady()
+    }
     return true
 }
 
@@ -248,11 +294,15 @@ function hxBegin(): boolean {
  * got it back, because the stuck fiber never looks at currentSensor again.
  */
 function reportHxMissing(id: string): void {
+    hxFailStreak++
     const now = control.millis()
     if (hxErrorReported && now - hxErrorMs < 5000) return
     hxErrorReported = true
     hxErrorMs = now
-    send("#ERR;" + id + ": no HX711 on P0/P1")
+    // The streak goes on the wire because the throttle above hides how often
+    // this really happens. "Once in a while" in the app looked like a loose
+    // wire, while the sensor was in fact failing most of the time.
+    send("#ERR;" + id + ": no HX711 on P0/P1 (" + hxFailStreak + "x)")
 }
 
 /**
@@ -292,22 +342,23 @@ function hxMedian5(): number {
 function applyPendingTare(): void {
     if (tareForceRequested) {
         tareForceRequested = false
-        if (hxBegin()) forceOffset = hxMedian5()
+        if (hxBegin(HX_GAIN_DEFAULT)) forceOffset = hxMedian5()
         else reportHxMissing("F")
     }
     if (tarePressRequested) {
         tarePressRequested = false
-        if (hxBegin()) pressOffset = hxMedian5()
+        if (hxBegin(HX_GAIN_HX710B)) pressOffset = hxMedian5()
         else reportHxMissing("p")
     }
 }
 
 function readHX711Force(): void {
-    if (!hxBegin()) {
+    if (!hxBegin(HX_GAIN_DEFAULT)) {
         reportHxMissing("F")
         return
     }
     hxErrorReported = false
+    hxFailStreak = 0
     // Median of 3 for stable measurement.
     const a = hxRead()
     const b = hxRead()
@@ -321,11 +372,12 @@ function readHX711Force(): void {
 }
 
 function readHX710BPressure(): void {
-    if (!hxBegin()) {
+    if (!hxBegin(HX_GAIN_HX710B)) {
         reportHxMissing("p")
         return
     }
     hxErrorReported = false
+    hxFailStreak = 0
     const a = hxRead()
     const b = hxRead()
     const c = hxRead()
@@ -446,7 +498,7 @@ function handleCommand(rawLine: string): void {
             // command handler's fiber, so an unguarded read would wedge the
             // one thing still able to talk to a hung board.
             if (currentSensor == Sensor.HX711 && id == "F" && target != 0) {
-                if (!hxBegin()) {
+                if (!hxBegin(HX_GAIN_DEFAULT)) {
                     send("#CAL;F;err")
                     return
                 }
@@ -455,7 +507,7 @@ function handleCommand(rawLine: string): void {
                 if (newScale != 0) forceScale = newScale
                 send("#CAL;F;ok;" + roundTo(forceScale, 3))
             } else if (currentSensor == Sensor.HX710B && id == "p" && target != 0) {
-                if (!hxBegin()) {
+                if (!hxBegin(HX_GAIN_HX710B)) {
                     send("#CAL;p;err")
                     return
                 }

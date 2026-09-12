@@ -49,6 +49,12 @@ const HANDSHAKE_ATTEMPTS = 8;
  * failure once per sample, and a toast a second is noise, not information.
  */
 const SENSOR_ERROR_TOAST_MS = 15000;
+/**
+ * How long the stream may go quiet before the app says so. Generous on
+ * purpose: the sonar sends nothing at all while its target is out of range,
+ * and a slow sensor is allowed a second between samples.
+ */
+const DATA_GAP_MS = 5000;
 
 /**
  * App — top-level orchestrator. Wires transport → parser → AppState → UI.
@@ -75,6 +81,9 @@ export class App {
   private transportKind: TransportKind | null = null;
   private handshakeTimer: number | null = null;
   private lastSensorErrorMs = Number.NEGATIVE_INFINITY;
+  private lastDataMs = 0;
+  private dataGapTimer: number | null = null;
+  private dataGapReported = false;
   private streamStartMs = 0;
   private currentSensor: SensorName | null = null;
   /** Channels announced by the firmware, before derived ones are added. */
@@ -570,6 +579,7 @@ export class App {
         void transport.disconnect();
       } else {
         this.requestHandshake(transport);
+        this.startDataGapWatch(transport);
       }
     } catch (err) {
       if (this.transport !== transport) return;
@@ -590,6 +600,7 @@ export class App {
 
   disconnect(): void {
     this.clearHandshakeTimer();
+    this.clearDataGapWatch();
     if (this.transport) {
       void this.transport.disconnect();
       this.transport = null;
@@ -647,6 +658,39 @@ export class App {
       this.handshakeTimer = window.setTimeout(ask, HANDSHAKE_RETRY_MS);
     };
     ask();
+  }
+
+  /**
+   * Notice when the board stops sending, and say so.
+   *
+   * Nothing used to tell a quiet board from a dead one. A probe that cannot be
+   * read, a converter timing out every sample, a firmware loop waiting on a bus
+   * that never answers — all three looked exactly like a board with nothing to
+   * report, because the last value simply stayed on screen. That is how a whole
+   * workshop spent its time guessing at cables.
+   */
+  private startDataGapWatch(transport: Transport): void {
+    this.clearDataGapWatch();
+    this.dataGapTimer = window.setInterval(() => {
+      if (this.transport !== transport) return;
+      if (!this.isConnectedStatus(appState.status)) return;
+      // Nothing has arrived yet at all — that is the handshake's problem to
+      // report, not this one's.
+      if (this.lastDataMs === 0 || this.dataGapReported) return;
+      if (performance.now() - this.lastDataMs < DATA_GAP_MS) return;
+      this.dataGapReported = true;
+      toast.warn(t('error.dataGap'), 8000);
+      announce(t('error.dataGap'));
+    }, 1000);
+  }
+
+  private clearDataGapWatch(): void {
+    if (this.dataGapTimer !== null) {
+      window.clearInterval(this.dataGapTimer);
+      this.dataGapTimer = null;
+    }
+    this.lastDataMs = 0;
+    this.dataGapReported = false;
   }
 
   private clearHandshakeTimer(): void {
@@ -742,6 +786,8 @@ export class App {
         toast.error(`${t('toast.deviceError')}: ${msg.message}`);
         break;
       case 'data': {
+        this.lastDataMs = performance.now();
+        this.dataGapReported = false;
         if (this.streamStartMs === 0) this.streamStartMs = performance.now();
         const tSec = (performance.now() - this.streamStartMs) / 1000;
         const derived = this.deriver?.push(tSec, msg.values);
