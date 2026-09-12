@@ -37,6 +37,13 @@ export type CalibrationMessage = {
   channelId: string;
   ok: boolean;
   factor?: number;
+  /**
+   * The scale the firmware held before this calibration, when it reports one.
+   * The only honest yardstick for the new factor: the scale is in converter
+   * counts per newton or pascal, so what counts as sane is a property of the
+   * sensor, not a number near 1.
+   */
+  previousFactor?: number;
 };
 
 export type ErrorMessage = { type: 'error'; message: string };
@@ -132,13 +139,15 @@ function parseControl(line: string): ParsedMessage {
       return { type: 'tare', ok: false, error: parts[2] };
     }
     case '#CAL': {
-      // #CAL;ID;ok;FAKTOR  or  #CAL;ID;err;msg
+      // #CAL;ID;ok;FAKTOR[;PREDCHOZI]  or  #CAL;ID;err;msg
       const channelId = parts[1] ?? '';
       const status = parts[2] ?? '';
       if (status === 'ok') {
         const factor = parseOptionalFloat(parts[3]);
+        const previousFactor = parseOptionalFloat(parts[4]);
         const msg: CalibrationMessage = { type: 'calibration', channelId, ok: true };
         if (factor !== undefined) msg.factor = factor;
+        if (previousFactor !== undefined) msg.previousFactor = previousFactor;
         return msg;
       }
       return { type: 'calibration', channelId, ok: false };

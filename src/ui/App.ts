@@ -74,7 +74,12 @@ export class App {
   private autoSave!: AutoSave;
   private recoveryModal!: RecoveryModal;
   private calibrationListeners = new Set<
-    (msg: { channelId: string; ok: boolean; factor?: number }) => void
+    (msg: {
+      channelId: string;
+      ok: boolean;
+      factor?: number;
+      previousFactor?: number;
+    }) => void
   >();
 
   private transport: Transport | null = null;
@@ -773,11 +778,17 @@ export class App {
         else toast.error(t('toast.tareErr'));
         break;
       case 'calibration': {
-        const payload: { channelId: string; ok: boolean; factor?: number } = {
+        const payload: {
+          channelId: string;
+          ok: boolean;
+          factor?: number;
+          previousFactor?: number;
+        } = {
           channelId: msg.channelId,
           ok: msg.ok,
         };
         if (msg.factor !== undefined) payload.factor = msg.factor;
+        if (msg.previousFactor !== undefined) payload.previousFactor = msg.previousFactor;
         this.calibrationListeners.forEach((l) => l(payload));
         break;
       }

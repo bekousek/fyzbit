@@ -75,6 +75,18 @@ describe('parseLine — control messages', () => {
     });
   });
 
+  it('parses the previous factor when the firmware reports one', () => {
+    // The only honest yardstick for a new factor: the scale is in converter
+    // counts per unit, so the wizard judges the ratio, not the magnitude.
+    expect(parseLine('#CAL;p;ok;581.84;574.2')).toEqual({
+      type: 'calibration',
+      channelId: 'p',
+      ok: true,
+      factor: 581.84,
+      previousFactor: 574.2,
+    });
+  });
+
   it('parses #CAL failure without factor', () => {
     expect(parseLine('#CAL;t;err;timeout')).toEqual({
       type: 'calibration',
