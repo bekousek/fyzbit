@@ -131,6 +131,7 @@
     "browserUnsupported": "This browser has neither Web Serial nor Web Bluetooth, so it cannot connect to a micro:bit. Chrome, Edge and Opera work; Firefox and Safari (and every browser on iPhone and iPad) do not implement them. You can still try the app in demo mode with a simulated sensor.",
     "calibrationTimeout": "Calibration did not respond. Try again.",
     "connectionLost": "Connection to micro:bit lost.",
+    "dataGap": "No data from the micro:bit for five seconds. With the sonar that may just be a target out of range; on the other sensors check the wiring and try RESET on the board.",
     "insecureContext": "This page is not served over a secure connection (https), so the browser blocked access to the micro:bit. Open the app at https://fyzbit.cz/.",
     "noHandshake": "The board did not introduce itself. Press both buttons A+B on the micro:bit, or unplug it and connect again.",
     "sensorReadFailed": "The sensor could not be read — check the wiring, and the 4.7 kΩ resistor between the data wire and 3V.",
