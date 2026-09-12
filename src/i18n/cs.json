@@ -67,7 +67,7 @@
     "title": "Kalibrace senzoru",
     "valueHelp": "Použij desetinnou tečku. Hodnota se pošle do micro:bitu, který spočítá nový kalibrační faktor.",
     "waiting": "Čekám…",
-    "warningFactor": "Pozor: nový faktor je výrazně mimo obvyklý rozsah. Zkontroluj zadanou hodnotu a zapojení čidla."
+    "warningFactor": "Pozor: nový faktor se od předchozího liší více než desetinásobně. Zkontroluj zadanou hodnotu a zapojení čidla."
   },
   "channel": {
     "acceleration": "Zrychlení",

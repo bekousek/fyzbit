@@ -67,7 +67,7 @@
     "title": "Sensor calibration",
     "valueHelp": "Use a decimal point. The value is sent to the micro:bit which computes a new calibration factor.",
     "waiting": "Waiting…",
-    "warningFactor": "Warning: the new factor is far outside the usual range. Double-check the entered value and sensor wiring."
+    "warningFactor": "Warning: the new factor differs from the previous one by more than ten times. Double-check the entered value and the sensor wiring."
   },
   "channel": {
     "acceleration": "Acceleration",

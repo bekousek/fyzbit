@@ -498,8 +498,13 @@ function handleCommand(rawLine: string): void {
                 }
                 const raw = hxRead()
                 const newScale = (raw - forceOffset) / target
+                const wasScale = forceScale
                 if (newScale != 0) forceScale = newScale
-                send("#CAL;F;ok;" + roundTo(forceScale, 3))
+                // The old scale goes with the new one. Only the board knows
+                // what magnitude this number should have — it is converter
+                // counts per newton — so the app can judge a calibration only
+                // by how far it moved, never by how close to 1 it landed.
+                send("#CAL;F;ok;" + roundTo(forceScale, 3) + ";" + roundTo(wasScale, 3))
             } else if (currentSensor == Sensor.HX710B && id == "p" && target != 0) {
                 if (!hxBegin(HX_GAIN_HX710B)) {
                     send("#CAL;p;err")
@@ -507,11 +512,12 @@ function handleCommand(rawLine: string): void {
                 }
                 const raw = hxRead()
                 const newScale = (raw - pressOffset) / target
+                const wasScale = pressScale
                 if (newScale != 0) pressScale = newScale
-                send("#CAL;p;ok;" + roundTo(pressScale, 3))
+                send("#CAL;p;ok;" + roundTo(pressScale, 3) + ";" + roundTo(wasScale, 3))
             } else {
                 // Acknowledge as a no-op so the app's wizard doesn't time out.
-                send("#CAL;" + id + ";ok;1.0")
+                send("#CAL;" + id + ";ok;1.0;1.0")
             }
         }
         return

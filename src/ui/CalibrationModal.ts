@@ -13,7 +13,12 @@ type CalibrationDeps = {
   send: (cmd: string) => void;
   /** Notifies subscribers when a #CAL;id;ok;factor reply arrives. */
   onCalibrationReply: (
-    handler: (msg: { channelId: string; ok: boolean; factor?: number }) => void,
+    handler: (msg: {
+      channelId: string;
+      ok: boolean;
+      factor?: number;
+      previousFactor?: number;
+    }) => void,
   ) => () => void;
 };
 
@@ -26,11 +31,15 @@ type Step = 'choose' | 'instructions' | 'value' | 'sending' | 'result';
  *   2. instructions — "prepare a known reference for ..."
  *   3. value        — number input with the channel's unit
  *   4. sending      — emit #CAL, wait up to 3s for reply
- *   5. result       — show new factor (with safety warning if >10× from default)
+ *   5. result       — show the new factor, warning if it moved more than 10×
  *
- * The "default factor" comparison is done against value 1.0 — firmware-reported
- * factors are scale multipliers; large deviations (>10×) suggest the user keyed
- * the wrong reference value or has a hardware fault.
+ * "Moved" is the operative word. The factor is the firmware's scale in
+ * converter counts per unit, so its magnitude belongs to the sensor: -10578 for
+ * the load cell, 581.84 for the pressure module. This once compared it against
+ * 1.0, which meant the warning fired on every correct calibration of those two
+ * and would have kept quiet on a genuinely wrong one. The firmware now reports
+ * the scale it held before, and the ratio between the two is what says whether
+ * the user keyed the wrong reference.
  */
 export class CalibrationModal {
   private dialog: HTMLDialogElement;
@@ -44,6 +53,7 @@ export class CalibrationModal {
   private selectedChannel: Channel | null = null;
   private referenceValue = 0;
   private resultFactor: number | null = null;
+  private resultPrevious: number | null = null;
   private resultError: string | null = null;
   private timeoutHandle: number | null = null;
   private unsubscribeReply: (() => void) | null = null;
@@ -80,6 +90,7 @@ export class CalibrationModal {
     this.selectedChannel = channels.length === 1 ? channels[0]! : null;
     this.referenceValue = 0;
     this.resultFactor = null;
+    this.resultPrevious = null;
     this.resultError = null;
     this.render();
     if (typeof this.dialog.showModal === 'function') this.dialog.showModal();
@@ -141,6 +152,7 @@ export class CalibrationModal {
       case 'result':
         this.cancelPendingReply();
         this.resultFactor = null;
+        this.resultPrevious = null;
         this.resultError = null;
         this.step = 'value';
         break;
@@ -173,9 +185,15 @@ export class CalibrationModal {
     this.timeoutHandle = myTimer;
   }
 
-  private handleReply(msg: { channelId: string; ok: boolean; factor?: number }): void {
+  private handleReply(msg: {
+    channelId: string;
+    ok: boolean;
+    factor?: number;
+    previousFactor?: number;
+  }): void {
     this.cancelPendingReply();
     this.resultFactor = msg.ok ? msg.factor ?? null : null;
+    this.resultPrevious = msg.ok ? msg.previousFactor ?? null : null;
     this.resultError = msg.ok ? null : this.resultError ?? t('calibration.failed');
     this.step = 'result';
     this.render();
@@ -348,7 +366,12 @@ export class CalibrationModal {
       return;
     }
     const factor = this.resultFactor ?? 1;
-    const showWarning = Math.abs(factor) > WARN_FACTOR_RATIO || Math.abs(factor) < 1 / WARN_FACTOR_RATIO;
+    // No previous scale means firmware too old to report one. Say nothing
+    // rather than guess: a wrong warning on a good calibration is worse than
+    // no warning at all, which is what comparing against 1.0 used to produce.
+    const previous = this.resultPrevious;
+    const moved = previous !== null && previous !== 0 ? Math.abs(factor / previous) : 1;
+    const showWarning = moved > WARN_FACTOR_RATIO || moved < 1 / WARN_FACTOR_RATIO;
     this.body.innerHTML = `
       <div class="cal-result cal-result--ok" role="status">
         <strong>${escapeHtml(t('calibration.doneTitle'))}</strong>
